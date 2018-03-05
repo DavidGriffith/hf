@@ -225,7 +225,9 @@ l1_time_t refclock_current(l1_time_t expected, int exp_valid)
 		    "So I use gettimeofday() as timing source, which has lowest accuracy.\n"
 		    "Let's hope you entered a good gettimeofday correction with -t %10.9f.\n", 
 		    tv_corr);
+#ifdef __i386__
 		rdtsc_ok=0;
+#endif
 	    }
 	}
 	return (lasttime = curtime);

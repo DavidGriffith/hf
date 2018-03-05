@@ -179,6 +179,7 @@ MYLIBS = ./l1/libl1.a ./fsk/libfsk.a ./mt63/libmt63.a ./cw/libcw.a
 noinst_HEADERS = main.h msg.h 
 hfkernel_SOURCES = main.c msg.c
 hfkernel_DEPENDANCIES = $(noinst_HEADERS) $(hfkernel_SOURCES) $(MYLIBS)
+THRLIBS=	-lpthread
 hfkernel_LDADD = $(MYLIBS) \
 	$(OSLIBS) $(SOCKLIBS) $(THRLIBS) $(SCHEDLIBS) $(ALSALIBS) -lstdc++
 

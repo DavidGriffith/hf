@@ -156,7 +156,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = scripts hfkernel hfterm dcf77 doc test util
+SUBDIRS = scripts hfkernel hfterm dcf77 doc/man test util
 EXTRA_DIST = depcomp hf.spec
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
