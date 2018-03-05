@@ -1,0 +1,173 @@
+.TH HFKERNEL 1 5/28/97
+.CM 1
+.SH "NAME"
+hfkernel \- HF (shortwave radio) protocol implementation using a soundcard
+.SH "SYNOPSIS"
+.B hfkernel
+[\-a <audio device>] [\-c <comm socket>] [\-r <socket perms>] [\-l]
+[\-i] [\-p <ptt comm port>] [\-m <cpu clock MHz>] [\-R]
+[\-t <gettimeofday correction>] [\-s <soundcard clock correction>]
+.SH "DESCRIPTION"
+.B hfkernel
+is an implementation of the Pactor 1, AMTOR (SITOR) and RTTY radio protocols.
+It uses a standard soundcard as the modem. PTT (push to talk) can be output
+on a serial port's RTS line.
+.B hfkernel
+does not have its own user interface. Instead, it provides an UNIX domain socket
+a terminal program or other client may connect. The UNIX domain socket
+was chosen to make it possible to change it to an Internet domain socket in the
+future.
+.B hfkernel
+needs to be run as root, because it wants realtime scheduling policies.
+
+.SH "OPTIONS"
+.TP
+.I \-a
+path to the audio device(default: /dev/dsp)
+.TP
+.I \-c
+path of the communication socket (default: hfapp)
+.TP
+.I \-r
+access permissions of the communication socket (default: 0777 = rwxrwxrwx)
+.TP
+.I \-p
+path of the serial port to output PTT (default: none)
+.TP
+.I \-m
+CPU clock in MHz (exact at the kHz level)
+.TP
+.I \-R
+disable the use of the RDTSC instruction (intel systems only).
+the use of the RDTSC instruction may cause problems on Laptops
+and/or APM enabled.
+.TP
+.I \-t
+gettimeofday correction factor
+.TP
+.I \-s
+soundcard sampling rate correction
+
+.SH "CLOCK ISSUES"
+HF protocols are usually synchronous. They require an exact
+clock source to remain bit synchronous even during longer
+disruption of the propagation. SITOR for example specifies
+that the reference clock must be no more than 20ppm off the
+ideal value. It's difficult to find such an exact clock source,
+therefore all the options chosen by the current implementation
+require manual tuning.
+.PP
+If the soundcard is full duplex capable, the reference clock
+is derived from the sample clock. To correct for inaccurate
+sample rate information given by the OSS driver, the \-s switch
+can be used. Your soundcard should use real crystals instead
+of cheap ceramic resonators.
+.PP
+If the soundcard is not full duplex capable, the above method
+cannot be used. On Intel systems, the program tries the
+RDTSC (read time stamp counters) to see if it is available
+and working (on Pentium class computers and better, this should
+be the case). These counters increment at the CPU clock rate,
+therefore the CPU clock frequency must be known to the program,
+accurate to the kHz level. Don't be fooled by marketing gags,
+eg. an AMD K5 PR133 runs at 100MHz.
+.PP
+On non Intel systems or if the RDTSC instruction is either
+unavailable or not working, gettimeofday is used, in the hope
+that the tv_usec field is accurate enough. Systematic frequency
+errors may be corrected by the \-t switch.
+
+.SH "CLOCK CALIBRATION"
+If you can receive the german timecode and reference frequency
+transmitter DCF77, you can use the 
+.B dcf77
+executable to measure the calibration factors. Tune your HF
+receiver to 78.5kHz LSB (or 76.5kHz USB) and start the
+.B dcf77
+program (preferably as root). After 1-2 minutes (under error
+free conditions), the program should have aquired the DCF77
+time. From then on wait about 15minutes before writing down
+the measurements.
+.PP
+The swiss timecode transmitter HBG at 75kHz might probably be used,
+but I do not know its exact transmission format (it seems to be
+very similar to DCF77).
+.PP
+If you cannot receive either DCF77 or HBG, you can use the
+.B refclock
+binary and a known exact clock source in the 200Hz-20kHz region.
+A readily available in most households and usually very accurate
+source is the line sync of an ordinary TV receiver. As far as
+I know, the line sync of the second public german TV channel
+(ZDF) is used as a reference frequency even by official
+bodies. Tune your TV equipment (with baseband video output)
+to a TV channel and feed the video output to the soundcard.
+Run 
+.B "refclock \-f 15625"
+as root. After a few seconds, the program should have
+calculated the correction parameters. (The command line above
+implies PAL format with its 15625Hz line sync frequency.
+For other video formats, use the appropriate frequency.)
+
+.SH "SOUNDCARD ISSUES"
+The soundcard must be supported by the OSS driver. It must
+support 16bit sampling in the endianness of the CPU, 8kHz
+sampling rate, memory mapping of the DMA buffers and triggering.
+A full duplex soundcard is preferred.
+.PP
+On half duplex soundcards, the soundcard must be switched if the
+protocol changes from receive to transmit and vice versa.
+This lasts quite long; anywhere in the region of 10 to 30ms.
+The program measures an average at startup. It tries to hide
+this latency under the PTT keyup delay (TXDelay), so set
+the txdelay to a larger value! And hope that the propagation
+time to your peers plus their txdelay is also longer.
+.PP
+The audio levels and parameters may be set with the usual mixer tools.
+Builtin AGC should be disabled.
+
+.SH "SUPPORTED PROTOCOLS"
+Currently, RTTY, Amtor and Pactor 1 are supported. RTTY and Amtor has
+very limited support for national charsets, due to lack of documentation.
+
+.SH "LIMITATIONS"
+All implemented protocols are not very robust by nature, and are not state
+of the art. The current version does not do frequency tracking (like almost
+all other amateur implementations). This is somewhat more problematic as the
+filters are probably narrower (their bandwidth gets adjusted to the reception
+speed automatically) than in other implementations. Pactor's diversity
+combining scheme commonly dubbed memory ARQ by advertising is implemented
+but inherently broken by design. The inventors assumed that noise statistics
+are the same during retransmissions which is usually wrong. Real diversity
+combining schemes should use equalizer bits (i.e. bits already known to the
+receiver) which enable the receiver to estimate the channel state and combine
+retransmissions accordingly. The time tracking might be responding too fast.
+.PP
+Pactor speedup (transition from 100 to 200 baud) is not currently initiated
+by the software. The software measures channel conditions and advertises
+when it thinks it would be able to receive 200 baud correctly. Speedup may
+be initiated manually.
+.PP
+The current implementation was not thoroughly tested over the air.
+.PP
+This implementation is currently very picky about the other hardware
+installed on the computer. The reason is that the
+.B hfkernel
+processes, even though with realtime scheduling policy, only run after
+every interrupt handler and every bottom half of the operating system has
+terminated. Depending on the computer speed and the nature of the drivers,
+this can last very long, more than 100ms. More than 10ms has a very
+detrimental effect on this HF protocol implementation. The conclusion
+of this is that the L1 (FSK modem) should probably go into kernel space.
+But currently I do not like the idea of me having to implement yet
+another soundcard driver...
+
+.SH "SEE ALSO"
+The documentation on the pactor 1 protocol, the CCIR
+document defining SITOR (AMTOR), OSS programming docs
+.SH BUGS
+or misfeatures will surely be found...
+
+.SH AUTHOR
+Thomas M. Sailer, HB9JNX/AE4WA, sailer@ife.ee.ethz.ch
+

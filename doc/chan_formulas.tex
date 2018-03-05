@@ -1,0 +1,38 @@
+\documentclass[11pt,twoside,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%
+\author{Thomas~Sailer,~HB9JNX and Alexander~Kurpiers,~DL8AAU}
+\title{Channel Simulator Gaussian Noise Generator Formulas}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\newcommand{\fourierpair}{\circ\cdots\bullet}
+
+\begin{equation}
+  \text{Fourier:}\quad
+  e^{-a t^2}\quad\fourierpair\quad
+  \sqrt{\frac{\pi}{a}}e^{-\frac{\omega^2}{4a}}
+\end{equation}
+
+\begin{equation}
+  S_{xx}(f) = \frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{1}{2}\left(\frac{f}{\sigma}\right)^2}
+\end{equation}
+
+\begin{equation}
+  f_{3dB} = 2\sigma\sqrt{\ln 2}
+  \quad\longrightarrow\quad
+  \sigma = \frac{f_{3dB}}{2\sqrt{\ln 2}}
+\end{equation}
+
+\begin{equation}
+  H(\omega) = \frac{1}{\sqrt{\sigma}\sqrt{\sqrt{2\pi}}}e^{-\frac{1}{4}\left(\frac{\omega}{2\pi\sigma}\right)^2}
+\end{equation}
+
+\begin{equation}
+  h(t) = \frac{1}{\sqrt{2\sigma}\sqrt{\sqrt{2\pi}}}e^{-\left(2\pi\sigma{}t\right)^2}
+\end{equation}
+
+\end{document}

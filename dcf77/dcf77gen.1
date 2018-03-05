@@ -1,0 +1,66 @@
+.TH DCF77GEN 1 "DCF77 utilities" "HB9JNX" \" -*- nroff -*-
+
+.SH NAME
+dcf77gen \- soundcard DCF77 (and HBG) transmitter
+
+.SH SYNOPSIS
+.B dcf77rx
+[\-a audio device] [\-s] [\-v verboselevel] [\-g] [\-l] [\-u]
+
+.SH DESCRIPTION
+.B dcf77gen
+is a soundcard modulator for time reference signals. Its format can be set
+to either
+.BR DCF77
+or
+.BR HBG
+. Its main purpose was to facilitate debugging and testing of
+.B dcf77rx
+.
+
+.SS OPTIONS
+.TP
+.I \-a
+specify the path to the sound driver (default: /dev/dsp on Linux, /dev/audio on Solaris).
+
+.TP
+.I \-s
+use standard output instead of audio output. Format is 8kHz 16bit words 1 channel
+in the endianness of the CPU.
+
+.TP
+.I \-v
+Set the verbosity level. The higher the number, the more debugging
+information is written to standard error.
+
+.TP
+.I \-g
+HBG mode.
+
+.TP
+.I \-l
+Transmitter uses LSB (lower sideband) mode.
+
+.TP
+.I \-u
+Transmitter uses USB (upper sideband) mode.
+
+.TP
+.I \-z
+Transmit the time in MESZ timezone; if not specified,
+it transmits MEZ.
+
+.SH BUGS
+The program uses the system time at startup and then derives the clock
+from the soundcard. It could be made a command line parameter to specify
+transmit time.
+.PP
+In order to build a \"real\" time signal transmitter,
+it would require a very accurate reference clock.
+
+.SH CREDITS
+Hans-Guenter DF4OX/DL0PTB sent me printed documentation about the DCF77 
+transmission format which helped me a lot.
+
+.SH AUTHOR
+Thomas Sailer, HB9JNX/AE4WA, sailer@ife.ee.ethz.ch

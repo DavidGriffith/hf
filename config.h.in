@@ -1,0 +1,93 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define as __inline if that's what the C compiler calls it.  */
+#undef inline
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
+
+/* define if bittypes like int16_t are defined */
+#undef HAVE_BITTYPES
+
+/* define if vsnprintf is available */
+#undef HAVE_VSNPRINTF
+
+/* define with the default frequencies */
+#undef FREQ_MARK
+#undef FREQ_SPACE
+
+/* define with default callsign */
+#undef MYCALL
+
+/* define if OSS fullduplex operation should be disabled */
+#undef OSS_DISABLE_FDX
+
+/* define if realtime features should be disabled */
+#undef DISABLE_REALTIME
+
+/* define with default alternate pactor CRC inits */
+#undef PCT_CRC_0
+#undef PCT_CRC_1
+#undef PCT_CRC_2
+#undef PCT_CRC_3
+
+/* define if multithreading */
+#undef _REENTRANT
+
+/* Define if you have the vsnprintf function.  */
+#undef HAVE_VSNPRINTF
+
+/* Define if you have the <errno.h> header file.  */
+#undef HAVE_ERRNO_H
+
+/* Define if you have the <forms.h> header file.  */
+#undef HAVE_FORMS_H
+
+/* Define if you have the <getopt.h> header file.  */
+#undef HAVE_GETOPT_H
+
+/* Define if you have the <pthread.h> header file.  */
+#undef HAVE_PTHREAD_H
+
+/* Define if you have the <sched.h> header file.  */
+#undef HAVE_SCHED_H
+
+/* Define if you have the <stropts.h> header file.  */
+#undef HAVE_STROPTS_H
+
+/* Define if you have the <sys/audioio.h> header file.  */
+#undef HAVE_SYS_AUDIOIO_H
+
+/* Define if you have the <sys/conf.h> header file.  */
+#undef HAVE_SYS_CONF_H
+
+/* Define if you have the <sys/io.h> header file.  */
+#undef HAVE_SYS_IO_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define if you have the <sys/soundcard.h> header file.  */
+#undef HAVE_SYS_SOUNDCARD_H
+
+/* Define if you have the <syslog.h> header file.  */
+#undef HAVE_SYSLOG_H
+
+/* Define if you have the m library (-lm).  */
+#undef HAVE_LIBM
+
+/* Name of package */
+#undef PACKAGE
+
+/* Version number of package */
+#undef VERSION
+

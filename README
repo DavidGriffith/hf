@@ -1,0 +1,49 @@
+	       LINUX AMATEUR HF PROTOCOL IMPLEMENTATION
+
+			   Thomas M. Sailer
+			sailer@ife.ee.ethz.ch
+			     HB9JNX/AE4WA
+
+This is the first public release of my HF amateur protocol suite for Linux
+using a soundcard as a modem. The state of the software is early alpha.
+Although the protocols RTTY, Amtor (Sitor) and Pactor 1 are almost
+fully implemented, it might not yet be completely stable, and there might
+be interface changes in the future.
+
+
+THE CONCEPT
+
+The implementation of the protocol uses one binary called hfkernel, which
+has no user interface. hfkernel provides an UNIX domain socket to
+communicate with the user interface or mailbox or whatever. UNIX
+domain sockets were chosen since they could be easily changed to
+internet domain sockets in the future, to let the hfkernel process
+run on a different machine than the user interface.
+
+hfkernel internally uses three threads, one for the L1 FSK modem code,
+one for the protocol, and one that handles socket I/O.
+
+
+THE USER INTERFACE
+
+A terminal program is included. This is however only "an excuse for
+a terminal program". I'll leave it to someone else to write something
+decent.
+
+
+THE INSTALLATION
+
+Since the hfkernel software uses many advanced operating system features,
+some of them only available under Linux, there isn't anything to configure.
+Run make to compile the software.
+
+It is very important you calibrate your clock source as described in
+doc/hfkernel.1 (groff -Tascii -mandoc doc/hfkernel.1 |less)
+
+To run it, first run hfkernel as root, then start hfterm as ordinary
+user. Don't forget to supply the correction factors on the hfkernel
+command line. If you terminate hfterm, you might currently also have to
+terminate and restart hfkernel.
+
+73s
+Tom

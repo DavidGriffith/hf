@@ -1,0 +1,1535 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 24 24 571 818
+%%Title: genscript output
+%%For: Thomas Sailer, H60.1
+%%Creator: enscript 1.3.0
+%%CreationDate: Fri May 23 09:59:33 1997
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Genscript-Prolog 1.3 0
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch 
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+  
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+  
+  newfontname newfont definefont pop
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto 
+  d_w 0 rlineto 
+  0 d_h rlineto 
+  d_w neg 0 rlineto 
+  closepath
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    0 d_footer_h translate
+    0 setlinewidth
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_ptsize -2 div moveto 
+    ul_str true charpath stroke
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont 
+    0 0 ul_ptsize 2 div sub moveto ul_str true charpath stroke
+  grestore
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Genscript-Encoding-latin1 1.3 0
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/minus        	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/dotlessi     	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/user_header_p true def
+/user_header_str (PACTOR I Protocol Description) def
+/HFpt 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont HFpt scalefont def
+/Courier /F-gs-font MF
+/F-gs-font findfont 7 scalefont setfont
+/#copies 1 def
+%%BeginResource: procset Genscript-Header-enscript 1.3 0
+%%IncludeResource: font Times-Bold
+%%IncludeResource: font Times-Roman
+
+% Fonts.
+/Times-Bold /HeaderFont-Bold MF
+/HeaderDateF /HeaderFont-Bold findfont 12 scalefont def
+
+/Times-Roman /HeaderFont-Times MF
+/HeaderHDRF /HeaderFont-Times findfont 14 scalefont def
+
+/HeaderPageNumF /Helvetica-Bold findfont 28.8 scalefont def
+
+/do_header {	% print enscript header
+  gsave
+    d_header_x d_header_y translate
+
+    % light bar
+    0 0 d_header_w d_header_h 2 div Box
+    .95 setgray fill
+
+    % filename
+    0 setgray 
+    HeaderHDRF setfont
+    d_header_w fname stringwidth pop sub 2 div d_header_h 8 div moveto
+    fname show
+
+    % user supplied header string.
+    user_header_p {
+      d_header_w user_header_str stringwidth pop sub 2 div 
+      d_header_h 8 div 5 mul moveto user_header_str show
+    } if
+
+    % dark gray boxes
+    /dbw d_header_h 2 mul def	% dark box width
+    /dbc .7 def			% dark box color
+
+    % left dark box.
+    0 0 dbw d_header_h Box
+    dbc setgray fill
+
+    0 setgray 
+    HeaderDateF setfont
+    moddatestr dup stringwidth pop dbw exch sub 2 div 
+    d_header_h 2 div 2 add moveto show
+    modtimestr dup stringwidth pop dbw exch sub 2 div 
+    d_header_h 5 div moveto show
+
+    % right dark box
+    d_header_w dbw sub 0 dbw d_header_h Box
+    dbc setgray fill
+
+    HeaderPageNumF setfont
+    1 setgray
+    pagenum 10 string cvs dup 
+    stringwidth pop dbw exch sub 2 div d_header_w dbw sub add
+    d_header_h .2 mul moveto show
+
+  grestore
+} def
+%%EndResource
+/d_page_w 794 def
+/d_page_h 547 def
+/d_header_x 0 def
+/d_header_y 511 def
+/d_header_w 794 def
+/d_header_h 36 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 794 def
+/d_footer_h 0 def
+/d_output_w 794 def
+/d_output_h 511 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 1 def
+/fname (pactor.txt) def
+/fdir () def
+/ftail (pactor.txt) def
+% User defined strings:
+/moddatestr (05/23/97) def
+/modtimestr (09:58:30) def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(H.-P. Helfert, DL6MAA, Gustav-Mueller-Str. 8 , D-8948 Mindelheim) s
+5 493 M
+(U. Strate, DF4KV, Lommerwiese 18, D-5330 Koenigswinter 1) s
+5 469 M
+(PACTOR - Einfuehrende Protokollbeschreibung  \(Level 1\)) s
+5 461 M
+(======================================================) s
+5 445 M
+(\(Stand: 5. November 1990\)) s
+5 421 M
+(Zielsetzungen) s
+5 413 M
+(-------------) s
+5 397 M
+(PACTOR  \(PT,   lat.:   "der  Vermittler"\)  wurde  von  Funkamateuren  fuer) s
+5 389 M
+(Funkamateure  im  Rahmen des  Experimentierfunkdienstes  entwickelt;  eine) s
+5 381 M
+(kommerzielle Nutzung ist nicht vorgesehen.) s
+5 365 M
+(PACTOR  soll  den derzeit bestehenden Mangel an einer  zuverlaessigen  und) s
+5 357 M
+(schnellen  Fernschreibbetriebsart  auf  Kurzwelle,   besonders  fuer   die) s
+5 349 M
+(Bereiche unterhalb 10 MHz,  beseitigen.) s
+5 333 M
+(Auf folgende Punkte wurde beim PT-Design besonderer Wert gelegt:) s
+5 317 M
+(>>> Fehlerfreie Datenuebertragung) s
+5 309 M
+(    \(praktisch: Fehlerquote kleiner 10 ** -5 \)) s
+5 293 M
+(>>> Echte binaere Datenuebertragung) s
+5 285 M
+(    \(z. B. kompletter ASCII-Zeichensatz\)) s
+5 269 M
+(>>> Gute Ausnutzung der aktuellen Kanalkapazitaet) s
+5 261 M
+(    \(automatische Anpassung der Schrittgeschwindigkeit, vollstaendig) s
+5 253 M
+(    bitsynchrone Uebertragung, Memory-ARQ, keine speziellen Requestbloecke\)) s
+5 237 M
+(>>> Sehr kleiner noetiger Stoerabstand fuer Aufrechterhaltung einer) s
+5 229 M
+(    Verbindung) s
+5 213 M
+(>>> Einfache Betriebsabwicklung, optimierter Halbduplexbetrieb mit) s
+5 205 M
+(    schnellem Richtungswechsel und beidseitig bestaetigtem QRT) s
+5 189 M
+(>>> Shiftlagenneutralitaet \(Mark- und Spacedefinition entfaellt\)) s
+5 173 M
+(>>> Realisierbarkeit mit einfacher Hardware) s
+5 165 M
+(    \(Level 1 auch fuer Portabel- und Notfunk verwendbar an uebli-) s
+5 157 M
+(    chen Amateurfunkgeraeten\)) s
+5 141 M
+(>>> Noetige Bandbreite maximal 600 Hz) s
+5 125 M
+(>>> Vollstaendige Transparenz fuer Dritte \(z. B. behoerdliche Ueber-) s
+5 117 M
+(    wachung\)) s
+5 101 M
+(>>> Kompatibilitaet zu Erweiterungen durch Level-Definition und das) s
+5 93 M
+(    Supervisorkonzept.) s
+5 77 M
+(    Folgende  Erweiterungen  sollten bei  Einfuehrung  leistungsfaehigerer) s
+5 69 M
+(    Hardware erprobt werden:) s
+5 53 M
+(  * Effizientere Quellencodierung \(z. B. Markow-Codierung\)) s
+5 45 M
+(  * Adaptive fehlerkorrigierende Kanalkodierung) s
+5 37 M
+(  * Modifiziertes Memory-ARQ) s
+5 29 M
+(  * Modemschaltungen mit Signalprozessoren zur bitsynchronen) s
+5 21 M
+(    Demodulation und automatischen Frequenzgangkorrektur bzw.) s
+5 13 M
+(    zur Erprobung neuer Modulationsverfahren) s
+5 5 M
+(  * Hoehere Schrittgeschwindigkeiten fuer QRG's > 10 MHz) s
+402 501 M
+(    \(automatische Umschaltmoeglichkeit auf Modus 200/400 Bd\)) s
+402 485 M
+(Protokoll-Grundzuege) s
+402 477 M
+(--------------------) s
+402 461 M
+(Das PACTOR-Grundschema aehnelt der AMTOR-Struktur, die sehr gut an den auf) s
+402 453 M
+(Kurzwelle  ueblichen  Dialogbetrieb  angepasst ist.  Es  handelt  sich  um) s
+402 445 M
+(Halbduplex-ARQ:  Datenpakete  \(Bloecke\),  die die Nutzinformation  tragen,) s
+402 437 M
+(werden  durch kurze Quittungssignale \(Controls\) der  empfangenden  Station) s
+402 429 M
+(bestaetigt.  Im  Fehlerfall kann der Blockempfaenger  durch  entsprechende) s
+402 421 M
+(Controls Wiederholungen eines Datenpaketes anfordern.) s
+402 405 M
+(* Synchronbetrieb) s
+402 389 M
+(Um  die  verfuegbare  Kanalkapazitaet gut  auszunutzen,  bedarf  es  einer) s
+402 381 M
+(bitsynchronen  Uebertragung.  Der  Synchronismus muss dabei  waehrend  der) s
+402 373 M
+(gesamten Verbindungsdauer aufrechterhalten werden.) s
+402 357 M
+(* Paketlaenge) s
+402 341 M
+(Eine laengere Versuchsreihe hat gezeigt, dass es fuer den Betrieb in stark) s
+402 333 M
+(fluktuierenden  Kanaelen nicht sinnvoll ist,  die Datenpaketlaenge an  die) s
+402 325 M
+(aktuellen Bedingungen automatisch anzupassen.) s
+402 317 M
+(Eine Aenderung des Zeitrasters fuehrt besonders in schlechten Kanaelen  zu) s
+402 309 M
+(Ueberschneidungen  von Datenbloecken und Controls,  so dass diese  Methode) s
+402 301 M
+(als unwirtschaftlich verworfen wurde.) s
+402 293 M
+(Die  Frage  nach  der  guenstigsten  Paketlaenge  wurde  durch  Ausmesssen) s
+402 285 M
+(verschiedener  Kurzwellenkanaele mit einer  FSK-Uebertragung  beantwortet.) s
+402 277 M
+(Die gewonnenen Daten wurden durch eine Computersimulation auf  ARQ-Systeme) s
+402 269 M
+(uebertragen.  Als im Langzeitmittel optimale Kurzwellen-Paketlaenge  ergab) s
+402 261 M
+(sich dabei eine Dauer von etwa einer Sekunde.) s
+402 253 M
+(Die  Zyklusdauer  \(Paketlaenge  +  Empfangspause\)  sollte  in  jedem  Fall) s
+402 245 M
+(deutlich kleiner als die haeufigste Fading-Periodendauer sein.) s
+402 237 M
+(Bei  der  Computersimulation  gehen  auch  kurze  Stoerimpulse  ein;  ohne) s
+402 229 M
+(Beruecksichtigung  dieser "Bursts" koennte die Paketlaenge erheblich  ver-) s
+402 221 M
+(groesert werden.) s
+402 213 M
+(Alternativ  koennte das Problem kurzer Fehlerbuendel aehnlich wie  in  der) s
+402 205 M
+(digitalen Audiotechnik durch Anwendung fehlerkorrigierender  Faltungscodes) s
+402 197 M
+(geloest  werden.  Deren Vorteile machen sich im allgemeinen aber erst  bei) s
+402 189 M
+(bekannter, annaehernd konstanter Kanalqualitaet bemerkbar.) s
+402 181 M
+(Eine  Verkuerzung der Paketlaengen kommt im uebrigen  der  Betriebstechnik) s
+402 173 M
+(\(kurze Break-In-Zeiten\) entgegen.) s
+402 157 M
+(* Paketsicherung) s
+402 141 M
+(Die Datenbloecke werden durch CRC gesichert. Die Anwendung fehlerkorrigie-) s
+402 133 M
+(render  Codes  ist zunaechst nicht vorgesehen,  kann jedoch  in  spaeteren) s
+402 125 M
+(aufwaertskompatiblen Versionen in Verbindung mit leistungsfaehigerer Hard-) s
+402 117 M
+(ware realisiert werden.) s
+402 101 M
+(* Nutzung fehlerhafter Pakete) s
+402 85 M
+(Um die in fehlerhaft empfangenen Paketen enthaltene Information zu nutzen,) s
+402 77 M
+(bedient  sich  PACTOR  eines  Memory-ARQ-Verfahrens  \(s.   u.\),  das  eine) s
+402 69 M
+(deutliche  Steigerung der Uebertragungsrate bei  geringen  Stoerabstaenden) s
+402 61 M
+(bewirkt.) s
+402 45 M
+(* Anpassung der Schrittgeschwindigkeit) s
+402 29 M
+(Die  Informationsgeschwindigkeit im realen Kanal ist einerseits durch  die) s
+402 21 M
+(verfuegbare  Bandbreite \(bei gegebenem Stoerabstand\) und andererseits  bei) s
+402 13 M
+(binaerem   FSK   auch   durch   auftretende   Phasenverzerrungen   infolge) s
+402 5 M
+(Mehrwegeausbreitung begrenzt.) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 2 def
+/fname (pactor.txt) def
+/fdir () def
+/ftail (pactor.txt) def
+% User defined strings:
+/moddatestr (05/23/97) def
+/modtimestr (09:58:30) def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(Auf  Kurzwelle  konnten mit 200 Baud besonders waehrend  der  Tagesstunden) s
+5 493 M
+(gute  Ergebnisse erzielt werden.  Am Abend treten verstaerkt  Laufzeitver-) s
+5 485 M
+(zerrungen  auf,  die eine Reduzierung der Schrittgeschwindigkeit  auf  100) s
+5 477 M
+(Baud erforderlich machen.) s
+5 469 M
+(PACTOR verfuegt ueber eine automatische Steuerung zur Umschaltung auf  die) s
+5 461 M
+(jeweils guenstigste Schrittgeschwindigkeit.) s
+5 437 M
+(Die Protokolldetails) s
+5 429 M
+(--------------------) s
+5 413 M
+(Grundsaetzliche Begriffe:) s
+5 397 M
+(MASTER = Station, die den Verbindungsaufbau initiiert.) s
+5 389 M
+(SLAVE  = die angerufene Station) s
+5 381 M
+(TX     = Sender von Informationspaketen) s
+5 373 M
+(RX     = Empfaenger von Informationspaketen) s
+5 365 M
+(BK     = Break-In , vom RX ausgeloester Senderichtungswechsel) s
+5 349 M
+(Im folgenden wird von einer byteweisen Datenorganisation  ausgegangen,  da) s
+5 341 M
+(dies der Realisierung auf Mikrorechnern entgegenkommt. Das niederwertigste) s
+5 333 M
+(Bit wird zuerst ausgesendet.) s
+5 325 M
+(Die  Shiftlage  der FSK-Aussendung wird  einmalig  beim  Verbindungsaufbau) s
+5 317 M
+(fixiert.  Mit  jedem  neuen Paket oder Kontrollsignal wird  die  Shiftlage) s
+5 309 M
+(invertiert.) s
+5 293 M
+(* Timing) s
+5 277 M
+(PACTOR arbeitet als bitsynchrones System mit einem festen Zeitraster.) s
+5 261 M
+(Gesamt-Zyklusdauer                 : 1.25 sec) s
+5 253 M
+(Paketdauer                         : 0.96 sec) s
+5 245 M
+(Fenster fuer Kontrollsignalempfang : 0.29 sec) s
+5 237 M
+(Kontrollsignaldauer                : 0.12 sec) s
+5 221 M
+(Es  verbleibt  eine  Restzeit von 170 ms fuer  Umschaltvorgaenge  und  die) s
+5 213 M
+(Signallaufzeit, so dass sich wie bei AMTOR eine maximale DX-Entfernung von) s
+5 205 M
+(ca. 20000 km ergibt \(geringfuegige Korrekturen gegenueber cq-DL 11/90\).) s
+5 189 M
+(Systemtakt-Betriebsmodi:) s
+5 173 M
+(1\) Intern \(Standardmodus\): Quarzzeitbasis  mit  Genauigkeit  15  ppm  oder) s
+5 165 M
+(besser. Der SLAVE-Takt wird auf den MASTER-Takt synchronisiert \(Auswertung) s
+5 157 M
+(der Flankenwechsel\).) s
+5 149 M
+(2\) Extern \(vorgesehen  fuer Spezialanwendungen\):  Beide  Stationen  leiten) s
+5 141 M
+(ihren  Systemtakt  von  einer  Zentralquelle  \(z.  B.  50-Hz-Verbund,  TV-) s
+5 133 M
+(Zeilenfrequenz, DCF77\) ab.) s
+5 117 M
+(* Kontrollsignal- und Paketaufbau) s
+5 101 M
+(Die Kontrollsignale \(CS\) werden vom RX als Empfangsbestaetigung  ausgesen-) s
+5 93 M
+(det.   Wiederholung  des  gleichen  CS  bedeutet  'REQUEST',   d.  h.  die) s
+5 85 M
+(Anforderung einer Blockwiederholung.  CS3 bildet den Kopf des  BK-Paketes,) s
+5 77 M
+(CS4 fordert einen Geschwindigkeitswechsel an \(s. u.\).) s
+5 69 M
+(Die  CS  haben eine einheitliche Laenge von 12 Bit und  werden  stets  mit) s
+5 61 M
+(einer Schrittgeschwindigkeit von 100 Baud ausgesendet.  Die Bitmuster sind) s
+5 53 M
+(so  gewaehlt,  dass  sich optimale Hammingdistanz \(8  Bit\)  und  guenstige) s
+5 45 M
+(Symmetrieeigenschaften ergeben.) s
+5 21 M
+(Bezeichnung       Funktion          Bitmuster\(HEX\)) s
+5 13 M
+(--------------------------------------------------) s
+5 5 M
+(CS1               Bestaetigung         4D5) s
+402 501 M
+(CS2               Bestaetigung         AB2) s
+402 493 M
+(CS3               Break-In             34B) s
+402 485 M
+(CS4               Speedchange          D2C) s
+402 453 M
+(Alle Pakete,  ausgenommen Spezialfaelle, bestehen aus den drei Teilen Kopf) s
+402 445 M
+(\(Header\), Datenbereich und Verwaltungsteil \(Status + CRC\).) s
+402 429 M
+(Aufbau der Datenpakete) s
+402 413 M
+(100 Baud :) s
+402 397 M
+(/Header/ Datenbereich 64 Bit  /Statusbyte/CRC1/CRC2/) s
+402 381 M
+(200 Baud :) s
+402 365 M
+(/Header/ Datenbereich 160 Bit /Statusbyte/CRC1/CRC2/) s
+402 349 M
+(Erlaeuterungen:) s
+402 333 M
+(1\) Header : Bitmuster 55\(HEX\)) s
+402 317 M
+(Das  Kopfbyte  liefert Zusatzinformation,  die  zur  Synchronisation,  zur) s
+402 309 M
+(REQUEST-Erkennung bei Memory-ARQ  sowie  beim Monitor-Modus genutzt  wird.) s
+402 301 M
+(Bei  jedem  Paket,  das  neue Information  enthaelt,  wird  das  Bitmuster) s
+402 293 M
+(invertiert.) s
+402 277 M
+(2\) Datenbereich:) s
+402 261 M
+(Der Datenbereich kann beliebige Binaerinformation enthalten;  die Art  der) s
+402 253 M
+(Codierung wird im Statusbyte angegeben.  Gegenwaertig kann zwischen 8-Bit-) s
+402 245 M
+(ASCII  und 7-Bit-ASCII \(Huffman-komprimiert\) gewaehlt werden.  Das  ASCII-) s
+402 237 M
+(Zeichen RS \(1E HEX\) dient in beiden Faellen als IDLE-Symbol.) s
+402 229 M
+(Der Huffman-Code eignet sich besonders zur Uebertragung von deutschem  und) s
+402 221 M
+(englischen Klartext.  Die resultierende mittlere Symbollaenge betraegt ca.) s
+402 213 M
+(4,5 Bit. Jedes Paket stellt eine Informationseinheit dar: Passt ein Symbol) s
+402 205 M
+(nicht  mehr  komplett  in  ein Paket,  wird  es  im  naechsten  Datenpaket) s
+402 197 M
+(gesendet. Eine Code-Tabelle findet sich im Anhang.) s
+402 181 M
+(3\) Statusbyte-Belegung:) s
+402 165 M
+(Bit 0:  Paketzaehler \(LSB\)) s
+402 157 M
+(Bit 1:  Paketzaehler \(MSB\)         Datenmodus    Bit 3  Bit 2) s
+402 149 M
+(Bit 2:  Datenmodus   \(LSB\) -->     -----------------------------) s
+402 141 M
+(Bit 3:  Datenmodus   \(MSB\) -->     ASCII-8-Bit    0       0) s
+402 133 M
+(Bit 4:  noch nicht belegt          Huffman-Code   0       1) s
+402 125 M
+(Bit 5:  noch nicht belegt          nicht bel.     1       0) s
+402 117 M
+(Bit 6:  BK-Anforderung             nicht bel.     1       1) s
+402 109 M
+(Bit 7:  QRT-Bit) s
+402 85 M
+(Die Bits 0 und 1 dienen als Paketzaehler;  aufeinanderfolgende Pakete  mit) s
+402 77 M
+(gleichem Zaehlerwert werden vom RX als REQUEST-Pakete erkannt. Die modulo-) s
+402 69 M
+(4-Zaehlung  ermoeglicht  die Behandlung des \(in der  Praxis  sehr  unwahr-) s
+402 61 M
+(scheinlichen\) Falles nicht erkannter Kontrollsignalfehler.) s
+402 45 M
+(4\) CRC-Bytes:) s
+402 29 M
+(Der  CRC wird nach CCITT-Norm ueber das gesamte Paket,  beginnend mit  dem) s
+402 21 M
+(Datenbereich \(d. h. ohne Header bzw. CS3 bei BK-Paketen\) berechnet.) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 3 def
+/fname (pactor.txt) def
+/fdir () def
+/ftail (pactor.txt) def
+% User defined strings:
+/moddatestr (05/23/97) def
+/modtimestr (09:58:30) def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(* Aufbau einer PACTOR-Verbindung) s
+5 485 M
+(Vom MASTER werden Synchronisationspakete mit folgendem Aufbau ausgesendet:) s
+5 469 M
+(/Header/S L A V C A L L/SLAVCA/    \(Header= 55 HEX\)) s
+5 453 M
+(/<------100 Baud------>/200Bd /) s
+5 437 M
+(Diese Pakete enthalten das SLAVE-Rufzeichen \(max.  8 Byte,  ASCII-Codiert\)) s
+5 429 M
+(als  100  Baud- und 200-Baud-Bitmuster.  Bei kuerzeren  Rufzeichen  werden) s
+5 421 M
+(Leerbytes mit 0F\(HEX\) aufgefuellt.  Die SLAVE-Station sucht den einlaufen-) s
+5 413 M
+(den  Bitstrom nach Synchronisationspaketen mit ihrem Rufzeichen ab  \(Beide) s
+5 405 M
+(moeglichen  Shiftlagen werden geprueft\) und antwortet  nach  erfolgreicher) s
+5 397 M
+(Synchronisation mit der Aussendung von CS. Die eigentliche Synchronisation) s
+5 389 M
+(wird  mit  dem  Head-Byte und einer waehlbaren  Anzahl  Bytes  des  ersten) s
+5 381 M
+(Rufzeichenteils vorgenommen.  Das 200 Bd-Muster dient lediglich zur Ueber-) s
+5 373 M
+(pruefung der Kanalqualitaet.  Wird es fehlerfrei empfangen,  wird mit  CS1) s
+5 365 M
+(geantwortet,  ansonsten mit CS4,  was zur sofortigen Geschwindigkeitsredu-) s
+5 357 M
+(zierung auf 100 Baud fuehrt.) s
+5 349 M
+(Analog dazu sucht der MASTER im Empfangsfenster zwischen zwei Paketen nach) s
+5 341 M
+(gueltigen CS in beiden Shiftlagen.  Sobald das erste gueltige CS empfangen) s
+5 333 M
+(und  synchronisiert  ist,  wird das erste normale Datenpaket  mit  Head=AA) s
+5 325 M
+(\(HEX\) und Paketzaehler=1 ausgesendet.) s
+5 309 M
+(* Levelfestlegung beim Verbindungsaufbau) s
+5 293 M
+(Beim   Verbindungsaufbau  ist  der  maximal  moegliche   Systemlevel   der) s
+5 285 M
+(Gegenstelle  unbekannt,  daher  wird  jede Verbindung  zunaechst  auf  dem) s
+5 277 M
+(kleinsten Level \(1\) gestartet.) s
+5 269 M
+(Die  ersten  uebertragenen Zeichen enthalten Informationen  ueber  maximal) s
+5 261 M
+(verfuegbare  Software-Levelnummer,  gefolgt vom  MASTER-Rufzeichen,  abge-) s
+5 253 M
+(schlossen mit CR \(Beispiel : 1DF4KV   <CR>\). Stellt die SLAVE-Station eine) s
+5 245 M
+(Ueberforderung  fest \(kleinerer eigener Systemlevel\),  teilt sie dies  dem) s
+5 237 M
+(MASTER mittels BK und Supervisorinformation \(s.  u.\) sofort mit, ansonsten) s
+5 229 M
+(wird die Verbindung auf dem angegebenen MASTER-Level fortgesetzt.) s
+5 221 M
+(Die  User-BK-Moeglichkeit ist erst mit Abschluss  der  MASTER-Systeminfor-) s
+5 213 M
+(mation \(<CR>\) freigegeben.) s
+5 197 M
+(* Senderichtungswechsel) s
+5 181 M
+(Nach  einem  korrekt  empfangenen Paket kann die  RX-Station  mittels  BK-) s
+5 173 M
+(Kontrollsignalen \(CS3\) eine Umkehrung der Senderichtung anfordern. Das CS3) s
+5 165 M
+(bildet bereits den Kopf des ersten,  vom neuen TX ausgesendeten Datenpake-) s
+5 157 M
+(tes.  Bei 200 Baud belegt das CS3 die ersten drei bei 100 Baud, die ersten) s
+5 149 M
+(zwei Bytes des Paketes,  wobei in diesem Fall 4 Bit unbenutzt bleiben. Der) s
+5 141 M
+(CRC wird wie beim normalen Datenpaket erst vom Beginn des Datenbereichs an) s
+5 133 M
+(berechnet,  der Paketzaehler wird auf 0 gesetzt.  Das naechste  Datenpaket) s
+5 125 M
+(nach einem BK-Paket erhaelt als Header 55\(HEX\).) s
+5 117 M
+(Empfaengt der TX ein CS3, schaltet er sofort in den RX-Modus und liest das) s
+5 109 M
+(Restpaket vollstaendig ein.  Bei fehlerfei empfangenem Paket antwortet  er) s
+5 101 M
+(mit CS1,  bzw.  CS3,  falls ein sofortiges "Rebreak" gewuenscht wird. Eine) s
+5 93 M
+(Wiederholung des BK-Paketes wird mittels CS2 angefordert.  Die  Antwort-CS) s
+5 85 M
+(auf ein BK-Paket beginnen im Zeitraster eine CS-Laenge \(0.12 sec\) vor Ende) s
+5 77 M
+(des alten eigenen TX-Blocks.) s
+5 69 M
+(Durch  Setzen  von  Bit 6 im Statusbyte kann der TX  auch  selbst  ein  BK) s
+5 61 M
+(anfordern, da dieser Status den RX zur Bestaetigung mit CS3 veranlasst.) s
+5 37 M
+(* Geschwindigkeitsverminderung 200 --> 100 Baud) s
+5 21 M
+(Der  RX kann immer nach einem fehlerhaften Paket ein CS4 senden,  was  auf) s
+5 13 M
+(der TX-Seite immer als "REJECT" interpretiert wird:  Das gerade gesendete,) s
+5 5 M
+(nicht  bestaetigte  Paket  wird  verworfen  und  die  in  ihm  enthaltene) s
+402 501 M
+(Information erneut im 100-Baud-Modus ausgesendet. Der Paketzaehlerwert des) s
+402 493 M
+(ersten  100-Bd-Paketes  wird vom verworfenen  200-Baud-Paket  uebernommen.) s
+402 485 M
+(Empfaengt  der  RX  einen 100-Bd-Block mit gleichem  Paketzaehler  wie  im) s
+402 477 M
+(vorangegangenen  200-Bd-Paket,   so  bedeutet  dies  doppelt  aufgenommene) s
+402 469 M
+(Information: Es muessen soviele Zeichen \(ausgenommen IDLE\) von der Ausgabe) s
+402 461 M
+(ferngehalten  werden,  wie  im letzten 200-Bd-Paket  ankamen.  Nach  einem) s
+402 453 M
+("speeddwn"-CS4  stellen  RX und TX den Header  auf  55\(HEX\),  um  korrekte) s
+402 445 M
+(Memory-ARQ-Funktion \(s. u.\) sicherzustellen.) s
+402 429 M
+(Sonderfaelle:) s
+402 413 M
+('REJECT' eines QRT-Paketes: --> Aussenden eines 100-Bd-QRT-Paketes) s
+402 405 M
+('REJECT'  eines BK-Paketes :  --> Aussenden eines normalen  100-Bd-Paketes) s
+402 397 M
+(mit Head= 55\(HEX\) statt des CS3-Kopfes.) s
+402 389 M
+(CS4  dient  als "REQUEST"-CS fuer den  ersten  100-Bd-Block,  Bestaetigung) s
+402 381 M
+(erfolgt  mittels  CS1 oder CS3,  danach kann bereits wieder  ein  CS4  als) s
+402 373 M
+("speedup"-Signal gesendet werden \(s. u.\).) s
+402 357 M
+(* Geschwindigkeitserhoehung 100 --> 200 Baud) s
+402 341 M
+(Der  RX  kann  nach jedem richtig  empfangenen  100-Bd-Paket  \(ausgenommen) s
+402 333 M
+("REQUEST"-Pakete\) mit CS4 bestaetigen,  was den TX zur Umschaltung auf 200) s
+402 325 M
+(Baud  zwingt.  Der  RX schaltet sofort nach CS4-Aussendung  auf  200-Baud-) s
+402 317 M
+(Empfang.  \(Sollte  der TX das CS4 nicht erhalten,  so ist dies  nicht  mit) s
+402 309 M
+(zusaetzlichem  Informationsverlust verbunden,  obwohl der RX  bereits  die) s
+402 301 M
+("falsche"  Geschwindigkeit  eingestellt  hat.  Das neue  Paket  waere  ein) s
+402 293 M
+("Request"-Paket, also irrelevant.\)) s
+402 285 M
+(CS4  in Folge \(ohne zwischenzeitliches richtiges CS\) werden als  "Request") s
+402 277 M
+(interpretiert, also ignoriert.) s
+402 269 M
+(Nach  erfolgreicher  Geschwindigkeitserhoehung muss  mindestens  noch  ein) s
+402 261 M
+(zweites 200-Bd-Paket vor dem naechsten CS4 \("speeddown\) empfangen werden.) s
+402 253 M
+(Ablehnungsmoeglichkeit:) s
+402 245 M
+(Erhaelt  der  RX nach dem CS4 nicht spaetestens nach  einer  vorgewaehlten) s
+402 237 M
+(Anzahl Zyklen ein fehlerfreies 200-Bd-Paket, so antwortet er mit einem OK-) s
+402 229 M
+(CS  \(verschieden vom letzten CS vor dem CS4\) und schaltet  danach  zurueck) s
+402 221 M
+(auf  100  Baud.  Der TX muss seinerseits das auf CS4 folgende  CS  auf  OK) s
+402 213 M
+(testen,  in  diesem Fall unverzueglich auf 100 Bd zurueckschalten und  die) s
+402 205 M
+(200 Bd-Information wiederholen \(bzw.  im QRT-Fall einen 100-Baud-QRT-Block) s
+402 197 M
+(aufbauen\).) s
+402 181 M
+(* Supervisorkonzept) s
+402 165 M
+(Um Kompatibilitaet zu kommenden Software-Versionen zu gewaehrleisten, muss) s
+402 157 M
+(bereits im Level-1-Protokoll die Uebertragung von Systeminformationen \(SI\)) s
+402 149 M
+(moeglich sein. Zu diesem Zweck wird ein Supervisor-Zeichen \(SB\) definiert,) s
+402 141 M
+(das  die normale Textausgabe auf die Systemebene umlenkt.  Das auf das  SB) s
+402 133 M
+(folgende Zeichen enthaelt den Supervisor-Funktionscode \(SIC\),  gefolgt von) s
+402 125 M
+(Parametern. Den SI-Abschluss bildet ein <SPACE>.) s
+402 109 M
+(Vorlaeufige SI-Definitionen:) s
+402 93 M
+(SB: ASCII <FS> =  1C \(HEX\)) s
+402 77 M
+(SIC:) s
+402 61 M
+(A:  Levelnummer folgt \('1' = Level 1\)) s
+402 53 M
+(B:  Mycall folgt \(kann z. B. automatisch in IDLE-Pakete eingefuegt werden,) s
+402 45 M
+(    um mitlesenden Dritten die Identifikation zu ermoeglichen\)) s
+402 37 M
+(a .. <DEL> : Controlzeichen ausgeben 01 bis 1F \(HEX\) ; ermoeglicht volle) s
+402 29 M
+(    Datentransparenz) s
+402 13 M
+(Die  gesamte  SI laeuft wie gewoehnlicher Text  ueber  das  PT-System,  um) s
+402 5 M
+(Komplikationen beim Geschwindigkeitswechsel zu vermeiden.) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 4 def
+/fname (pactor.txt) def
+/fdir () def
+/ftail (pactor.txt) def
+% User defined strings:
+/moddatestr (05/23/97) def
+/modtimestr (09:58:30) def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(Sofort  benoetigte  SI  muss in den laufenden  Text  eingeschoben  werden,) s
+5 493 M
+(fruehestens  nach  dem letzten bereits  \(mindestens  einmal\)  bearbeiteten) s
+5 485 M
+(Zeichen, um im Wiederholungsfalle Fehler zu vermeiden.) s
+5 469 M
+(* Beenden einer PACTOR-Verbindung) s
+5 453 M
+(Der  Abschluss  einer ARQ-Verbindung  bring allgemein das Problem mit sich,) s
+5 445 M
+(dass Information ohne echte  Bestaetigung  gesendet werden  muss, da  immer) s
+5 437 M
+(wieder eine Bestaetigung der Bestaetigung noetig waere fuer einen definier-) s
+5 429 M
+(ten Verbindungsabbruch.) s
+5 421 M
+(PACTOR  benutzt spezielle QRT-Pakete, um die Gefahr eines unkontrollierten) s
+5 413 M
+(QRT zu minimieren:) s
+5 397 M
+(100 Baud:) s
+5 381 M
+(/Header/ G I S L L A C/Header/Satusbyte/CRC1/CRC2/) s
+5 365 M
+(200 Baud:) s
+5 349 M
+(/Header/X/ G I S L L A C/Header/XXX/Statusbyte/CRC1/CRC2/) s
+5 333 M
+(         /<------100 Baud------>/) s
+5 317 M
+(\(maximal 7 signifikante Bytes zulaessig\)) s
+5 309 M
+(\(X=beliebig\)) s
+5 293 M
+(Das  QRT-Paket wird je nach aktueller  Geschwindigkeit nach  obigem  Schema) s
+5 285 M
+(aufgebaut, wobei das Rufzeichen der Gegenstation  ab dem  17. 200-Bd-Daten-) s
+5 277 M
+(byte von rechts nach links stehen muss. Das Rufzeichen wird immer als  100-) s
+5 269 M
+(Bd-Bitmuster gesendet; das QRT-Bit im Statusbyte muss gesetzt sein.) s
+5 253 M
+(Wird ein QRT-Paket empfangen, sendet der RX noch ein Bestaetigungskontroll-) s
+5 245 M
+(zeichen und geht dann in den  STBY-Zustand. Das QRT-Paket darf  nicht  mehr) s
+5 237 M
+(der Dekodierung \(Ausdruck\) zugefuehrt werden.) s
+5 221 M
+(Da es  bei  gestoerten Kanaelen sehr wahrscheinlich ist, dass das erste Be-) s
+5 213 M
+(staetigungs-CS  nicht  korrekt vom TX empfangen wird, muss der in den STBY-) s
+5 205 M
+(Zustand gegangene RX auch in der normalen Suchphase noch mit dem  korrekten) s
+5 197 M
+(CS auf QRT-Pakete antworten.) s
+5 181 M
+(Der  RX  sucht dafuer den eingehenden Bitstrom nach dem bytereversen Rufzei-) s
+5 173 M
+(chen  im  QRT-Paket  ab  und  synchronisiert  gegebenenfalls  darauf.  Jedes) s
+5 165 M
+(empfangene  QRT-Paket  fuehrt  zur Aussendung eines Betstaetigungs-CS, wobei) s
+5 157 M
+(die Shiftlage  des  CS  sich nach der Shiftlage des QRT-Paketes richtet. Der) s
+5 149 M
+(RX  muss  sich dazu natuerlich die alte Relation \(vor STBY\) von CS-Shiftlage) s
+5 141 M
+(und  Blockshiftlage merken; ausserdem muss der CS-Zeitpunkt gespeichert wer-) s
+5 133 M
+(den.) s
+5 109 M
+(* Memory-ARQ) s
+5 93 M
+(Normale ARQ-Systeme  verzichten  auf die in fehlrhaften Paketen enthaltene) s
+5 85 M
+(Information. Eine  solche  Vorgehensweise  fuehrt  bei  geringer  werdendem) s
+5 77 M
+(Stoerabstand sehr rasch zum Totalausfall einer Verbindung, da es extrem un-) s
+5 69 M
+(wahrscheinlich wird, ein Paket fehlerfrei zu empfangen.) s
+5 53 M
+(Memory-ARQ  summiert die Empfangsspannung \(Nutz- plus Rauschspannung\) glei-) s
+5 45 M
+(cher  \(nocht  nicht  fehlerfrei aufgenommener\) Pakete bitweise auf, wodurch) s
+5 37 M
+(sich der effektive  Signal-Rauschabstand im Idealfall um den Faktor n \(=An-) s
+5 29 M
+(zahl aufsummierter Pakete\) erhoeht.) s
+5 13 M
+(Beispiel fuer Fall n=2 und konstanter Signal- und Rauschleistung:) s
+402 501 M
+(\(N = Rauschspannung, S = Signalspannung, <..> = Mittelwert\)) s
+402 485 M
+(* Summenspannung:  2*S + N1 + N2;) s
+402 469 M
+(* Leistung des Summensignales:) s
+402 453 M
+(<\(2*S + N1 + N2\)**2> = 4*S**2 + <N1**2> + <N2**2> + <gemischte Terme>;) s
+402 437 M
+(<gemischte Terme> = 0; <N1**2> = <N2**2> = Rauschleistung;) s
+402 413 M
+(--> S/N  verdoppelt  bei n=2, analog fuer  beliebige  n.  \(Dies  entspricht) s
+402 405 M
+(letztendlich  nur dem  Satz,  dass die Bitenergie in den effektiven Signal-) s
+402 397 M
+(Rauschabstand eingeht --> spezielle Form des Energieerhaltungssatzes.  Bit-) s
+402 389 M
+(laenge und Bitleistung einzeln betrachtet sind aussagelos. Memory-ARQ nutzt) s
+402 381 M
+(nutzt also die gesamte Signalenergie aus.) s
+402 373 M
+(Memory-ARQ senkt den noetigen Mindeststoerabstand fuer eine  Verbindung  um) s
+402 365 M
+(1 - 15 dB ab. In  realen, also fluktuierenden Kanaelen muss vermieden wer-) s
+402 357 M
+(den  werden, dass  Pakete  mit  relativ  geringem Stoerabstand den Stoerab-) s
+402 349 M
+(stand  des  Summenpaketes  wesentlich  verschlechtern. Hierzu misst man den) s
+402 341 M
+(Stoerabstand  ueber die gesamte Paketlaenge \(relativ kleine Unschaerfe\) und) s
+402 333 M
+(gewichtet die Summanden mit diesem gemessenen Paketstoerabstand.) s
+402 325 M
+(Um Quantisierungsrauschen minimal zu halten, wird ein 8-Bit A/D-Wandler zum) s
+402 317 M
+(Einlesen der Empfangsspannung empfohlen.) s
+402 301 M
+(In das PT-Protokoll sind zum Memory-ARQ folgende Punkte aufgenommen worden:) s
+402 285 M
+(Summenpakete, deren CRC passt, werden wie normale fehlerfreie Pakete behan-) s
+402 277 M
+(delt. \(Da  der 16-Bit CRC eine hohe Sicherheit gewaehrleistet, bringt Memo-) s
+402 269 M
+(ry-ARQ in der Praxis keinerlei Nachteile mit sich.\)) s
+402 253 M
+(Alte  "Request"-Pakete, die  durch Stoerung eines OK-CS vom TX  ausgesendet) s
+402 245 M
+(werden, duerfen nicht in die Summation gelangen. Hierzu  fuehrt  man  einen) s
+402 237 M
+("Similarity"-Test durch, der bei PACTOR aus der Ueberpruefung des Headbytes) s
+402 229 M
+(besteht.  Bei  neuen  Paketen \(mit neuer Informaton\) wird der Header inver-) s
+402 221 M
+(tiert, so dass der RX  auch  ohne  CRC \(Stoerungsfall\) erkennen kann, ob es) s
+402 213 M
+(sich um ein "Request"-Paket handelt.  Jedes richtige Paket \(CRC in Ordnung\)) s
+402 205 M
+(fuehrt zur Loeschung der Memory-ARQ-Summen.) s
+402 197 M
+(Bei CS3-Paketen muss der  "Similarity"-Test  natuerlich  mit dem CS3-Header) s
+402 189 M
+(durchgefuehrt werden.) s
+402 173 M
+(Das PT-Memory-ARQ ist dank der permanent wechselnden Shiftlage auch faehig,) s
+402 165 M
+(konstante  Stoersignale  \(Traeger\) oder andere Unsymmetrien im Kanal auszu-) s
+402 157 M
+(umitteln.) s
+402 133 M
+(Anhang) s
+402 125 M
+(------) s
+402 109 M
+(                         PT-Huffman-Code) s
+402 101 M
+(                         ===============) s
+402 85 M
+(Der  Huffman-Code  ist relativ unempfindlich gegenueber  Abweichungen  der) s
+402 77 M
+(realen  von der theoretischen Buchstabenhaeufigkeit,  so dass fast  gleich) s
+402 69 M
+(gute Ergebnisse bei deutschem und englischem Klartext erreicht werden. Der) s
+402 61 M
+(erreichbare  Kompressionsfaktor  gegenueber ASCII betraegt  ca.  1.7  \(bei) s
+402 53 M
+(einer Entropie von 4.5 Bit/Zeichen\).  Wesentliche Verbesserungen  koennten) s
+402 45 M
+(bei  Beruecksichtigung  der statistischen  Abhaengigkeiten  der  einzelnen) s
+402 37 M
+(Zeichen erzielt werden \(Markow-Quellencodierung\).) s
+402 21 M
+(Code geordnet nach Haeufigkeit,) s
+402 13 M
+(LSB \(uerst gesendet\) links!) s
+_R
+S
+%%Page: (5) 5
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 5 def
+/fname (pactor.txt) def
+/fdir () def
+/ftail (pactor.txt) def
+% User defined strings:
+/moddatestr (05/23/97) def
+/modtimestr (09:58:30) def
+%%EndPageSetup
+column_lines
+do_header
+5 493 M
+(space      :   32           10) s
+5 485 M
+(e          :   101          011) s
+5 477 M
+(n          :   110          0101) s
+5 469 M
+(i          :   105          1101) s
+5 461 M
+(r          :   114          1110) s
+5 453 M
+(t          :   116          00000) s
+5 445 M
+(s          :   115          00100) s
+5 437 M
+(d          :   100          00111) s
+5 429 M
+(a          :   97           01000) s
+5 421 M
+(u          :   117          11111) s
+5 413 M
+(l         :   108          000010) s
+5 405 M
+(h          :   104          000100) s
+5 397 M
+(g          :   103          000111) s
+5 389 M
+(m          :   109          001011) s
+5 381 M
+(           :   13           001100) s
+5 373 M
+(           :   10           001101) s
+5 365 M
+(o          :   111          010010) s
+5 357 M
+(c          :   99           010011) s
+5 349 M
+(b          :   98           0000110) s
+5 341 M
+(f          :   102          0000111) s
+5 333 M
+(w          :   119          0001100) s
+5 325 M
+(D          :   68           0001101) s
+5 317 M
+(k          :   107          0010101) s
+5 309 M
+(z          :   122          1100010) s
+5 301 M
+(.          :   46           1100100) s
+5 293 M
+(,          :   44           1100101) s
+5 285 M
+(S          :   83           1111011) s
+5 277 M
+(A          :   65           00101001) s
+5 269 M
+(E          :   69           11000000) s
+5 261 M
+(p          :   112          11000010) s
+5 253 M
+(v          :   118          11000011) s
+5 245 M
+(0          :   48           11000111) s
+5 237 M
+(F          :   70           11001100) s
+5 229 M
+(B          :   66           11001111) s
+5 221 M
+(C          :   67           11110001) s
+5 213 M
+(I          :   73           11110010) s
+5 205 M
+(T          :   84           11110100) s
+5 197 M
+(O          :   79           000101000) s
+5 189 M
+(P          :   80           000101100) s
+5 181 M
+(1          :   49           001010000) s
+5 173 M
+(R          :   82           110000010) s
+5 165 M
+(\(          :   40           110011011) s
+5 157 M
+(\)          :   41           110011100) s
+5 149 M
+(L          :   76           110011101) s
+5 141 M
+(N          :   78           111100000) s
+5 133 M
+(Z          :   90           111100110) s
+5 125 M
+(M          :   77           111101010) s
+5 117 M
+(9          :   57           0001010010) s
+5 109 M
+(W          :   87           0001010100) s
+5 101 M
+(5          :   53           0001010101) s
+5 93 M
+(y          :   121          0001010110) s
+5 85 M
+(2          :   50           0001011010) s
+5 77 M
+(3          :   51           0001011011) s
+5 69 M
+(4          :   52           0001011100) s
+5 61 M
+(6          :   54           0001011101) s
+5 53 M
+(7          :   55           0001011110) s
+5 45 M
+(8          :   56           0001011111) s
+5 37 M
+(H          :   72           0010100010) s
+5 29 M
+(J          :   74           1100000110) s
+5 21 M
+(U          :   85           1100000111) s
+5 13 M
+(V          :   86           1100011000) s
+5 5 M
+(           :   28           1100011001) s
+402 501 M
+(x          :   120          1100011010) s
+402 493 M
+(K          :   75           1100110100) s
+402 485 M
+(?          :   63           1100110101) s
+402 477 M
+(=          :   61           1111000010) s
+402 469 M
+(q          :   113          1111010110) s
+402 461 M
+(Q          :   81           1111010111) s
+402 453 M
+(j          :   106          00010100110) s
+402 445 M
+(G          :   71           00010100111) s
+402 437 M
+(-          :   45           00010101111) s
+402 429 M
+(:          :   58           00101000111) s
+402 421 M
+(!          :   33           11110011101) s
+402 413 M
+(/          :   47           11110011110) s
+402 405 M
+(*          :   42           001010001100) s
+402 397 M
+("          :   34           110001101100) s
+402 389 M
+(%          :   37           110001101101) s
+402 381 M
+('          :   39           110001101110) s
+402 373 M
+(_          :   95           111100001100) s
+402 365 M
+(&          :   38           111100111001) s
+402 357 M
+(+          :   43           111100111110) s
+402 349 M
+(>          :   62           111100111111) s
+402 341 M
+(           :   64           0001010111000) s
+402 333 M
+($          :   36           0001010111001) s
+402 325 M
+(<          :   60           0001010111010) s
+402 317 M
+(X          :   88           0001010111011) s
+402 309 M
+(#          :   35           0010100011011) s
+402 301 M
+(Y          :   89           00101000110101) s
+402 293 M
+(;          :   59           11110000110100) s
+402 285 M
+(\\          :   92           11110000110101) s
+402 277 M
+(           :   91           001010001101000) s
+402 269 M
+(           :   93           001010001101001) s
+402 261 M
+(           :   127          110001101111000) s
+402 253 M
+(           :   126          110001101111001) s
+402 245 M
+(           :   125          110001101111010) s
+402 237 M
+(           :   124          110001101111011) s
+402 229 M
+(           :   123          110001101111100) s
+402 221 M
+(           :   96           110001101111101) s
+402 213 M
+(           :   94           110001101111110) s
+402 205 M
+(           :   31           110001101111111) s
+402 197 M
+(           :   29           111100001101100) s
+402 189 M
+(           :   27           111100001101101) s
+402 181 M
+(           :   25           111100001101110) s
+402 173 M
+(           :   24           111100001101111) s
+402 165 M
+(           :   23           111100001110000) s
+402 157 M
+(           :   22           111100001110001) s
+402 149 M
+(           :   21           111100001110010) s
+402 141 M
+(           :   20           111100001110011) s
+402 133 M
+(           :   19           111100001110100) s
+402 125 M
+(           :   18           111100001110101) s
+402 117 M
+(           :   17           111100001110110) s
+402 109 M
+(           :   16           111100001110111) s
+402 101 M
+(           :   30           111100001111000) s
+402 93 M
+(           :   15           111100001111001) s
+402 85 M
+(           :   14           111100001111010) s
+402 77 M
+(           :   12           111100001111011) s
+402 69 M
+(           :   11           111100001111100) s
+402 61 M
+(           :   9            111100001111101) s
+402 53 M
+(           :   8            111100001111110) s
+402 45 M
+(           :   7            111100001111111) s
+402 37 M
+(           :   6            111100111000000) s
+402 29 M
+(           :   5            111100111000001) s
+402 21 M
+(           :   4            111100111000010) s
+402 13 M
+(           :   3            111100111000011) s
+402 5 M
+(           :   2            111100111000100) s
+_R
+S
+%%Page: (6) 6
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 6 def
+/fname (pactor.txt) def
+/fdir () def
+/ftail (pactor.txt) def
+% User defined strings:
+/moddatestr (05/23/97) def
+/modtimestr (09:58:30) def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(           :   1            111100111000101) s
+5 493 M
+(           :   0            111100111000110) s
+5 485 M
+(           :   26           111100111000111) s
+5 461 M
+(/*-----------------------------------------------------------------------) s
+5 453 M
+( *          Datendurchsatzberechnung bei PACTOR) s
+5 445 M
+( *              ohne/mit Memory-ARQ) s
+5 437 M
+( *          Annahme: lineare Superposition) s
+5 429 M
+( *                                                        waa 10/90) s
+5 421 M
+( *---------------------------------------------------------------------*/) s
+5 413 M
+(#include <stdio.h>) s
+5 405 M
+(#include <mth.h>) s
+5 389 M
+(double sn,pp,pe,pss,psum,snx,db_min=-20.,db_step,db_max=15.;) s
+5 381 M
+(double bw=600.,baudr=200.,bwd2br,ln10d10,db,pneu,pa,x;) s
+5 373 M
+(int n,bits=192;) s
+5 357 M
+(main\(\)) s
+5 349 M
+({) s
+5 341 M
+( register int i,k,maxsum=400;) s
+5 325 M
+( bwd2br=bw/baudr/2.;     /*   Bandbreite/\(2*Baudrate\)         */) s
+5 317 M
+( ln10d10=log\(10.\)/10.;) s
+5 301 M
+( printf\("\\nEingabe Anzahl Datenpunkte :"\);) s
+5 293 M
+( scanf \("%d",&n\);) s
+5 285 M
+( db=db_min;) s
+5 277 M
+( db_step=\(db_max-db_min\)/\(n-1\);   /* Schrittweite                    */) s
+5 269 M
+( printf\("\\n   Stoerabstand \(dB\)    Durchsatz normal \(%%\) \\) s
+5 261 M
+(    Durchsatz Memo-ARQ \(%%\) "\);) s
+5 253 M
+( printf\("\\n---------------------------------------------------------\\) s
+5 245 M
+(------------------"\);) s
+5 237 M
+( for \(i=0;i<n;i++\){) s
+5 229 M
+(   printf\("\\n\\t %-8.3lf",db\);) s
+5 221 M
+(   sn=exp\(db*ln10d10\);            /* Umrechnung dB -> SN             */) s
+5 213 M
+(   pe=0.5*exp\(-sn*bwd2br\);        /* FSK-Bitfehlerwahrscheinlichkeit */) s
+5 205 M
+(   if \(pe<0.1\)) s
+5 197 M
+(     pp=exp\(log\(1.-pe\)*bits\);     /* Paket-OK-Wahrscheinlichkeit     */) s
+5 189 M
+(   else) s
+5 181 M
+(     pp=0.0;) s
+5 173 M
+(   pss=pp;) s
+5 165 M
+(   pp*=100.;) s
+5 157 M
+(   printf\("\\t    %8.3lf ",pp\);) s
+5 149 M
+(   pa=pss;) s
+5 141 M
+(   psum=pss;) s
+5 133 M
+(   for \(k=2;k<=maxsum;k++\){       /* Iteration fuer M-ARQ            */) s
+5 125 M
+(     snx=sn*k;                    /* Ann. : lineare Stoerabstands-   */) s
+5 117 M
+(     if \(snx>50.\)                 /*   Verbesserung bei Memo-ARQ     */) s
+5 109 M
+(       pe=0.0;) s
+5 101 M
+(     else) s
+5 93 M
+(       pe=0.5*exp\(-snx*bwd2br\);) s
+5 85 M
+(     if \(pe<0.1\)) s
+5 77 M
+(       pp=exp\(log\(1.-pe\)*bits\);) s
+5 69 M
+(     else) s
+5 61 M
+(       pp=0.0;) s
+5 53 M
+(     pneu=\(1.-pa\)*pss;) s
+5 45 M
+(     pa+=pneu;) s
+5 37 M
+(     x=\(1.-pa\)*pp;) s
+5 29 M
+(     pa+=x;) s
+5 21 M
+(     psum+=x/k;) s
+5 13 M
+(   }) s
+5 5 M
+(   psum*=100.;) s
+402 501 M
+(   printf\("\\t\\t%8.3lf",psum\);) s
+402 493 M
+(   db+=db_step;) s
+402 485 M
+( }) s
+402 477 M
+(}) s
+402 461 M
+(EOF.) s
+_R
+S
+%%Trailer
+%%Pages: 6
+%%DocumentNeededResources: font Times-Roman Courier-Bold Courier 
+%%+ font Times-Bold 
+%%EOF

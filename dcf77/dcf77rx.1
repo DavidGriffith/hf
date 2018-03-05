@@ -1,0 +1,75 @@
+.TH DCF77RX 1 "DCF77 utilities" "HB9JNX" \" -*- nroff -*-
+
+.SH NAME
+dcf77rx \- soundcard DCF77 (and HBG) receiver
+
+.SH SYNOPSIS
+.B dcf77rx
+[\-a audio device] [\-s] [\-v verboselevel] [\-g] [\-p] [\-l] [\-u]
+
+.SH DESCRIPTION
+.B dcf77rx
+is a soundcard demodulator for time reference signals transmitted by
+the transmitters
+.BR DCF77
+and
+.BR HBG
+on LF frequencies. The program expects the transmitter signal downconverted
+to an audio passband frequency of 1kHz by an LSB or USB receiver.
+.PP
+The decoded time information is used to derive correction factors for the sampling
+rate, the gettimeofday clock and to measure the exact CPU clock frequency.
+These clock sources are used in my SITOR/Pactor1 package as reference clocks.
+The time currently does not set system time.
+
+.SS OPTIONS
+.TP
+.I \-a
+specify the path to the sound driver (default: /dev/dsp on Linux, /dev/audio on Solaris).
+
+.TP
+.I \-s
+use standard input instead of audio input. Format is 8kHz 16bit words 1 channel
+in the endianness of the CPU.
+
+.TP
+.I \-v
+Set the verbosity level. The higher the number, the more debugging
+information is written to standard error.
+
+.TP
+.I \-g
+HBG mode.
+
+.TP
+.I \-p
+DCF77 phase mode. DCF77 transmits the time information amplitude modulated
+and phase modulated with a pseudorandom code. This option uses the latter to
+decode the time. This is strongly recommended, as the PN code is more robust
+and allows much more exact determination of the second pulses.
+
+.TP
+.I \-l
+Receiver uses LSB (lower sideband) mode.
+
+.TP
+.I \-u
+Receiver uses USB (upper sideband) mode.
+
+.SH BUGS
+In DCF77 BPSK PN mode, due to the small number of searchers and therefore
+low system load, the receiver requires around 15sec to aquire the second
+clock.
+.PP
+Due to the nature of the amplitude modulated transmissions from HBG and DCF77,
+the receiver is quite sensitive to noise and preturbances.
+.PP
+The receiver requires more than one minute to acquire time, due to the
+nature of the transmissions.
+
+.SH CREDITS
+Hans-Guenter DF4OX/DL0PTB sent me printed documentation about the DCF77 
+transmission format which helped me a lot.
+
+.SH AUTHOR
+Thomas Sailer, HB9JNX/AE4WA, sailer@ife.ee.ethz.ch
