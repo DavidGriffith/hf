@@ -2,10 +2,10 @@
 #include "config.h"
 #endif
 
+#include <stdlib.h> 
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {

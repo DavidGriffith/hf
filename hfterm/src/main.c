@@ -5,6 +5,7 @@
  *
  *      Copyright (C) 1996  Thomas Sailer (sailer@ife.ee.ethz.ch)
  *        Swiss Federal Institute of Technology (ETH), Electronics Lab
+ *	modified 2000-2004 by Axel Krause & Gnther Montag (dl4mge@darc.de).
  *
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -20,117 +21,32 @@
  *      along with this program; if not, write to the Free Software
  *      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *
+*
  */
 
 /*****************************************************************************/
-      
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <netinet/in.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#include "hfapp.h"
 #include "hft.h"
 
-#include "interface.h"
-#include "support.h"
-#include "spectrum.h"
-
-/* --------------------------------------------------------------------- */
-
-#ifndef FREQ_SPACE
-#define FREQ_SPACE 1275
+#ifndef MAXKEY
+#define MAXKEY 2048
 #endif
 
-#ifndef FREQ_MARK
-#define FREQ_MARK  1475
-#endif
-
-#ifndef MYCALL
-#define MYCALL ""
-#endif
-
-#ifndef PCT_CRC_0
-#define PCT_CRC_0 "FFFF"
-#endif
-
-#ifndef PCT_CRC_1
-#define PCT_CRC_1 "FFFF"
-#endif
-
-#ifndef PCT_CRC_2
-#define PCT_CRC_2 "FFFF"
-#endif
-
-#ifndef PCT_CRC_3
-#define PCT_CRC_3 "FFFF"
+#ifndef MAXRX
+#define MAXRX 2000
 #endif
 
 /* --------------------------------------------------------------------- */
 
-static GtkWidget *wspec;
-static GtkWidget *wpar;
-static GtkWidget *wmain;
-static GtkWidget *wabout;
-static GtkWidget *wmonitor;
-
-int scope_on = 0;
+char versioninfo[128];
+char kernelstartcommand[128];
+int rxfile_ready = 0, scope_on = 0, log_on = 0;
+int kernelstart = 1;
 static int fd_krnl = -1;
-
-static char *name_kernel = "hfapp";
-
-static struct par {
-	struct {
-		unsigned int freq[2];
-	} fsk;
-
-	struct {
-		unsigned int baud;
-		unsigned int rxinvert;
-		unsigned int txinvert;
-	} rtty;
-
-	struct {
-		unsigned char destcall[4];
-		unsigned char selfeccall[4];
-		unsigned char mycall[4];
-		unsigned int txdelay;
-		unsigned int retry;
-		unsigned int rxinvert;
-		unsigned int txinvert;
-	} amtor;
-
-	struct {
-		unsigned char destcall[8];
-		unsigned char mycall[8];
-		unsigned int txdelay;
-		unsigned int retry;
-		unsigned char longpath;
-		unsigned int crcpreset[4];
-	} pactor;
-
-	struct {
-		unsigned char destcall[10];
-		unsigned char mycall[10];
-		unsigned int txdelay;
-		unsigned int retry;
-	} gtor;
-} params;
+static char *name_kernel = "/var/run/hfapp";
+char gmt[32];
+GdkFont *radiofont = NULL;
+struct par params;
 
 /* --------------------------------------------------------------------- */
 /*
@@ -140,9 +56,8 @@ static struct par {
 void errprintf(int severity, const char *fmt, ...)
 {
         va_list args;
-
         va_start(args, fmt);
-	fprintf(stderr, "hfterm[%lu]: ", (unsigned long)getpid());
+	display_status( "hfterm[%lu]: ", (unsigned long)getpid());
 	vfprintf(stderr, fmt, args);
         va_end(args);
         if (severity <= SEV_FATAL)
@@ -156,491 +71,380 @@ void errstr(int severity, const char *st)
         errprintf(severity, "error: %s: %s\n", st, strerror(errno));
 }
 
-/* --------------------------------------------------------------------- */
-
-void display_status(const char *data)
+/* --------------------------------------------------------------- */
+void display_status(const char *fmt, ... )
 {
-	GtkText *txt;
+	GtkText *txt = NULL;
 	unsigned int len;
-
-	if (!data || !(len = strlen(data)))
+        va_list args;
+	char display[256];
+	
+	if (!fmt || !(len = strlen(fmt)))
 		return;
+	
+	memset (display, 0, sizeof(display));
 	txt = GTK_TEXT(gtk_object_get_data(GTK_OBJECT(wmain), "textstatus"));
-	gtk_text_freeze(txt);
-	gtk_text_set_point(txt, 0);
-	gtk_editable_delete_text(GTK_EDITABLE(txt), 0, ~0);
-	gtk_text_insert(txt, NULL, NULL, NULL, data, len);
-	gtk_text_thaw(txt);
+	// to prevent stack overflow while running loooooong
+	while (gtk_text_get_length(txt) > MAXMON)
+	{
+	 gtk_text_freeze(txt);
+	  gtk_text_set_point (txt, 0);
+	  gtk_text_forward_delete (txt, MAXMON / 2);
+	  gtk_text_set_point (txt, gtk_text_get_length(txt));
+	 gtk_text_thaw(txt);
+	}
+        va_start(args, fmt);
+	vsnprintf(display, sizeof(display), fmt, args);	
+        va_end(args);
+	gtk_text_insert(txt, radiofont, NULL, NULL, display, strlen(display));
+	gtk_text_insert(txt, NULL, NULL, NULL, "\n", 2);
 }
 
-/* --------------------------------------------------------------------- */
+/* ------------------------------------------------------------------ */
 
-static void set_fsk_freq(unsigned int mark, unsigned int space)
+void rx_window_keep_small()
 {
-	struct hfapp_msg msg;
-	char buf[16];
-	GtkEntry *entry;
-	Spectrum *spec;
+	GtkText *txt = NULL;
+	int length;
 
-	msg.hdr.type = htonl(HFAPP_MSG_SET_FSKPAR);
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(sizeof(msg.data.fpar));
-	if (space < 500)
-		space = 500;
-	if (space > 3500)
-		space = 3500;
-	if (mark < 500)
-		mark = 500;
-	if (mark > 3500)
-		mark = 3500;
-	params.fsk.freq[0] = space;
-	params.fsk.freq[1] = mark;
-	msg.data.fpar.freq[0] = htons(params.fsk.freq[0]);
-	msg.data.fpar.freq[1] = htons(params.fsk.freq[1]);
-	msg_send(&msg);
-	snprintf(buf, sizeof(buf), "%d", params.fsk.freq[0]);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "fskspacefreq"));
-	gtk_entry_set_text(entry, buf);
-	snprintf(buf, sizeof(buf), "%d", params.fsk.freq[1]);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "fskmarkfreq"));
-	gtk_entry_set_text(entry, buf);
-	snprintf(buf, sizeof(buf), "%d Hz", params.fsk.freq[0]);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wspec), "specfreqspace"));
-	gtk_entry_set_text(entry, buf);
-	snprintf(buf, sizeof(buf), "%d Hz", params.fsk.freq[1]);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wspec), "specfreqmark"));
-	gtk_entry_set_text(entry, buf);
-	spec = SPECTRUM(gtk_object_get_data(GTK_OBJECT(wspec), "spec"));
-	spectrum_setmarker(spec, space, mark, -1);
-}
-
-/* ---------------------------------------------------------------------- */
-
-#define DBSPAN 80
-#define SRATE 8000
-
-#if 0
-
-static int cb_canvas(FL_OBJECT *ob, Window win, int w, int h, XEvent *ev, void *d)
-{
-        XWindowAttributes winattrs;     
-        GC gc;
-        XGCValues gcv;
-	XButtonEvent *bev = (XButtonEvent *)ev;
-	XMotionEvent *mev = (XMotionEvent *)ev;
-	unsigned int freq;
-	unsigned char buf[16];
-
-	switch (ev->type) {
-	case Expose:  /* GraphicsExpose??*/
-		XGetWindowAttributes(fl_get_display(), fl_get_canvas_id(fd_spec->scdisp), &winattrs);
-		gcv.line_width = 1;
-		gcv.line_style = LineSolid;
-		gcv.fill_style = FillSolid;
-		gc = XCreateGC(fl_get_display(), pixmap, GCLineWidth | GCLineStyle | GCFillStyle, &gcv);
-		XSetState(fl_get_display(), gc, col_background, col_background, GXcopy, AllPlanes);
-		XCopyArea(fl_get_display(), pixmap, fl_get_canvas_id(fd_spec->scdisp), gr_context, 
-			  0, 0, winattrs.width, winattrs.height, 0, 0);
-		return 0;
-
-	case ButtonPress:
-		freq = (bev->x * SRATE + SPEC_WIDTH) / (2*SPEC_WIDTH);
-		if (bev->button == 1)
-			set_fsk_freq(freq+freq_shift, freq);
-		else if (bev->button == 3)
-			set_fsk_freq(freq, freq-freq_shift);
-		snprintf(buf, sizeof(buf), "%d Hz", freq);
-		fl_set_object_label(fd_spec->freq_pointer, buf);	
-		return 0;
-
-	case MotionNotify:
-		freq = (mev->x * SRATE + SPEC_WIDTH) / (2*SPEC_WIDTH);
-		snprintf(buf, sizeof(buf), "%d Hz", freq);
-		fl_set_object_label(fd_spec->freq_pointer, buf);
-		return 0;
-
-	default:
-		fprintf(stderr, "Canvas: unknown event %d\n", ev->type);
-		return 0;
+	txt = GTK_TEXT(gtk_object_get_data(GTK_OBJECT(wmain), "textmain"));
+	length = gtk_text_get_length(txt);
+	// to prevent crashes from stack overflow with growing rx text
+	while  (length > MAXRX) {
+	  if (! rxfile_ready ) rx_routine_store_prepare();
+	  gtk_text_freeze(txt);
+	  rx_routine_store_part();
+	  display_status("first half of rx text saved in ~/hf/hfrx.");
+	  gtk_text_set_point (txt, 0);
+	  gtk_text_forward_delete (txt, MAXRX / 2  ); // removed "-10"
+	  length = gtk_text_get_length(txt);
+	  gtk_text_set_point (txt, length);
+	  gtk_text_thaw(txt);
 	}
 }
-
-#endif
-
-/* --------------------------------------------------------------------- */
-
-#if 0
-static void scope_window(int on) 
-{
-	struct hfapp_msg msg;
-	if (on) {
-		fl_show_form(fd_spec->spec, FL_PLACE_CENTER, FL_FULLBORDER, 
-			     "HF Terminal Spectrum Display");
-		if (!(pixmap = XCreatePixmap(fl_get_display(), 
-					     fl_get_canvas_id(fd_spec->scdisp), 
-					     SPEC_WIDTH, SPEC_HEIGHT, 
-					     fl_get_canvas_depth(fd_spec->scdisp))))
-			errprintf(SEV_FATAL, "unable to open offscreen pixmap\n");
-		fl_add_canvas_handler(fd_spec->scdisp, Expose, cb_canvas, NULL);
-		fl_add_canvas_handler(fd_spec->scdisp, MotionNotify, cb_canvas, NULL);
-		fl_add_canvas_handler(fd_spec->scdisp, ButtonPress, cb_canvas, NULL);
-		gr_context = XCreateGC(fl_get_display(), fl_state[fl_vmode].trailblazer, 0, 0);
-		col_zeroline = fl_get_flcolor(FL_RED);
-		col_background = fl_get_flcolor(FL_WHITE);
-		col_trace = fl_get_flcolor(FL_BLACK);
-		col_demodbars = fl_get_flcolor(FL_BLUE);
-		
-		msg.hdr.type = htonl(HFAPP_MSG_REQ_SAMPLES);
-		msg.hdr.len = htonl(sizeof(msg.data.u));
-		msg.hdr.err = htonl(ERR_NOERR);
-		msg.data.u = htonl(SPEC_WIDTH*2);
-		msg_send(&msg);
-		scope_on = 1;
-		return;
-	}
-	fl_remove_canvas_handler(fd_spec->scdisp, Expose, cb_canvas);
-	fl_remove_canvas_handler(fd_spec->scdisp, MotionNotify, cb_canvas);
-	fl_remove_canvas_handler(fd_spec->scdisp, ButtonPress, cb_canvas);
-	fl_hide_form(fd_spec->spec);
-	XFreeGC(fl_get_display(), gr_context);
-	XFreePixmap(fl_get_display(), pixmap);
-	scope_on = 0;
-}
-#endif
-
-/* --------------------------------------------------------------------- */
-
-void scope_draw(float *data)
-{
-#if 0
-        int cnt;
-        GC gc;
-        XGCValues gcv;
-	int yc = 0, ycz;
-
-	if (!scope_on)
-		return;
-#if 0
-        XWindowAttributes winattrs;
-        XGetWindowAttributes(fl_get_display(), fl_get_canvas_id(fd_spec->scdisp), &winattrs);
-	winattrs.width, winattrs.height;
-#endif 
-        gcv.line_width = 1;
-        gcv.line_style = LineSolid;
-        gc = XCreateGC(fl_get_display(), pixmap, GCLineWidth | GCLineStyle, &gcv);
-        XSetState(fl_get_display(), gc, col_background, col_background, GXcopy, AllPlanes);
-	XFillRectangle(fl_get_display(), pixmap, gc, 0, 0, SPEC_WIDTH, SPEC_HEIGHT);
-	/*
-	 * draw grid
-	 */
-        XSetForeground(fl_get_display(), gc, col_zeroline);
-	for (cnt = 0; cnt < SPEC_HEIGHT; cnt += (10 * SPEC_HEIGHT + DBSPAN / 2) / DBSPAN)
-		XDrawLine(fl_get_display(), pixmap, gc, 0, cnt, SPEC_WIDTH-1, cnt);
-	for (cnt = 0; cnt < SPEC_WIDTH; cnt += (500 * (2*SPEC_WIDTH) + SRATE / 2) / SRATE)
-		XDrawLine(fl_get_display(), pixmap, gc, cnt, 0, cnt, SPEC_HEIGHT-1);
-	/*
-	 * draw demodulator frequency bars
-	 */
-        XSetForeground(fl_get_display(), gc, col_demodbars);
-	cnt = (fsk_freq[0] * (2*SPEC_WIDTH) + SRATE / 2) / SRATE;
-	XDrawLine(fl_get_display(), pixmap, gc, cnt, 0, cnt, SPEC_HEIGHT-1);
-	cnt = (fsk_freq[1] * (2*SPEC_WIDTH) + SRATE / 2) / SRATE;
-	XDrawLine(fl_get_display(), pixmap, gc, cnt, 0, cnt, SPEC_HEIGHT-1);	
-	/*
-	 * draw curve
-	 */
-        XSetForeground(fl_get_display(), gc, col_trace);
-        for (cnt = 0; cnt < SPEC_WIDTH; cnt++) {
-		ycz = yc;
-		yc = -data[cnt] / DBSPAN * SPEC_HEIGHT;
-		if (yc < 0) 
-			yc = 0;
-		if (yc >= SPEC_HEIGHT)
-			yc = SPEC_HEIGHT-1;
-		if (cnt > 0)
-			XDrawLine(fl_get_display(), pixmap, gc, cnt-1, ycz, cnt, yc);
-	}
-        XCopyArea(fl_get_display(), pixmap, fl_get_canvas_id(fd_spec->scdisp), gr_context, 0, 0, 
-                  SPEC_WIDTH, SPEC_HEIGHT, 0, 0);
-        XFreeGC(fl_get_display(), gc);
-        XSync(fl_get_display(), 0);
-#endif
-}
-
-/* --------------------------------------------------------------------- */
-
-static void param_get(void)
-{
-	GtkEntry *entry;
-	GtkToggleButton *tog;
-
-	/* FSK parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "fskspacefreq"));
-	params.fsk.freq[0] = strtoul(gtk_entry_get_text(entry), NULL, 0);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "fskmarkfreq"));
-	params.fsk.freq[1] = strtoul(gtk_entry_get_text(entry), NULL, 0);
-	/* RTTY parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "rttybaudrate"));
-	params.rtty.baud = strtoul(gtk_entry_get_text(entry), NULL, 0);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "rttyinvert"));
-	params.rtty.rxinvert = gtk_toggle_button_get_active(tog);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "rttyrxtxinvert"));
-	params.rtty.txinvert = gtk_toggle_button_get_active(tog);
-	if (params.rtty.rxinvert)
-		params.rtty.txinvert = !params.rtty.txinvert;
-	/* Amtor parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtordestcall"));
-	strncpy(params.amtor.destcall, gtk_entry_get_text(entry), sizeof(params.amtor.destcall));
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtormycall"));
-	strncpy(params.amtor.mycall, gtk_entry_get_text(entry), sizeof(params.amtor.mycall));
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtorselfeccall"));
-	strncpy(params.amtor.selfeccall, gtk_entry_get_text(entry), sizeof(params.amtor.selfeccall));
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtortxdelay"));
-	params.amtor.txdelay = strtoul(gtk_entry_get_text(entry), NULL, 0);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtorretry"));
-	params.amtor.retry = strtoul(gtk_entry_get_text(entry), NULL, 0);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "amtorinvert"));
-	params.amtor.rxinvert = gtk_toggle_button_get_active(tog);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "amtorrxtxinvert"));
-	params.amtor.txinvert = gtk_toggle_button_get_active(tog);
-	if (params.amtor.rxinvert)
-		params.amtor.txinvert = !params.amtor.txinvert;
-	/* Pactor parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcall"));
-	strncpy(params.pactor.destcall, gtk_entry_get_text(entry), sizeof(params.pactor.destcall));
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactormycall"));
-	strncpy(params.pactor.mycall, gtk_entry_get_text(entry), sizeof(params.pactor.mycall));
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorretry"));
-	params.pactor.retry = strtoul(gtk_entry_get_text(entry), NULL, 0);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactortxdelay"));
-	params.pactor.txdelay = strtoul(gtk_entry_get_text(entry), NULL, 0);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "pactorlongpath"));
-	params.pactor.longpath = gtk_toggle_button_get_active(tog);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcrc0"));
-	params.pactor.crcpreset[0] = strtoul(gtk_entry_get_text(entry), NULL, 16);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcrc1"));
-	params.pactor.crcpreset[1] = strtoul(gtk_entry_get_text(entry), NULL, 16);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcrc2"));
-	params.pactor.crcpreset[2] = strtoul(gtk_entry_get_text(entry), NULL, 16);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcrc3"));
-	params.pactor.crcpreset[3] = strtoul(gtk_entry_get_text(entry), NULL, 16);
-	/* GTOR parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "gtordestcall"));
-	strncpy(params.gtor.destcall, gtk_entry_get_text(entry), sizeof(params.gtor.destcall));
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "gtormycall"));
-	strncpy(params.gtor.mycall, gtk_entry_get_text(entry), sizeof(params.gtor.mycall));
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "gtorretry"));
-	params.gtor.retry = strtoul(gtk_entry_get_text(entry), NULL, 0);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "gtortxdelay"));
-	params.gtor.txdelay = strtoul(gtk_entry_get_text(entry), NULL, 0);
-}
-	
-static void param_set(void)
-{
-	GtkEntry *entry;
-	GtkToggleButton *tog;
-	char buf[16];
-
-	/* FSK parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "fskspacefreq"));
-	snprintf(buf, sizeof(buf), "%u", params.fsk.freq[0]);
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "fskmarkfreq"));
-	snprintf(buf, sizeof(buf), "%u", params.fsk.freq[1]);
-	gtk_entry_set_text(entry, buf);
-	/* RTTY parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "rttybaudrate"));
-	snprintf(buf, sizeof(buf), "%u", params.rtty.baud);
-	gtk_entry_set_text(entry, buf);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "rttyinvert"));
-	gtk_toggle_button_set_active(tog, params.rtty.rxinvert);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "rttyrxtxinvert"));
-	gtk_toggle_button_set_active(tog, params.rtty.txinvert ^ params.rtty.rxinvert);
-	/* Amtor parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtordestcall"));
-	strncpy(buf, params.amtor.destcall, sizeof(params.amtor.destcall));
-	buf[sizeof(params.amtor.destcall)] = 0;
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtormycall"));
-	strncpy(buf, params.amtor.mycall, sizeof(params.amtor.mycall));
-	buf[sizeof(params.amtor.mycall)] = 0;
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtorselfeccall"));
-	strncpy(buf, params.amtor.selfeccall, sizeof(params.amtor.selfeccall));
-	buf[sizeof(params.amtor.selfeccall)] = 0;
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtortxdelay"));
-	snprintf(buf, sizeof(buf), "%u", params.amtor.txdelay);
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "amtorretry"));
-	snprintf(buf, sizeof(buf), "%u", params.amtor.txdelay);
-	gtk_entry_set_text(entry, buf);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "amtorinvert"));
-	gtk_toggle_button_set_active(tog, params.amtor.rxinvert);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "amtorrxtxinvert"));
-	gtk_toggle_button_set_active(tog, params.amtor.txinvert ^ params.amtor.rxinvert);
-	/* Pactor parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcall"));
-	strncpy(buf, params.pactor.destcall, sizeof(params.pactor.destcall));
-	buf[sizeof(params.pactor.destcall)] = 0;
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactormycall"));
-	strncpy(buf, params.pactor.mycall, sizeof(params.pactor.mycall));
-	buf[sizeof(params.pactor.mycall)] = 0;
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorretry"));
-	snprintf(buf, sizeof(buf), "%u", params.pactor.retry);
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactortxdelay"));
-	snprintf(buf, sizeof(buf), "%u", params.pactor.txdelay);
-	gtk_entry_set_text(entry, buf);
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wpar), "pactorlongpath"));
-	gtk_toggle_button_set_active(tog, params.pactor.longpath);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcrc0"));
-	snprintf(buf, sizeof(buf), "%04X", params.pactor.crcpreset[0]);
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcrc1"));
-	snprintf(buf, sizeof(buf), "%04X", params.pactor.crcpreset[1]);
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcrc2"));
-	snprintf(buf, sizeof(buf), "%04X", params.pactor.crcpreset[2]);
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "pactorcrc3"));
-	snprintf(buf, sizeof(buf), "%04X", params.pactor.crcpreset[3]);
-	gtk_entry_set_text(entry, buf);
-	/* GTOR parameters */
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "gtordestcall"));
-	strncpy(buf, params.gtor.destcall, sizeof(params.gtor.destcall));
-	buf[sizeof(params.gtor.destcall)] = 0;
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "gtormycall"));
-	strncpy(buf, params.gtor.mycall, sizeof(params.gtor.mycall));
-	buf[sizeof(params.gtor.mycall)] = 0;
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "gtorretry"));
-	snprintf(buf, sizeof(buf), "%u", params.gtor.retry);
-	gtk_entry_set_text(entry, buf);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar), "gtortxdelay"));
-	snprintf(buf, sizeof(buf), "%u", params.gtor.txdelay);
-	gtk_entry_set_text(entry, buf);
-}
-	
-static void param_kernel(void)
-{
-	struct hfapp_msg msg;
-
-	/* FSK parameters */
-	set_fsk_freq(params.fsk.freq[1], params.fsk.freq[0]);
-	/* RTTY parameters */
-	msg.hdr.type = htonl(HFAPP_MSG_SET_RTTYPAR);
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(sizeof(msg.data.rpar));
-	msg.data.rpar.baud = htons(params.rtty.baud);
-	msg.data.rpar.rxinvert = params.rtty.rxinvert;
-	msg.data.rpar.txinvert = params.rtty.txinvert;
-	msg_send(&msg);
-	/* Amtor parameters */
-	msg.hdr.type = htonl(HFAPP_MSG_SET_AMTORPAR);
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(sizeof(msg.data.apar));
-	strncpy(msg.data.apar.destcall, params.amtor.destcall, sizeof(msg.data.apar.destcall));
-	strncpy(msg.data.apar.selfeccall, params.amtor.selfeccall, sizeof(msg.data.apar.selfeccall));
-	strncpy(msg.data.apar.mycall, params.amtor.mycall, sizeof(msg.data.apar.mycall));
-	msg.data.apar.txdelay = htons(params.amtor.txdelay);
-	msg.data.apar.retry = htons(params.amtor.retry);
-	msg.data.apar.rxinvert = params.amtor.rxinvert ;
-	msg.data.apar.txinvert = params.amtor.txinvert;
-	msg_send(&msg);
-	/* Pactor parameters */
-	msg.hdr.type = htonl(HFAPP_MSG_SET_PACTORPAR);
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(sizeof(msg.data.ppar));
-	strncpy(msg.data.ppar.destcall, params.pactor.destcall, sizeof(msg.data.ppar.destcall));
-	strncpy(msg.data.ppar.mycall, params.pactor.mycall, sizeof(msg.data.ppar.mycall));
-	msg.data.ppar.txdelay = htons(params.pactor.txdelay);
-	msg.data.ppar.retry = htons(params.pactor.retry);
-	msg.data.ppar.longpath = params.pactor.longpath;
-	msg.data.ppar.crcpreset[0] = htons(params.pactor.crcpreset[0]);
-	msg.data.ppar.crcpreset[1] = htons(params.pactor.crcpreset[1]);
-	msg.data.ppar.crcpreset[2] = htons(params.pactor.crcpreset[2]);
-	msg.data.ppar.crcpreset[3] = htons(params.pactor.crcpreset[3]);
-	msg_send(&msg);
-	/* GTOR parameters */
-	msg.hdr.type = htonl(HFAPP_MSG_SET_GTORPAR);
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(sizeof(msg.data.gpar));
-	strncpy(msg.data.gpar.destcall, params.gtor.destcall, sizeof(msg.data.gpar.destcall));
-	strncpy(msg.data.gpar.mycall, params.gtor.mycall, sizeof(msg.data.gpar.mycall));
-	msg.data.gpar.txdelay = htons(params.gtor.txdelay);
-	msg.data.gpar.retry = htons(params.gtor.retry);
-	msg_send(&msg);
-}
-
-/* --------------------------------------------------------------------- */
 
 void write_input(unsigned char *data, int datalen)
 {
 	GtkText *txt;
+	GtkEditable *entry;
+	gint pos;
+	int i, factor;
+	static int squelchcount = 0;
+	int squelchwait;
+	
+	if (!data && datalen <= 0) return;
 
-	if (!data && datalen <= 0)
+	/* squelch. The squelch_passed... flags are updated in spectrum.c 
+	 * squelch works only if the spectrum is on! 
+	 */
+	
+	// no squelch for mt63, as no spectrum working
+	if (lastrxmsg == HFAPP_MSG_STATE_MT63_RX) {
+	  if (scope_on) {
+/*
+	      if (!squelch_passed_mt36_500_1000) {
+		if (params.mt63.doubleinterleave) factor = 2;
+		else factor = 1;
+		squelchwait = (params.mt63.integration * factor) ; 
+		squelchcount++;
+		//display_status("MT63 squelch waits for %d units", squelchwait);
+		//display_status("MT63 squelch count %d units", squelchcount);
+		if (squelchcount > squelchwait) {
+		//	display_status(
+		//	"MT63 signal remained weak for %d units -> squelched",
+		//	squelchwait);
+	       return;
+		}
+
+	      } else squelchcount = 0;
+*/	      
+	  }
+	}
+
+	/* for cw mode under construction */
+	else if ((lastrxmsg == HFAPP_MSG_STATE_CW_RX) &&
+	    ( ! squelch_passed_cw)) {
+	  if (scope_on) {
+/*	  
+	    squelchwait = 10;
+	    squelchcount++;
+	    if (squelchcount > squelchwait ) {
+		display_status("cw signal remained weak for %3.1f s -> squelched",
+		params.mt63.integration * factor);
 		return;
+	    }
+*/	    
+	  }
+	}
+
+	/* for all other modes, which are the fsk modes */
+	else if (scope_on) {
+	    if (!squelch_passed_fsk) {
+		squelchwait = 0;
+		squelchcount++;
+		//display_status("FSK squelch waits for %d units", squelchwait);
+		//display_status("FSK squelch count %d units", squelchcount);
+		if (squelchcount > squelchwait) {
+		    /*
+		    display_status(
+			"FSK signal remained weak for %d units -> squelched",
+			squelchwait);
+		    */
+		    display_status("FSK signal weak since %d units -> squelched",	squelchwait);
+		    return;
+		}
+	    } else squelchcount = 0;
+	}
+	
+	fbbtest = 0;
+	if (mailbox_on == 1) mailbox_input(data, datalen);
+	rx_window_keep_small();
 	txt = GTK_TEXT(gtk_object_get_data(GTK_OBJECT(wmain), "textmain"));
-	gtk_text_insert(txt, NULL, NULL, NULL, data, datalen);
+
+/*
+the other squelch flags 
+extern int squelch_passed_mt36_1000_1500;
+extern int squelch_passed_mt36_1500_2500;
+could in future be processed here to feed mt63_bandwidth_autodetect() !
+*/
+
+/* carriage return handling : this i tried: 
+ * removes the ugly hook by which the radiofont expresses a 
+ * carriage-return. 
+ */
+
+/* works for rtty  and amtor : */
+/*
+	if (data[datalen - 1] == '\r') {
+	    //display_status ("datalen is %d, last is carriage return", datalen);
+	    data[datalen - 1] = ' '; 
+	}
+*/
+/* works for pactor : */ 
+/*
+	if (data[datalen - 2] == '\r') {
+	    //display_status ("datalen is %d, before last is carriage return", datalen);
+	    data[datalen - 2] = ' ';
+	}
+*/
+/* orig by Tom 
+	gtk_text_insert(txt, radiofont, NULL, NULL, data, datalen);
+*/
+	for (i = 0; i < datalen; i++) {
+	    if (data[i] == '\b') {
+	    	entry = GTK_EDITABLE
+		    (gtk_object_get_data(GTK_OBJECT(wmain), "textmain"));
+		pos = gtk_editable_get_position(entry);
+		if (pos > 0) {
+		    gtk_editable_delete_text(entry, pos-1, pos);
+		}
+	    } 
+	    else {
+		if (data[i] == '\r') {
+		    // data[i] = ' '; 
+		    // but this removes newlines wheen text processed by
+		    // dos/windows
+		    gtk_text_insert(txt, NULL, NULL, NULL, data+i, 1); 
+		    /* removes the ugly hook by which the radiofont expresses a 
+		    carriage-return. */
+		} else
+	    	gtk_text_insert(txt, radiofont, NULL, NULL, data+i, 1);
+	    }
+	}
 }
 
 void write_output(unsigned char *data, int datalen)
 {
+	int i;
 	GtkText *txt;
+	GtkEditable *entry;
+	gint pos;
+	GdkColor txfg, txbg;
 
-	if (!data && datalen <= 0)
-		return;
+	txfg.pixel = 0;
+	txfg.red = 65535;	
+	txfg.green = 0;
+	txfg.blue = 65535;
+	/* pink */
+
+	txbg.pixel = 0;
+	txbg.red = 55000;
+	txbg.green = 65535;
+	txbg.blue = 55000;
+	/* light green */
+	
+	if (!data && datalen <= 0) {
+	    display_status ("hfterm/src/main.c: no data, len 0");
+	    return;
+	}
+	if (!data ) {
+	    display_status ("hfterm/src/main.c: no data");
+	    return;
+	}
+	if ( datalen <= 0) {
+	    display_status ("hfterm/src/main.c: len 0");
+	    return;
+	}
+	fbbtest = 0;
+	rx_window_keep_small();
 	txt = GTK_TEXT(gtk_object_get_data(GTK_OBJECT(wmain), "textmain"));
-	gtk_text_insert(txt, NULL, &(GTK_WIDGET(txt)->style->fg[GTK_WIDGET_STATE(GTK_WIDGET(txt))]), NULL, data, datalen);
+
+	if (radiofont == NULL) {
+	    if ((radiofont = gdk_font_load("7x13")) == NULL)
+		display_status("simple font 7x13 could not be loaded.");
+	}
+
+	    /*    
+	    newline only at a line:
+	    pactor: datalen = 2
+	    all other: datalen = 1
+	    
+	    5 letters and newline in a line:
+	    pactor: datalen = 7
+	    all other: datalen = 1
+	    */
+
+	/*  with the 7x13 font 
+	    the carriage return (\r) is printed as a hook, not looking nice!
+	*/
+	    /* works for rtty  and amtor !! */
+/*
+	if (data[datalen - 1] == '\r') {
+	    //display_status ("datalen is %d, last is carriage return", datalen);
+	    data[datalen - 1] = ' '; 
+	}
+*/
+	    /* works for pactor !! */ 
+/*
+	if (data[datalen - 2] == '\r') {
+	    //display_status ("datalen is %d, before last is carriage return", datalen);
+	    data[datalen - 2] = ' ';
+	}
+*/
+	    /* orig by Tom, modified by Gnther */
+/*
+	gtk_text_insert(txt, radiofont, 
+//    &(GTK_WIDGET(txt)->style->fg[GTK_WIDGET_STATE(GTK_WIDGET(txt))]), 
+	&txfg, &txbg, data, datalen);
+*/
+	for (i = 0; i < datalen; i++) {
+	    if (data[i] == '\b') {
+	    	entry = GTK_EDITABLE
+		    (gtk_object_get_data(GTK_OBJECT(wmain), "textmain"));
+		pos = gtk_editable_get_position(entry);
+		if (pos > 0) {
+		    gtk_editable_delete_text(entry, pos-1, pos);
+		}
+	    } 
+	    else {
+		if (data[i] == '\r') {
+		    data[i] = ' ';
+		    /* removes the ugly hook by which the radiofont expresses a 
+		    carriage-return. */
+		}
+	    	gtk_text_insert(txt, radiofont, &txfg, &txbg, data+i, 1);
+	    }
+	}
+}
+
+void start_write_mailboxtest()
+{
+/* 
+ * before start of mailbox-test
+ * by writing to input window, 
+ * set a color and 
+ * go to end of input text 
+ * and write a newline
+ * 
+ */
+        GtkText *txt;
+	int length;
+	GdkColor boxtestfg, boxtestbg;
+
+    	boxtestbg.pixel = 0;
+	boxtestbg.red = 65535;	
+	boxtestbg.green = 65535;
+	boxtestbg.blue = 50000;
+	/* light yellow */
+
+	boxtestfg.pixel = 0;
+	boxtestfg.red = 0;
+	boxtestfg.green = 0;
+	boxtestfg.blue = 65535;
+	/* should be blue */
+	
+	txt = GTK_TEXT(gtk_object_get_data(GTK_OBJECT(wmain), "textmain"));
+	length = gtk_text_get_length(txt);
+	gtk_text_set_point (txt, length);
+	gtk_text_insert(txt, radiofont, 
+//    &(GTK_WIDGET(txt)->style->fg[GTK_WIDGET_STATE(GTK_WIDGET(txt))]), 
+        &boxtestfg, &boxtestbg, "\n", 1);
+	rx_window_keep_small();
 }
 
 void write_monitor(unsigned char *data, int datalen)
 {
-	GtkText *txt;
-
+	GtkText *txt = NULL;
 	if (!data && datalen <= 0)
 		return;
-	txt = GTK_TEXT(gtk_object_get_data(GTK_OBJECT(wmonitor), "textmonitor"));
+	txt = GTK_TEXT(gtk_object_get_data(GTK_OBJECT(wmonitor), 
+	    "textmonitor"));
 	if (!GTK_WIDGET_DRAWABLE(GTK_WIDGET(txt)))
 		return;
-	gtk_text_insert(txt, NULL, NULL, NULL, data, datalen);
+	while (gtk_text_get_length(txt) > MAXMON)
+	{
+	 // gtk_text_freeze(txt);
+	  gtk_text_set_point (txt, 0);
+	  gtk_text_forward_delete (txt, MAXMON / 2);
+	  gtk_text_set_point (txt, gtk_text_get_length(txt));
+	 // gtk_text_thaw(txt);
+	}
+	gtk_text_insert(txt, radiofont, NULL, NULL, data, datalen);
 }
 
-/* --------------------------------------------------------------------- */
+/* ------------------------------------------------------------------ */
 
 void write_kernel(unsigned char *data, int datalen)
 {
 	int i;
+	int failmax = 100;
+	static int failcount = 0;
 
 	if (fd_krnl < 0) {
-		errprintf(SEV_WARNING, "write_kernel: fd closed\n");
-		return;
+	    failcount++;
+	    //display_status ("hfterm: can not write to hfkernel %d.time", failcount);
+	    return;
 	}
 	while (datalen > 0) {
 		i = write(fd_krnl, data, datalen);
 		if (i < 0) {
-			if (errno != EAGAIN)
-				errstr(SEV_FATAL, "write");
+		    if (errno == EAGAIN) {
+			failcount++;
+			if (failcount > failmax) {
+			    errstr(SEV_FATAL, "write hfterm -> hfapp");
+			} 
+		    }
+		    if (errno != EAGAIN)
+			errstr(SEV_FATAL, "write hfterm -> hfapp");
 		} else {
-			data += i;
-			datalen -= i;
+		    failcount = 0;	
+		    data += i;
+		    datalen -= i;
 		}
 	}
 }
 
-/* --------------------------------------------------------------------- */
+/* ------------------------------------------------------------------ */
 
-static void edit_newline(void)
+//static 
+void edit_newline(void)
 {
         struct hfapp_msg msg;
-	GtkEntry *entry;
+//	GtkEntry *entry;
+//	see below
+//	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wmain), "textedit"));
+//	gtk_entry_set_text(entry, "");
 
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wmain), "textedit"));
-	gtk_entry_set_text(entry, "");
 	msg.data.b[0] = '\r';
 	msg.data.b[1] = '\n';
         msg.hdr.type = htonl(HFAPP_MSG_DATA_TRANSMIT);
@@ -649,7 +453,8 @@ static void edit_newline(void)
         msg_send(&msg);
 }
 
-static void edit_backspace(void)
+//static 
+void edit_backspace(void)
 {
         struct hfapp_msg msg;
 	GtkEditable *entry;
@@ -658,7 +463,7 @@ static void edit_backspace(void)
 	entry = GTK_EDITABLE(gtk_object_get_data(GTK_OBJECT(wmain), "textedit"));
 	pos = gtk_editable_get_position(entry);
 	if (pos > 0) {
-		gtk_editable_set_position(entry, pos-1);
+//		gtk_editable_set_position(entry, pos-1);
 		gtk_editable_delete_text(entry, pos, pos);
 	}
 	msg.data.b[0] = '\b';
@@ -668,16 +473,13 @@ static void edit_backspace(void)
         msg_send(&msg);
 }
 
-static void edit_addchar(char v)
+//static 
+void edit_addchar(char v)
 {
         struct hfapp_msg msg;
-	GtkEntry *entry;
 	char buf[2];
-
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wmain), "textedit"));
 	buf[0] = v;
 	buf[1] = 0;
-	gtk_entry_append_text(entry, buf);
 	msg.data.b[0] = v;
         msg.hdr.type = htonl(HFAPP_MSG_DATA_TRANSMIT);
         msg.hdr.len = htonl(1);
@@ -687,392 +489,32 @@ static void edit_addchar(char v)
 
 /* --------------------------------------------------------------------- */
 
-void spec_samples(short *data, unsigned int len)
-{
-	struct hfapp_msg msg;
-	short tmp[SPECTRUM_NUMSAMPLES];
-	unsigned int i;
-	Spectrum *spec;
-
-	if (!scope_on)
-		return;
-	if (len < SPECTRUM_NUMSAMPLES)
-		errprintf(SEV_WARNING, "HFAPP_MSG_ACK_SAMPLES: message too short\n");
-	else {
-		for (i = 0; i < SPECTRUM_NUMSAMPLES; i++)
-			tmp[i] = ntohs(data[i]);
-		spec = SPECTRUM(gtk_object_get_data(GTK_OBJECT(wspec), "spec"));
-		spectrum_setdata(spec, tmp);
-	}
-	msg.hdr.type = htonl(HFAPP_MSG_REQ_SAMPLES);
-	msg.hdr.len = htonl(sizeof(msg.data.u));
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.data.u = htonl(SPECTRUM_NUMSAMPLES);
-	msg_send(&msg);
-}
-
-/* --------------------------------------------------------------------- */
-
-static unsigned int get_freq_shift(void)
-{
-	GtkToggleButton *tog;
-
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wspec), "shift170"));
-	if (gtk_toggle_button_get_active(tog))
-		return 170;
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wspec), "shift200"));
-	if (gtk_toggle_button_get_active(tog))
-		return 200;
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wspec), "shift425"));
-	if (gtk_toggle_button_get_active(tog))
-		return 425;
-	tog = GTK_TOGGLE_BUTTON(gtk_object_get_data(GTK_OBJECT(wspec), "shift800"));
-	if (gtk_toggle_button_get_active(tog))
-		return 800;
-	return 0;
-}
-
-gboolean on_spec_motion_event(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
-{
-	unsigned int freq;
-	char buf[16];
-	GtkEntry *entry;
-	Spectrum *spec;
-
-	freq = ((SRATE/2) * event->x + SPECTRUM_WIDTH/2) / SPECTRUM_WIDTH;
-	snprintf(buf, sizeof(buf), "%d Hz", freq);
-	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wspec), "specfreqpointer"));
-	gtk_entry_set_text(entry, buf);
-	spec = SPECTRUM(gtk_object_get_data(GTK_OBJECT(wspec), "spec"));
-	spectrum_setmarker(spec, -1, -1, freq);
-	printf("on_scope_motion_event: x %g y %g\n", event->x, event->y);
-	return FALSE;
-}
-
-
-gboolean on_spec_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
-{
-	unsigned int freq, shift;
-
-	freq = ((SRATE/2) * event->x + SPECTRUM_WIDTH/2) / SPECTRUM_WIDTH;
-	shift = get_freq_shift();
-	switch (event->button) {
-	case 1:
-		set_fsk_freq(freq, freq+shift);
-		break;
-
-	case 2:
-		set_fsk_freq(freq-shift/2, freq+shift/2);
-		break;
-
-	case 3:
-		set_fsk_freq(freq-shift, freq);
-		break;
-	}
-	printf("on_scope_button_press_event: x %g y %g  button 0x%04x\n", event->x, event->y, event->button);
-	return FALSE;
-}
-
-void on_parok_clicked(GtkButton *button, gpointer user_data)
-{
-	param_get();
-	param_set();
-	param_kernel();
-	gtk_widget_hide(wpar);
-}
-
-
-void on_parcancel_clicked(GtkButton *button, gpointer user_data)
-{
-	param_set();
-	gtk_widget_hide(wpar);
-}
-
-
-void on_quit_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	gtk_main_quit();
-}
-
-
-void on_become_irs_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_MODE_IRS);
-	msg_send(&msg);
-}
-
-
-void on_become_iss_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_MODE_ISS);
-	msg_send(&msg);
-}
-
-
-void on_qrt_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_MODE_QRT);
-	msg_send(&msg);
-}
-
-
-void on_speedup_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_MODE_SPEEDUP);
-	msg_send(&msg);
-}
-
-void on_uppercase_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_CASE_UPPER);
-	msg_send(&msg);
-}
-
-
-void on_lowercase_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_CASE_LOWER);
-	msg_send(&msg);
-}
-
-
-void on_figurecase_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_CASE_FIGURE);
-	msg_send(&msg);
-}
-
-
-void on_standby_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_STANDBY);
-	msg_send(&msg);
-}
-
-void on_pactor_arq_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_PACTOR_ARQ);
-	msg_send(&msg);
-}
-
-
-void on_pactor_fec_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_PACTOR_FEQ);
-	msg_send(&msg);
-}
-
-
-void on_gtor_arq1_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_GTOR_ARQ);
-	msg_send(&msg);
-}
-
-
-void on_amtor_arq_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_AMTOR_ARQ);
-	msg_send(&msg);
-}
-
-
-void on_amtor_collective_fec_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_AMTOR_COLFEQ);
-	msg_send(&msg);
-}
-
-
-void on_amtor_selective_fec_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_AMTOR_SELFEQ);
-	msg_send(&msg);
-}
-
-
-void on_rtty_receive_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_RTTY_RX);
-	msg_send(&msg);
-}
-
-
-void on_rtty_transmit_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.hdr.len = htonl(0);
-	msg.hdr.type = htonl(HFAPP_MSG_START_RTTY_TX);
-	msg_send(&msg);
-}
-
-void on_frequency_spectrum_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	struct hfapp_msg msg;
-
-	msg.hdr.type = htonl(HFAPP_MSG_REQ_SAMPLES);
-	msg.hdr.len = htonl(sizeof(msg.data.u));
-	msg.hdr.err = htonl(ERR_NOERR);
-	msg.data.u = htonl(SPECTRUM_NUMSAMPLES);
-	msg_send(&msg);
-	scope_on = 1;
-	gtk_widget_show(wspec);
-}
-
-void on_parameters_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	gtk_widget_show(wpar);
-}
-
-
-void on_monitor_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	gtk_widget_show(wmonitor);
-}
-
-void on_about_activate(GtkMenuItem *menuitem, gpointer user_data)
-{
-	gtk_widget_show(wabout);
-}
-
-
-gboolean on_text_keypress_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
-{
-	char c = event->keyval;
-
-	printf("on_text_keypress_event: 0x%x %c  state %u\n", event->keyval, (c >= ' ' && c <= 0x7f) ? c : '.', event->state);
-
-	if (event->state & ~(GDK_SHIFT_MASK | GDK_LOCK_MASK))
-		return FALSE;
-	if (event->keyval == GDK_BackSpace) {
-		edit_backspace();
-		return TRUE;
-	}
-	if (event->keyval == GDK_Return) {
-		edit_newline();
-		return TRUE;
-	}
-	if (event->keyval >= 32 && event->keyval < 128) {
-		edit_addchar(event->keyval);
-		return TRUE;
-	}
-	return FALSE;
-}
-
-
-gboolean on_text_keyrelease_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
-{
-	char c = event->keyval;
-
-	printf("on_text_keyrelease_event: 0x%x %c  state %u\n", event->keyval, (c >= ' ' && c <= 0x7f) ? c : '.', event->state);
-	return TRUE;
-}
-
-gboolean on_wspec_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
-{
-	gtk_widget_hide(widget);
-	scope_on = 0;
-	return TRUE;
-}
-
-gboolean on_wmain_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
-{
-	gtk_main_quit();
-	return FALSE;
-}
-
-
-gboolean on_wmain_destroy_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
-{
-	gtk_main_quit();
-	return FALSE;
-}
-
-void on_aboutok_clicked (GtkButton *button, gpointer user_data)
-{
-	gtk_widget_hide(wabout);
-}
-
-/* --------------------------------------------------------------------- */
-
-static GPollFD msgpfd;
-
-static gboolean poll_prepare(gpointer source_data, GTimeVal *current_time, gint *timeout, gpointer user_data)
+//static 
+gboolean poll_prepare(gpointer source_data, GTimeVal *current_time, gint *timeout, gpointer user_data)
 {
 	*timeout = -1;
         return FALSE;
 }
 
-static gboolean poll_check(gpointer source_data, GTimeVal *current_time, gpointer user_data)
+//static 
+gboolean poll_check(gpointer source_data, GTimeVal *current_time, gpointer user_data)
 {
-	if (msgpfd.revents & G_IO_IN)
-		return TRUE;
+    static int poll_check_count = 0;
+    int poll_check_max = 1000;
+	if (msgpfd.revents & G_IO_IN) {
+	    poll_check_count = 0;
+	    return TRUE;
+	}
+	poll_check_count++;
+	if (poll_check_count > poll_check_max) {
+	    errstr(SEV_FATAL, 
+		"hfterm: connection to hfkernel disturbed. Exiting.");
+	}
         return FALSE;
 }
 
-static gboolean poll_dispatch(gpointer source_data, GTimeVal *current_time, gpointer user_data)
+//static 
+gboolean poll_dispatch(gpointer source_data, GTimeVal *current_time, gpointer user_data)
 {
 	if (msgpfd.revents & G_IO_IN)
 		msg_process(msgpfd.fd);
@@ -1087,76 +529,171 @@ static GSourceFuncs poll_funcs =
         NULL
 };
 
-static void init(void)
+void timequery()
 {
-	static const char *mycall = MYCALL;
-	struct sockaddr_un saddr;
-	char buf[16];
-	char *bp1;
-	const char *bp2;
+	/*Datum-Systemabfrage*/
+	time_t now;
+	time(&now);
+	// "GENORMT":
+	//sprintf(gmt, "%s", asctime(gmtime(&now)));	
+	// This i like better:
+	// strftime(gmt, 31, "%a %d.%m.%y, %H:%M", gmtime(&now));
+	// but to makie it compatible to cabrillo:
+	strftime(gmt, 31, "%Y-%m-%d %H%M", gmtime(&now));
+} 
 
+//static 
+void init(void)
+{
+	struct sockaddr_un saddr;
+	int kernel_running = 0;
+	char systemstring[256];
+	
+	system("cd ~"); 
+	system("pwd"); 
+		sprintf(systemstring, 
+	 	"if ! [ -d ~/hf ] ; then mkdir ~/hf; cp -ruv %s/share/hf/hf-examplefiles/* ~/hf; fi", PREFIX);
+	system(systemstring);
+	
+	sprintf(versioninfo,  "hf %s. All Docs in: %s/share/hf", 
+	    PACKAGE_VERSION, PREFIX);
+	display_status(versioninfo);
+	
+	param_set_defaults();
+	param_read();	
+	fixtext_read();
+	log_read();
+	log_list();
+	param_set();
+	logbook_window_show(NULL, NULL	);
+	if ((radiofont = gdk_font_load("7x13")) == NULL)
+	    display_status("simple font 7x13 could not be loaded.");
+		
+	if(kernelstart) {
+	    sprintf(kernelstartcommand, 
+		"hfkernel -s %f -t %f -m %f -a %s -p %s %s &",
+		 params.general.snd_corr, 
+		 params.general.tv_corr, 
+		 params.general.cpu_mhz, 
+		 params.general.soundcard, 
+		 params.general.serial, 
+		 params.general.kerneloptions);
+	
+		printf(" the hfkernel start command is: \n %s\n", 		kernelstartcommand);
+	
+	// I kill all hfkernel threads first to go sure no zombies around there	
+	    system("hfkernel -k");
+	    
+	// I start hfkernel new
+	    display_status("I start hfkernel now....");
+	    system(kernelstartcommand);
+	    display_status("I will wait a second....");
+	    sleep(1);
+	    display_status("I will try to connect...");
+	}
+	
+	// I connect the kernel
 	if ((fd_krnl = socket(PF_UNIX, SOCK_STREAM, 0)) < 0)
 		errstr(SEV_FATAL, "socket");
 	saddr.sun_family = AF_UNIX;
 	strncpy(saddr.sun_path, name_kernel, sizeof(saddr.sun_path));
-	if (connect(fd_krnl, (struct sockaddr *)&saddr, sizeof(saddr))) {
-		errstr(SEV_WARNING, "connect");
-		close(fd_krnl);
-		msgpfd.fd = fd_krnl = -1;
+	if (connect(fd_krnl, (struct sockaddr *)&saddr, sizeof(saddr)))
+	{
+	    errstr(SEV_WARNING, "connect");
+	    close(fd_krnl);
+	    msgpfd.fd = fd_krnl = -1;
+	    if (kernelstart) {
+		display_status
+		    ("I could not start hfkernel.\n"
+		    "Please try to start it on a console first.\n" 
+		    "Write down the options you need, \n"
+		    "enter them into the configure menu.\n"
+		    "See F1 or /usr/share<doc/>(packages/)/hf/HF-HOWTO for help.\n"); 
+	    } else {
+	        display_status
+		    ("By option -n you did not want to start hfkernel.\n"
+		    "It also seems not to have been running before.\n" 
+		    "This mode is for debug only.\n" );
+	    }
 	} else {
-		g_source_add(G_PRIORITY_HIGH, FALSE, &poll_funcs, NULL, NULL, NULL);
+		// if the connect is o.k.
+		
+		g_source_add(G_PRIORITY_HIGH, FALSE, 
+		    &poll_funcs, NULL, NULL, NULL);
 		msgpfd.fd = fd_krnl;
 		msgpfd.events = G_IO_IN;
 		msgpfd.revents = 0;
 		g_main_add_poll(&msgpfd, G_PRIORITY_HIGH);
+		kernel_running = 1;
+		display_status
+		    ("hfterm has connected hfkernel All is good.\n" );
 	}
+	    	
+	if(kernel_running) {
+	    param_kernel();
 	
-	memset(&params, 0, sizeof(params));
-	strncpy(params.gtor.mycall, mycall, sizeof(params.gtor.mycall));
-	params.gtor.txdelay = 30;
-	params.gtor.retry = 30;
-	strncpy(params.pactor.mycall, mycall, sizeof(params.pactor.mycall));
-	params.pactor.txdelay = 30;
-	params.pactor.retry = 30;
-	params.pactor.crcpreset[0] = strtoul(PCT_CRC_0, NULL, 16);
-	params.pactor.crcpreset[1] = strtoul(PCT_CRC_1, NULL, 16);
-	params.pactor.crcpreset[2] = strtoul(PCT_CRC_2, NULL, 16);
-	params.pactor.crcpreset[3] = strtoul(PCT_CRC_3, NULL, 16);
-
-	bp2 = mycall-1+strlen(mycall);
-	buf[sizeof(buf)-1] = 0;
-	bp1 = buf+4;
-	*bp1 = 0;
-	while (bp2 >= mycall) {
-		if (isalpha(*bp2))
-			*--bp1 = *bp2;
-		bp2--;
-		if (bp1 <= buf)
-			bp1 = buf+1;
+	/*
+	    msg.hdr.err = htonl(ERR_NOERR);
+	    msg.hdr.len = htonl(0);
+	    msg.hdr.type = htonl(HFAPP_MSG_START_STANDBY);
+	    msg_send(&msg);
+	    display_status("start with STANDBY FOR PACTOR-AMTOR- GTOR...");
+	    lastrxcmd = HFAPP_MSG_START_STANDBY;
+	    way = RX;
+	*/
 	}
-	strncpy(params.amtor.mycall, buf, sizeof(params.amtor.mycall));
-	strncpy(params.amtor.selfeccall, buf, sizeof(params.amtor.selfeccall));
-	params.amtor.txdelay = 30;
-	params.amtor.retry = 30;
-	params.rtty.baud = 45;
-	set_fsk_freq(FREQ_MARK, FREQ_SPACE);
+
 }
 
-/* --------------------------------------------------------------------- */
+/* ------------------------------------------------------------------ */
+
+void finit(void)
+{
+	/*is called from callbacks.c */
+	errprintf (SEV_INFO,"hfterm: 73 & hpe cuagn sn !! \n");        
+	display_status("\n73 !!! by hfterm !");        
+	gtk_main_quit();
+/* - Rx-Text-Rest speichern ------------------------------------------*/
+	rx_routine_store_rest();
+/* - Fix - Text speichern --------------------------------------------*/
+	fixtext_store();
+/* - Config-Datei speichern ------------------------------------------*/
+	param_store();
+/* - Log-Datei speichern ---------------------------------------------*/
+	log_store();
+/* - finish hfkernel     ---------------------------------------------*/
+	system ("hfkernel -k");
+}
+
+
+/* ------------------------------------------------------------------ */
 
 int main(int argc, char *argv[])
 {
         int c, err = 0;
-
-	bindtextdomain(PACKAGE, PACKAGE_LOCALE_DIR);
-	textdomain(PACKAGE);
-
+//	compiler:  "statement with no effect"
+//	bindtextdomain(PACKAGE, PACKAGE_LOCALE_DIR);
+//	textdomain(PACKAGE);
+//		
 	gtk_set_locale();
 	gtk_init(&argc, &argv);
-        while ((c = getopt(argc, argv, "k:")) != -1) 
+	
+        while ((c = getopt(argc, argv, "nc:h:p:")) != -1) 
                 switch (c) {
-                case 'k':
-                        name_kernel = optarg;
+                case 'n':
+                	kernelstart = 0;
+			break;
+
+		case 'c':
+                	if (optarg != NULL) name_kernel = optarg;
+                        break;
+
+                case 'h':
+                        sprintf(params.mailbox.host, "%s", optarg);
+                        break;
+
+                case 'p':
+                        params.mailbox.port = atoi(optarg);
                         break;
 
                 default:
@@ -1164,10 +701,21 @@ int main(int argc, char *argv[])
                         break;
                 }
         if (err) {
-                fprintf(stderr, "usage: hfterm [-k <hfkernel>]\n");
+                errprintf 
+		    (SEV_WARNING,
+		    "usage: hfterm [n] [-c <socket>] [-p <port>] [-h <host>]\n"
+		    " -n: no start of hfkernel (debug, graphical interface only)\n"
+		    " -c: socket to hfkernel, default: /var/run/hfapp\n"
+		    " -h: ip-adress of mailbox-host, default: 127.0.0.1\n"
+		    " -p  port of mailbox programm, default: 6300\n");
                 exit(1);
         }
-#if 0
+
+#if MAP 
+//  same would be:
+//  add_pixmap_directory("/usr/local/share/hfterm/pixmaps");
+//  this is outcommented because it will hfterm on my old box slooow  !!
+
 	add_pixmap_directory(PACKAGE_DATA_DIR "/pixmaps");
 	add_pixmap_directory(PACKAGE_SOURCE_DIR "/pixmaps");
 #endif
@@ -1176,23 +724,24 @@ int main(int argc, char *argv[])
 	 * (except popup menus), just so that you see something after building
 	 * the project. Delete any components that you don't want shown initially.
 	 */
+//	wrxfileselection = create_wrxfileselection();
+	wmain = create_wmain();
 	wspec = create_wspec();
 	wpar = create_wpar();
 	wabout = create_wabout();
+	whilfe = create_whilfe();
+	Wfixtext = create_Wfixtext();
+	Wsearchlogentr = create_Wsearchlogentr();
+	wlistalllog = create_wlistalllog();
+	wqsoeditor = create_wqsoeditor();
+//	whinweis = create_whinweis();
+//	wmap = create_wmap();	
 	wmonitor = create_wmonitor();
-	wmain = create_wmain();
- 	init();
-	param_set();
-	param_kernel();
 	gtk_widget_show(wmain);
-	display_status("HFTerm\n(C) 1999 by Thomas Sailer, HB9JNX/AE4WA\n");
 
+	init();
 	gtk_main();
-	return 0;
+	exit(0);
 }
 
 /* --------------------------------------------------------------------- */
-
-
-
-

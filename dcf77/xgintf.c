@@ -26,12 +26,11 @@
 /*****************************************************************************/
       
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include"config.h"
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-
+#include <stdlib.h> 
+#include<stdio.h>
 #include "xgintf.h"
 #include "dcf77.h"  /* die */
 

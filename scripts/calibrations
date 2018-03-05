@@ -1,0 +1,51 @@
+#!/bin/bash
+
+##	***	***	/usr/local/etc/calibrations	***	***
+##	***					 		***
+##	***	      file for calibration results 		***
+##	***	      used by dcc77rx and reffreq		***
+##	***					 		***
+##	***		part of the hf package 			***
+##	***	        by Günther Montag DL4MGE		***
+##	***					 		***
+##	***					 		***
+##	***	***	***	***	***	***	***	***	
+
+## For longer standing Amtor od Pactor connects, and also for MT63,
+## a calibration might improve the performance of hf. 
+
+## Note: You must enter your correction factors by hand into the 
+## "General" section of hfterm!
+
+## There is a lot of documentation in English and German!
+## See:
+## the HF-HOWTO in the doc subdirectory of the hf package
+## or in /usr/local/share/doc/hf
+## or F1 in the hfterm window under X.
+## See man dcf77rx, man reffreq, ratecal1, many examples in the HF-HOWTO!
+
+## You can enter correction factors here by hand in the syntax shown here.
+## dcf77rx and reffreq 
+## will enter their corrections automatically at the end of this file.
+
+## Short explanation of the 3 Time correction factors: #####################
+## If your soundcard can do full-duplex, hfkernel uses the soundcard clock.
+## You can enter a soundcard clock correction factor here: 
+soundcorr=1.0
+##
+## If your soundcard can do only half-duplex, 
+## hfkernel tries the RDTSC instruction for getting the time.
+## For this you can enter the exact rate (in kHz) here:
+#mhzcorr=
+##
+## If RDTSC does not work, 
+## hf uses the less accurate 'gettimeofday' for getting the time.
+## Insert a gettimeofday correction factor here:
+timecorr=1.0
+##
+###############################################################################
+
+###############################################################################
+## From here on, if you use dcf77rx or reffreq, automatically
+## correction factors will be entered, the last of each kind will be valid.
+###############################################################################

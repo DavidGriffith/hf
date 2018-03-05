@@ -1,0 +1,4 @@
+## this is a script that compiles alsa test programs for
+## development of alsa driver for hgkernel
+gcc alsafdx.c -o alsafdx -lasound
+gcc alsalatency.c -o alsalatency -lasound

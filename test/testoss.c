@@ -2,8 +2,8 @@
 #include "config.h"
 #endif
 
+#include <stdlib.h> 
 #include <stdio.h>
-#include <stdlib.h>
 
 #ifndef HAVE_SYS_SOUNDCARD_H
 
@@ -24,7 +24,6 @@ int main(int argc, char *argv[])
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <stdlib.h>
 
 #define AUDIOPATH "/dev/dsp"
 

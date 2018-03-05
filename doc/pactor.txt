@@ -639,6 +639,14 @@ Y          :   89           00101000110101
  *          Annahme: lineare Superposition
  *                                                        waa 10/90
  *---------------------------------------------------------------------*/
+ /*-----------------------------------------------------------------------
+ *          Dieses c-Programm wurde kompiliert und ist
+ *	    bei der Installation des hf-Pakets
+ *          in /usr/local/bin/paccalc installiert
+ *	    und mit 'paccalc' aufrufbar.
+ *          dl4mge 5/03
+ *                     
+ *---------------------------------------------------------------------*/
 #include <stdio.h>
 #include <mth.h>
 

@@ -1,0 +1,52 @@
+.TH HF 1 2/15/07
+.CM 1 
+.SH "NAME"
+hf is the start script for Tom Sailer's amateur radio sondcard program suite, implementing the "historic" digimodes RTTY, AMTOR (SITOR), PACTOR1, GTOR, now also MT63 and a CW elbug. 
+.SH "SYNOPSIS"
+.B hf
+is the start script, to be invoked without any options. It starts the graphical interface terminal hfterm, where all configuration is done. hfterm will start the demodulator hfkernel. 
+.SH "CONTENTS AND DESCRIPTION OF THE PACKAGE"
+.B hf
+is the startscript and also the name of the program package.
+.B hfkernel
+is the 'heart' of the program, which modulates and demodulates, as far as we know it is worldwide the only program that can transmit Pactor 1 only by soundcard, no TNC. Because of its real-time-mode it needs superuser rights, and because of DMA (direct memory access for quick access to the soundcard's ring buffer) not every soundcard and/or sound driver can do this job!
+.B hfterm
+is the graphic terminal interface, which starts hfkernel and connects to it via an UNIX domain socket. hfterm has been programmed with the Gtk+ toolkit (Version 1.2.10). It has a frequency spectrum, monitor function, help, text macros, a logbook, a beacon and a mailbox function, which can connect via telnet to  F6FBB, the  well-known packet radio BBS. This has to be configured first for telnet access (see HF-HOWTO) and started as 'xfbbd' before on the same machine or  another connected by ethernet. hf can be used as an automatic  mailbox and for remote control.
+.B dcf77rx 
+is a calibration tool, which utilizes the German Longwave time and 
+frequency beacon DCF77 at 77,5 kHz, and which can also set the system time automagically to the beacon's time. Calibration may be needed for longer pactor connects which needs exact timing. See man dcf77rx.
+.B dcf77gen
+is a simulation program for this beacon's signals. See man dcf77gen.
+.B reffreq 
+is a calibration tool using any NF reference frequency.
+.B ratecal1 
+is a calibration tool using any pulsed signal, can be the German dcf77 signal, can be the North American WWV, can be a Pactor or Amtor or Gtor ARQ! Tnx to Pawel Jalocha, who is also author of MT63, who made this wonderful tool. There are various other test programs.
+.B HF-HOWTO 
+is the main documentation, found in /usr/local/share/doc/hf
+or in the doc directory of the hf package.
+.SH "INSTALLATION AND FIRST START"
+Just 'tar -zxvf' the tar.gz package, then run './configure', 'make' and (as root) 'make install'. Or 'rpm -i' the rpm package. hfkernel will be installed "suid root" (by 'chmod 4755 /usr/local/bin/hfkernel') automatically. As first test, just run 'hf', from a graphic console. This starts hfterm, this starts hfkernel. The console messages show errors or if all is o.k., then characters should appear on the hfterm's receive window, and the spectrum (F2) should show a living curve.
+Most problems are soundcard-dependant (MMAP-errors). There is a hardware detect, but sometimes experimental options have to be tried in the config menu of hfterm (e.g.-n = no DMA), then restart hf. See the documentation.
+.SH "BUGS & QUIRKS"
+A lot, but programming is fun most of the time, just help !
+.SH "SEE ALSO"
+The main documentation texts are .B HF-HOWTO
+(english) and 
+.B DE-HF-HOWTO
+(German)
+and some other, some only German, in /usr/(local)/share/hf
+.SH "AUTHORS"
+Father: 
+.B Thomas Sailer
+Maintainer:
+.B Dr. med. Guenther Montag
+DL4MGE, Safaridoktor@compuserve.de
+.SH "HOMEPAGE"
+.B hfterm.sf.net
+.SH "MAILING LIST"
+subscribe:
+.B https://lists.sourceforge.net/lists/listinfo/hfterm-hackers
+write to:
+.B hfterm-hackers@lists.sourceforge.net
+and
+.SH ".... have a lot of fun !!!"

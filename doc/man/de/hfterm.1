@@ -1,0 +1,47 @@
+.TH HF 1 2/15/07
+.CM 1 
+.SH "NAME"
+hf ist das Start-Skript für Tom Sailer's Amateurfunk- Soundkarten- Programm, das die "historischen" Protokolle RTTY, AMTOR(SITOR), PACTOR1, GTOR, und nun auch MT63 und eine CW-Elbug implementiert.
+.SH "SYNOPSIS"
+.B hf
+ist das Startskript, es wird ohne Optionen aufgerufen. Es startet das graphische Terminal hfterm, das in einem Menü konfiguriert werden kann. hfterm wiederum startet hfkernel, das Herz des Programmes. 
+.SH "INHALT UND BESCHREIBUNG DES PAKETS"
+.B hf
+ist das Startscript und auch der Name des Pakets.
+.B hfkernel 
+ist das "Herz" des Pakets, es moduliert und demoduliert. So weit wir wissen, ist hfkernel weltweit das einzige Programm, das allein mit Soundkarte (ohne TNC) Pactor 1 senden kann. Wegen des Real-time-Modus und dem Benutzen von treads braucht es Superuser-Rechte, und wegen des DMA (direct memory access, schneller Zugriff auf den Soundkarten-Ringpuffer) kann nicht jede Soundkarte und nicht jeder Treiber diese Aufgabe erfüllen.
+.B hfterm
+ist das graphische Terminal, das hfkernel startet und sich mit ihm über ein UNIX domain socket verbindet. hfterm ist für das Gtk+ toolkit (Version 1.2.10) geschrieben und läuft unter X. Es hat ein Frequenz-Spektrum, eine Monitorfunktion, Hilfe, Textbausteine, ein Logbuch, automatische Sende-Empfangsumschaltung, Bake und eine Mailboxfunktion, die über TCP/IP eine Verbindung mit F6FBB, dem bekannten Packet-Radio-BBS aufbauen kann. Dies muß zuvor für den telnet-Zugang konfiguriert worden sein und kann auf dem gleichen oder einem anderen, mit Ethernet verbunden Computer laufen, als 'xfbbd' gestartet. hf kann als automatische Mailbox oder für Fernsteuerungszwecke verwendet werden.
+.B dcf77rx 
+ist ein Abstimmprogramm, verwendet das Signal des deutschen Langwellen-Zeitnormalsender DCF77 auf 77,5 kHz, und kann auch automatisch die Systemzeit nach der Bakenzeit setzen. Eine Kalibrierung kann für längere ARQ-Verbindungen und auch für MT63 wichtig sein. Siehe man dcf77rx.
+.B dcf77gen
+simuliert die Signale dieser Bake. Siehe man dcf77gen.
+.B reffreq 
+ist ein Kalibrierwerkzeug, das jede bekannte Referenzfrequenz im 
+NF-Bereich nutzen kann.
+.B ratecal1 
+ist ein Kalibrierwerkzeug für ein beliebiges pulsierendes Signal, dies kann das DCF77-Signal, das nordamerikanische WWV, oder ein Pactor- oder Amtor- oder Gtor- ARQ sein! Danke an Pawel Jalocha, auch Autor von MT63, der dieses praktische Programm gemacht hat. Es gibt noch viele andere Testprogramme.
+.SH "INSTALLATION UND ERSTER START"
+Entpacke das tar.gz-Paket mit 'tar -zxvf', dann: './configure', 'make' und (als root) 'make install'. Oder 'rpm -i' das rpm-Paket. hfkernel wird "suid root" installiert (durch 'chmod 4755 /usr/bin/hfkernel'). Starte 'hf' - am besten auf einer graphischen Konsole. Dies wird hfterm starten, dieses startet hfkernel. Meldungen auf der Konsole zeigen Fehler oder ob alles o.k. ist, dann sollten decordierte Zeichen auf dem Empfangsschirm erscheinen, und das Spektrum (F2) sollte eine bewegte Kurve zeigen. (Evtl. Squelch tiefer  stellen mit der rechten Maustaste.) Die meisten Probleme sind von der Soundkarte abhängig (MMAP). Es gibt dafür eine automatische Hardware-Erkennung, manchmal aber müssen experimentelle Optionen im Konfigurationsmenü in hfterm getestet werden (z.B. -n = kein DMA), danach hf neu starten. Siehe Dokumentation. 
+.SH "BUGS & QUIRKS"
+jede Menge, aber Programmieren macht (meistens) Spaß, hilf mit!
+.SH "SIEHE AUCH"
+Die ausführlichen Hilfe-Texte sind 
+.B HF-HOWTO
+(englisch) und 
+.B DE-HF-HOWTO
+(deutsch) und andere in /usr/(local)/share/hf
+.SH "AUTOREN"
+Vater: 
+.B Thomas Sailer
+Maintainer:
+.B Dr. med. Günther Montag
+DL4MGE, Safaridoktor@compuserve.de
+.SH "HOMEPAGE"
+.B hfterm.sf.net
+.SH "MAILING-LISTE"
+Bitte subscribe:
+.B https://lists.sourceforge.net/lists/listinfo/hfterm-hackers
+and maile dann an .B hfterm-hackers@lists.sourceforge.net
+und 
+.SH ".... Viel Spaß !!!"

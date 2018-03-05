@@ -29,7 +29,7 @@
 #include "config.h"
 #endif
 
-#include <string.h>
+#include <string.h>  
 #include <stdlib.h>
 
 #include "dcf77.h"
@@ -92,7 +92,7 @@ static void hbg_init(unsigned int sample_rate)
 
 extern __inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
 {
-	vlprintf(8, "Decode Bit: %u  Cnt: %u\n", bit, d.t.dcnt);
+	vlprintf(2, "Decode Bit: %u  Cnt: %u\n", bit, d.t.dcnt);
 	if (bit == 0) {
 		if (d.t.dcnt >= 59)
 			time_decode(d.t.dbits, samples);
@@ -111,6 +111,9 @@ extern __inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
 
 extern __inline__ void hbg_process_ampl(int si, unsigned int samples)
 {
+	static int rodcnt = 0;
+	char* rod = "|/-\\ ";
+
 	if ((++d.d.d.a.decay_cnt) >= 400) {
 		d.d.d.a.decay_cnt = 0;
 		d.d.d.a.ampl = (d.d.d.a.ampl * 4055) >> 12;
@@ -133,7 +136,13 @@ extern __inline__ void hbg_process_ampl(int si, unsigned int samples)
 			/* minute mark */
 			d.d.d.a.state = 4;
 		} else {
-			vlprintf(5, "second tick at: %08x\n", d.d.sec_ph);
+			vlprintf(2, "second tick at: %08x\n", d.d.sec_ph);
+			if (verboselevel < 2) {
+			    printf("\t\t\t\t\t\t\t\t%c\r", rod[rodcnt]);
+			    fflush(stdout); // without this, printf does not printf!!
+			    rodcnt++;
+			    if (rodcnt > 3) rodcnt = 0;
+			}
 			if (((d.d.sec_ph - (0x40000000 / SAMPLE_RATE * 16)) & 0x3fffffff) < 0x20000000) {
 				d.d.sec_ph -= 0x400000;
 				d.d.sec_fcorr -= 0x10;
@@ -193,7 +202,7 @@ static void hbg_demod(const short *s, unsigned int n)
 		hbg_process_ampl(si, samples);	
 		d.d.sec_ph += d.d.sec_inc;
 		if (d.d.sec_ph >= 0x40000000) {
-			vlprintf(5, "Carrier frequency offset: %6.3fHz   Sec freq offset: %6.1fms/s\n", 
+			vlprintf(2, "Carrier frequency offset: %6.3fHz   Sec freq offset: %6.1fms/s\n", 
 				d.f.car_fcorr * ((float)d.sample_rate / (float)0x1000000),
 				d.d.sec_fcorr * (1000.0 / 0x40000000));
 		}

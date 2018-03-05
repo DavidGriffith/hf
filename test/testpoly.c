@@ -2,8 +2,8 @@
 #include "config.h"
 #endif
 
+#include <stdlib.h> 
 #include <stdio.h>
-#include <stdlib.h>
 
 #define POLY_HI (1<<9)
 #define POLY_LO ((1<<4)|(1<<0))

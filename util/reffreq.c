@@ -40,7 +40,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <sys/time.h>
 #include <signal.h>
 #include <sched.h>
 #include <sys/ipc.h>
@@ -52,15 +51,51 @@
 #include <endian.h>
 #endif
 
+#ifdef __FreeBSD__
+#include <sys/soundcard.h>
+#include <sys/endian.h>
+#endif
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
 /* --------------------------------------------------------------------- */
 
-static const char *name_audio = "/dev/dsp";
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define AUDIO_FMT AFMT_S16_BE
+#else
+#define AUDIO_FMT AFMT_S16_LE
+#endif
+#define SAMPLE_RATE 8000
 
-static int sample_rate;
-static float cpu_mhz;
-static float tvcorr;
-static float scorr;
+static const char *name_audio = "/dev/dsp";
+static int sample_rate, set_sample_rate;
+static float cpu_mhz, mhzcorr, tvcorr, timecorr;
+static float soundcorr;
 static float inp_freq;
+int fd;
+int nommap = 0;
+char gmt[32];
+
+/* --------------------------------------------------------------------- */
+
+void timequery()
+{
+	time_t now;
+	time(&now);
+	//would also be possible like ...
+	//sprintf(gmt, "%s", asctime(gmtime(&now)));	
+	// strftime(gmt, 31, "%a %d.%m.%y, %H:%M", gmtime(&now));
+	strftime(gmt, 31, "%Y-%m-%d %H%M", gmtime(&now));
+} 
 
 /* --------------------------------------------------------------------- */
 
@@ -73,6 +108,97 @@ static void die(const char *func)
 }
 
 /* --------------------------------------------------------------------- */
+
+void output()
+{
+        static char head[256],  foot[256];
+	char factors[512];
+#ifdef __linux__
+	const char *configfilename =  "/etc/calibrations";
+#endif
+#ifdef __FreeBSD__
+	const char *configfilename =  "/usr/local/etc/calibrations";
+#endif
+	FILE *configfile = NULL;
+	static int prepared = 0;
+
+/*
+ *  output of the 3 correction factors to stdout
+ */
+	printf(	"Corrections: \n" 
+	    "\t***  soundcorr:   (hfkernel option -s):\t%10.8f  ***\n"
+	    "\t***  mhzcorr:     (hfkernel option -m):\t%10.6f  ***\n"
+	    "\t***  timecorr:    (hfkernel option -t):\t%10.8f  ***\n",
+	    soundcorr, mhzcorr, timecorr);
+
+/*
+ *  preparation of head, foot, and opening config file
+ */
+	configfile = fopen(configfilename, "a");
+	if(configfile == NULL) {
+	    fprintf(stderr, "sorry, configuration file %s can not be opened\n"
+	        "for appending correction factors\n", configfilename);
+	    return;
+	} 
+//	printf("configuration file %s opened\n", configfilename);
+
+	if (! prepared) {
+
+    	    timequery();
+
+	    sprintf(head, 
+"##############################################################################\n"
+	    "## * * Correction factors by dcf77rx at %s  * *\n"
+	    "## * * Edit if not credible. Last values will be valid.  * *\n",
+	    gmt);
+//	    printf( "head string prepared.\n"); 
+
+	    sprintf(foot, 
+	    "## * * * * End of one cycle of reffreq calibration.  * * * *\n");
+//	    printf( "foot string prepared.\n"); 
+
+	    if ( (fwrite(head, strlen(head), 1, configfile)) != 1) {
+    		fprintf (stderr, 
+		    "Error in writing head lines to config file %s\n", 
+		    configfilename);
+        	return;
+	    }
+//	    printf( "head string written.\n"); 	    
+	    prepared = 1;
+	}
+
+/*	
+ *  output of the 3 correction factors to the config file
+ */
+	sprintf(factors, "## reffreq calibration:\n" 
+	    "soundcorr=%10.8f\n"
+	    "mhzcorr=%10.6f\n"
+	    "timecorr=%10.8f\n",
+	    soundcorr, mhzcorr, timecorr);
+//	    printf( "factors string prepared\n"); 
+	    
+	if ( (fwrite(factors, strlen(factors), 1, configfile)) != 1) {
+    	    fprintf (stderr, 
+		"Error in writing correction factors to config file %s\n", 
+		configfilename);
+    	    return;
+	}
+	printf( "correction factors written to config file.\n"); 	
+
+	if ( (fwrite(foot, strlen(foot), 1, configfile)) != 1) {
+    	    fprintf (stderr, 
+		"Error in writing foot lines to config file %s\n", 
+		configfilename);
+    	    return;
+	}
+//	printf( "foot string written.\n"); 
+	fclose(configfile);
+//	printf( "configuration file closed.\n"); 
+	return;
+}
+
+/* --------------------------------------------------------------------- */
+
 #ifdef __i386__
 
 static int rdtsc_ok = 0;
@@ -277,54 +403,60 @@ static int process_input(short *s, unsigned int samples,
 		tm3start = tm3;
 	}
 	for (; samples > 0; samples--, s++, tm1 += tm1inc, tm2 += tm2inc, tm3 += tm3inc) {
-		if (fft_ptr >= FFT_SIZE) {
-			/*
-			 * set non-realtime sched
-			 */
-			memset(&schp, 0, sizeof(schp));
-			schp.sched_priority = sched_get_priority_min(SCHED_OTHER);
-			if (sched_setscheduler(0, SCHED_OTHER, &schp) != 0) 
-				perror("sched_setscheduler");
-			for (i = 0; i < FFT_SIZE; i++)
-				fft_data[2*i] *= 0.54 - 0.46 * cos(M_PI * 2.0 * i / (FFT_SIZE-1));
-			fft_rif(fft_data, FFT_SIZE, 1);
-			i = FFT_SIZE * inp_freq / (float)sample_rate;
-			for (j = i/10, idx = 0, pwr = 0; j >= 0; j--) {
-				f = fsqr(fft_data[2*(i-j)]) + fsqr(fft_data[2*(i-j)+1]);
-				if (f > pwr) {
-					idx = i-j;
-					pwr = f;
-				}
-				f = fsqr(fft_data[2*(i+j)]) + fsqr(fft_data[2*(i+j)+1]);
-				if (f > pwr) {
-					idx = i+j;
-					pwr = f;
-				}
+	    if (fft_ptr >= FFT_SIZE) {
+		/*
+		 * set non-realtime sched
+		 */
+		memset(&schp, 0, sizeof(schp));
+		schp.sched_priority = sched_get_priority_min(SCHED_OTHER);
+		if (sched_setscheduler(0, SCHED_OTHER, &schp) != 0) 
+		    perror("sched_setscheduler");
+		for (i = 0; i < FFT_SIZE; i++)
+		    fft_data[2*i] *= 0.54 - 0.46 * cos(M_PI * 2.0 * i / (FFT_SIZE-1));
+		    fft_rif(fft_data, FFT_SIZE, 1);
+		    i = FFT_SIZE * inp_freq / (float)sample_rate;
+		    for (j = i/10, idx = 0, pwr = 0; j >= 0; j--) {
+		    	f = fsqr(fft_data[2*(i-j)]) + fsqr(fft_data[2*(i-j)+1]);
+		    	if (f > pwr) {
+			    idx = i-j;
+			    pwr = f;
 			}
-			printf("peak index: %d\n", idx);
-			f = (float)idx / inp_freq;
-			tvcorr = (float)idx / inp_freq / (tm2 - tm2start) * 1000000;
-			cpu_mhz = (tm3 - tm3start) / (float)idx * inp_freq;
-			printf("gettimeofday correction: %10.7f  CPU clock: %10.1f\n"
-			       "(kernel driver command line params: scale_tvusec=%u scale_rdtsc=%u)\n",
-			       tvcorr, cpu_mhz, (int)((float)(1<<24)*tvcorr), (int)((float)(1ULL<<32)/cpu_mhz));
-			return 1;
-		}
-		fft_data[2*fft_ptr] = *s;
-		fft_data[2*fft_ptr+1] = 0;
-		fft_ptr++;
+			f = fsqr(fft_data[2*(i+j)]) + fsqr(fft_data[2*(i+j)+1]);
+			if (f > pwr) {
+			    idx = i+j;
+			    pwr = f;
+			}
+		    }
+		    printf("peak index: %d\n", idx);
+		    f = (float)idx / inp_freq;
+		    tvcorr = (float)idx / inp_freq / (tm2 - tm2start) * 1000000;
+		    cpu_mhz = (float)(tm3 - tm3start) / (float)idx * inp_freq / 1000000;
+		    /*
+		    this is original by Tom
+		    printf("gettimeofday correction: %10.7f  CPU clock: %10.1f\n"
+		    up to here ok
+		       "(kernel driver command line params: scale_tvusec=%u scale_rdtsc=%u)\n",
+		    this is bogus
+		       tvcorr, cpu_mhz, (int)((float)(1<<24)*tvcorr), (int)((float)(1ULL<<32)/cpu_mhz));
+		    */
+		    
+		    /*
+		    this would give the bogus to my new variables
+		    timecorr = (int)((float)(1<<24)*tvcorr);
+		    mhzcorr = (int)((float)(1ULL<<32)/cpu_mhz);
+		    */
+		    timecorr = tvcorr;
+		    mhzcorr = cpu_mhz;
+		    return 1;
+	    }
+	    fft_data[2*fft_ptr] = *s;
+	    fft_data[2*fft_ptr+1] = 0;
+	    fft_ptr++;
 	}
 	return 0;
 }
 
 /* --------------------------------------------------------------------- */
-
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define AUDIO_FMT AFMT_S16_BE
-#else
-#define AUDIO_FMT AFMT_S16_LE
-#endif
-#define SAMPLE_RATE 8000
 
 /* --------------------------------------------------------------------- */
 
@@ -357,14 +489,68 @@ extern __inline__ int ld2(unsigned int x)
 
 /* --------------------------------------------------------------------- */
 
+static void oss_init_audio(int openflag)
+{
+	/*
+	 * open and configure audio with OSS API
+	 */
+         
+	int apar;
+
+	if ((fd = open(name_audio, openflag, 0)) < 0)
+	    die("oss_init_audio: open");
+	apar = AUDIO_FMT;
+	if (ioctl(fd, SNDCTL_DSP_SETFMT, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_SETFMT");
+	if (apar != AUDIO_FMT) {
+	    fprintf(stderr, "audio driver does not support the S16 format\n");
+	    exit(1);
+	}
+	apar = 0;
+	if (ioctl(fd, SNDCTL_DSP_STEREO, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_STEREO");
+	if (apar != 0) {
+	    fprintf(stderr, "audio driver does not support mono\n");
+		exit(1);
+	}
+        if (! sample_rate) sample_rate = SAMPLE_RATE;
+        set_sample_rate = sample_rate;
+	if (ioctl(fd, SNDCTL_DSP_SPEED, &set_sample_rate) == -1)
+		die("ioctl: SNDCTL_DSP_SPEED");
+	if (set_sample_rate != sample_rate) {
+	    if (abs(set_sample_rate-sample_rate) >= sample_rate/100) {
+	        fprintf(stderr, "audio driver does not support the required "
+			"sampling frequency:\n"
+                        "set %d instead of required %d\n",
+                        set_sample_rate, sample_rate);
+		exit(1);
+	    }
+	    fprintf(stderr, 
+                "audio driver inexact sampling rate: %d Hz\n", set_sample_rate);
+	}
+	/*
+	 * set fragment sizes
+	 */
+	apar = 0xffff0007U;
+	if (ioctl(fd, SNDCTL_DSP_SETFRAGMENT, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_SETFRAGMENT");
+        /*
+        printf("oss_init_audio: set soundcard %s "
+            "as file-descriptor %d\n"
+            "with open-flag %d at sample rate %d\n",
+            name_audio, fd, openflag, set_sample_rate);
+	*/
+}
+
+/* --------------------------------------------------------------------- */
+
 static void sound_input(void)
 {
-	int i, apar;
-	int fd;
+	int i, apar, count = 0;
 	struct audio_buf_info info;
 	struct count_info cinfo;
 	unsigned int size;
-	short *abuf, *s;
+	short *abuf = NULL, *s = NULL, inbuf[256];
 	fd_set mask;
 	unsigned int fragptr;
 	unsigned int curfrag, sampdelay;
@@ -378,6 +564,8 @@ static void sound_input(void)
 	unsigned int last_usec;
 	struct timeval tv;
 
+        if (nommap)  s = inbuf;
+	
 	/*
 	 * set realtime sched
 	 */
@@ -386,133 +574,136 @@ static void sound_input(void)
         if (sched_setscheduler(0, SCHED_RR, &schp) != 0) 
                 perror("sched_setscheduler");
 	/*
-	 * start receiver
-	 */
-	if ((fd = open(name_audio, O_RDWR, 0)) < 0)
-		die("open");
-	/*
-	 * configure audio
-	 */
-	apar = AUDIO_FMT;
-	if (ioctl(fd, SNDCTL_DSP_SETFMT, &apar) == -1)
-		die("ioctl: SNDCTL_DSP_SETFMT");
-	if (apar != AUDIO_FMT) {
-		fprintf(stderr, "audio driver does not support the S16 format\n");
-		exit(1);
-	}
-	apar = 0;
-	if (ioctl(fd, SNDCTL_DSP_STEREO, &apar) == -1)
-		die("ioctl: SNDCTL_DSP_STEREO");
-	if (apar != 0) {
-		fprintf(stderr, "audio driver does not support mono\n");
-		exit(1);
-	}
+	 * init audio
+         */
 	sample_rate = 44100;
-	if (ioctl(fd, SNDCTL_DSP_SPEED, &sample_rate) == -1)
-		die("ioctl: SNDCTL_DSP_SPEED");
-	if (sample_rate != 44100) {
-		if (abs(sample_rate-44100) >= 44100/100) {
-				fprintf(stderr, "audio driver does not support the required "
-					"sampling frequency\n");
-				exit(1);
-		}
-		fprintf(stderr, "audio driver inexact sampling rate: %d Hz\n", sample_rate);
-	}
-	tm2inc = (1000000 + sample_rate / 2) / sample_rate;
-	/*
-	 * set fragment sizes
-	 */
-	apar = 0xffff0007U;
-	if (ioctl(fd, SNDCTL_DSP_SETFRAGMENT, &apar) == -1)
-		die("ioctl: SNDCTL_DSP_SETFRAGMENT");
+        oss_init_audio(O_RDWR);
+
+	tm2inc = (1000000 + set_sample_rate / 2) / set_sample_rate;
+
 	if (ioctl(fd, SNDCTL_DSP_GETISPACE, &info) == -1)
 		die("ioctl: SNDCTL_DSP_GETISPACE");
 	size = info.fragsize * info.fragstotal;
-	/*
-	 * mmap buffers
-	 */
-	if ((abuf = (void *)mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, 
-			 fd, 0)) == (void *)-1)
+	if (! nommap) {
+	    /*
+	     * mmap buffers
+	     */
+	    if ((abuf = (void *)mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, 
+		 fd, 0)) == (void *)-1)
 		die("mmap: PROT_READ");
+	    /*
+	     * start recording
+	     */
+	    apar = 0;
+	    if (ioctl(fd, SNDCTL_DSP_SETTRIGGER, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_SETTRIGGER");
+	    apar = PCM_ENABLE_INPUT;
+	    if (ioctl(fd, SNDCTL_DSP_SETTRIGGER, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_SETTRIGGER");
+	}
 	fprintf(stderr, "OSS: input: #frag: %d  fragsz: %d  bufaddr: %p\n",
 		info.fragstotal, info.fragsize, abuf);
-	/*
-	 * start recording
-	 */
-	apar = 0;
-	if (ioctl(fd, SNDCTL_DSP_SETTRIGGER, &apar) == -1)
-		die("ioctl: SNDCTL_DSP_SETTRIGGER");
-	apar = PCM_ENABLE_INPUT;
-	if (ioctl(fd, SNDCTL_DSP_SETTRIGGER, &apar) == -1)
-		die("ioctl: SNDCTL_DSP_SETTRIGGER");
 	fragptr = 0;
 	/*
 	 * first CPU speed estimate
 	 */
+	
+	if (nommap) {
+	    //initial one read
+	    i = read(fd, inbuf, info.fragsize);
+	    if (i < info.fragsize) die ("oss_input_sound: read");
+            memset(inbuf, 0, sizeof(inbuf));
+	    //printf("one read.\n");
+        }
+
 	if (ioctl(fd, SNDCTL_DSP_GETIPTR, &cinfo) == -1)
 		die("ioctl: SNDCTL_DSP_GETIPTR");
 	tm2 = rdtsc_get();
 	curfrag = cinfo.ptr;
+	//printf("cinfo.ptr before one select: %d\n", cinfo.ptr);
 	/* wait one interrupt */
 	do {
 		FD_ZERO(&mask);
 		FD_SET(fd, &mask);
 		i = select(fd+1, &mask, NULL, NULL, NULL);
-		if (i < 0) 
-			die("select");
+		//if (i) printf ("select success\n");
+		if (i < 0) die("select");
 	} while (!FD_ISSET(fd, &mask));
+
 	if (ioctl(fd, SNDCTL_DSP_GETIPTR, &cinfo) == -1)
 		die("ioctl: SNDCTL_DSP_GETIPTR");
+	//printf("cinfo.ptr after one select: %d\n", cinfo.ptr);
+
 	tm3 = rdtsc_get();
-        if (gettimeofday(&tv, NULL))
-		die("gettimeofday");
+        if (gettimeofday(&tv, NULL)) die("gettimeofday");
 	curfrag = (cinfo.ptr - curfrag) / 2;
 	tm3inc = (tm3 - tm2 + curfrag / 2) / curfrag;
+
 	printf("first CPU clock guess: %9d Hz  tsc diff: %d  sample diff: %d\n", tm3inc * sample_rate, 
 	       (unsigned int)(tm3 - tm2), curfrag);
+
 	tm2 = 0;
 	last_usec = tv.tv_usec;
 	tm1 = 0;
 	curfrag = cinfo.ptr / info.fragsize;
+
 	/*
 	 * loop
 	 */
 	for (;;) {
-		/*
-		 * process input
-		 */
-		sampdelay = ((size + cinfo.ptr - fragptr * info.fragsize) % size) / 2;
-		while (fragptr != curfrag) {
-			s = abuf + (fragptr * info.fragsize / 2);
-			if (process_input(s, info.fragsize / 2, tm1, 1, 
-					  tm2 - tm2inc * sampdelay, tm2inc, tm3  - tm3inc * sampdelay, tm3inc))
-				goto loop_end;
-			fragptr = (fragptr + 1) % info.fragstotal;
-			tm1 += info.fragsize / 2;
-			sampdelay -= info.fragsize / 2;
+	    /*
+	     * process input
+	     */
+	    sampdelay = 
+		((size + cinfo.ptr - fragptr * info.fragsize) % size) / 2;
+	    while (fragptr != curfrag) {
+		if (nommap) {	
+		    memset(inbuf, 0, sizeof(inbuf));
+		    i = read(fd, inbuf, info.fragsize);
+	    	    if (i < info.fragsize) die ("input_sound: read");
+
+		    //printf("r");
+            	    count++;
+        	} else { //if (! nommap)
+	    	    s = abuf + (fragptr * info.fragsize / 2);
+		    count++;
 		}
-		/*
-		 * wait for next interrupt (fragment)
-		 */
-		FD_ZERO(&mask);
-		FD_SET(fd, &mask);
-		i = select(fd+1, &mask, NULL, NULL, NULL);
-		if (i < 0) 
-			die("select");
-		if (!FD_ISSET(fd, &mask))
-			continue;
-		if (ioctl(fd, SNDCTL_DSP_GETIPTR, &cinfo) == -1)
+		if (process_input(s, info.fragsize / 2, 
+		      tm1, 1, 
+		      tm2 - tm2inc * sampdelay, tm2inc, 
+		      tm3  - tm3inc * sampdelay, tm3inc))
+		    goto loop_end;
+		
+		fragptr = (fragptr + 1) % info.fragstotal;
+		tm1 += info.fragsize / 2;
+	 	sampdelay -= info.fragsize / 2;
+	    }
+	    /*
+	     * wait for next interrupt (fragment)
+	     */
+	    FD_ZERO(&mask);
+	    FD_SET(fd, &mask);
+	    i = select(fd+1, &mask, NULL, NULL, NULL);
+	    if (i < 0) 	die("select");
+	    if (!FD_ISSET(fd, &mask)) continue;
+	    if (ioctl(fd, SNDCTL_DSP_GETIPTR, &cinfo) == -1)
 			die("ioctl: SNDCTL_DSP_GETIPTR");
-		tm3 = rdtsc_get();
-		if (gettimeofday(&tv, NULL))
-			die("gettimeofday");
-		curfrag = cinfo.ptr / info.fragsize;
-		tm2 += (1000000 + tv.tv_usec - last_usec) % 1000000;
-		last_usec = tv.tv_usec;
+	    tm3 = rdtsc_get();
+	    if (gettimeofday(&tv, NULL)) die("gettimeofday");
+	    curfrag = cinfo.ptr / info.fragsize;
+	    tm2 += (1000000 + tv.tv_usec - last_usec) % 1000000;
+	    last_usec = tv.tv_usec;
+	    //count++;
+	    //printf ("fragment pointer: %d\n", fragptr);
 	}
 loop_end:
-	if (munmap((caddr_t)abuf, info.fragsize * info.fragstotal))
+	//printf ("first part, rate = 44100: read %d fragments.\n", count); 
+	count = 0;
+
+	if (!nommap) {
+	    if (munmap((caddr_t)abuf, info.fragsize * info.fragstotal))
 		die("munmap");
+	}
 	if (close(fd))
 		die("close");
 	/*
@@ -525,63 +716,34 @@ loop_end:
         schp.sched_priority = sched_get_priority_min(SCHED_RR);
         if (sched_setscheduler(0, SCHED_RR, &schp) != 0) 
                 perror("sched_setscheduler");
-	if ((fd = open(name_audio, O_RDWR, 0)) < 0)
-		die("open");
-	/*
-	 * configure audio
-	 */
-	apar = AUDIO_FMT;
-	if (ioctl(fd, SNDCTL_DSP_SETFMT, &apar) == -1)
-		die("ioctl: SNDCTL_DSP_SETFMT");
-	if (apar != AUDIO_FMT) {
-		fprintf(stderr, "audio driver does not support the S16 format\n");
-		exit(1);
-	}
-	apar = 0;
-	if (ioctl(fd, SNDCTL_DSP_STEREO, &apar) == -1)
-		die("ioctl: SNDCTL_DSP_STEREO");
-	if (apar != 0) {
-		fprintf(stderr, "audio driver does not support mono\n");
-		exit(1);
-	}
-	sample_rate = SAMPLE_RATE;
-	if (ioctl(fd, SNDCTL_DSP_SPEED, &sample_rate) == -1)
-		die("ioctl: SNDCTL_DSP_SPEED");
-	if (sample_rate != SAMPLE_RATE) {
-		if (abs(sample_rate-SAMPLE_RATE) >= SAMPLE_RATE/100) {
-				fprintf(stderr, "audio driver does not support the required "
-					"sampling frequency\n");
-				exit(1);
-		}
-		fprintf(stderr, "audio driver inexact sampling rate: %d Hz\n", sample_rate);
-	}
-	tm2inc = (1000000 + sample_rate / 2) / sample_rate;
-	/*
-	 * set fragment sizes
-	 */
-	apar = 0xffff0007U;
-	if (ioctl(fd, SNDCTL_DSP_SETFRAGMENT, &apar) == -1)
-		die("ioctl: SNDCTL_DSP_SETFRAGMENT");
+
+        sample_rate = SAMPLE_RATE;
+	oss_init_audio(O_RDWR);
+
+	tm2inc = (1000000 + set_sample_rate / 2) / set_sample_rate;
+
 	if (ioctl(fd, SNDCTL_DSP_GETISPACE, &info) == -1)
 		die("ioctl: SNDCTL_DSP_GETISPACE");
 	size = info.fragsize * info.fragstotal;
-	/*
-	 * mmap buffers
-	 */
-	if ((abuf = (void *)mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, 
-			 fd, 0)) == (void *)-1)
+	if (! nommap) {
+	    /*
+	     * mmap buffers
+	     */
+	    if ((abuf = (void *)mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, 
+		     fd, 0)) == (void *)-1)
 		die("mmap: PROT_READ");
-	fprintf(stderr, "OSS: input: #frag: %d  fragsz: %d  bufaddr: %p\n",
+	    fprintf(stderr, "OSS: input: #frag: %d  fragsz: %d  bufaddr: %p\n",
 		info.fragstotal, info.fragsize, abuf);
-	/*
-	 * start recording
-	 */
-	apar = 0;
-	if (ioctl(fd, SNDCTL_DSP_SETTRIGGER, &apar) == -1)
+	    /*
+	     * start recording
+	     */
+	    apar = 0;
+	    if (ioctl(fd, SNDCTL_DSP_SETTRIGGER, &apar) == -1)
 		die("ioctl: SNDCTL_DSP_SETTRIGGER");
-	apar = PCM_ENABLE_INPUT;
-	if (ioctl(fd, SNDCTL_DSP_SETTRIGGER, &apar) == -1)
+	    apar = PCM_ENABLE_INPUT;
+	    if (ioctl(fd, SNDCTL_DSP_SETTRIGGER, &apar) == -1)
 		die("ioctl: SNDCTL_DSP_SETTRIGGER");
+	}
 	fragptr = 0;
 	/*
 	 * first CPU speed estimate
@@ -598,41 +760,53 @@ loop_end:
 	 * loop
 	 */
 	do {
-		/*
-		 * wait for next interrupt (fragment)
-		 */
-		FD_ZERO(&mask);
-		FD_SET(fd, &mask);
-		i = select(fd+1, &mask, NULL, NULL, NULL);
-		if (i < 0) 
-			die("select");
-		if (!FD_ISSET(fd, &mask))
-			continue;
-		if (ioctl(fd, SNDCTL_DSP_GETIPTR, &cinfo) == -1)
-			die("ioctl: SNDCTL_DSP_GETIPTR");
-		if (gettimeofday(&tv, NULL))
-			die("gettimeofday");
-		tm1 += (size + cinfo.ptr - curfrag) % size;
-		curfrag = cinfo.ptr;
-		tm2 += (1000000 + tv.tv_usec - last_usec) % 1000000;
+	    /*
+	     * wait for next interrupt (fragment)
+	     */
+	    if (nommap) {
+		i = read(fd, inbuf, info.fragsize);
+		if (i < info.fragsize) die ("oss_input_sound: rate 8000: read");
+        	memset(inbuf, 0, sizeof(inbuf));
+		//printf("8");
+		//count++;
+	    }
+	    FD_ZERO(&mask);
+	    FD_SET(fd, &mask);
+	    i = select(fd+1, &mask, NULL, NULL, NULL);
+	    if (i < 0) 	die("select");
+	    if (!FD_ISSET(fd, &mask)) continue;
+	    count++;
+	    if (ioctl(fd, SNDCTL_DSP_GETIPTR, &cinfo) == -1)
+		die("ioctl: SNDCTL_DSP_GETIPTR");
+	    if (gettimeofday(&tv, NULL))
+		die("gettimeofday");
+	    tm1 += (size + cinfo.ptr - curfrag) % size;
+	    curfrag = cinfo.ptr;
+	    tm2 += (1000000 + tv.tv_usec - last_usec) % 1000000;
 		last_usec = tv.tv_usec;
 	} while (tm2 < 1000000);
-	scorr = 2.0 * (tm2 * tvcorr) / (tm1 * 1000000.0 / sample_rate);
-	if (munmap((caddr_t)abuf, info.fragsize * info.fragstotal))
+	
+	//printf ("second part, rate = 8000: read %d fragments.\n", count); 
+	count = 0;
+
+	soundcorr = 2.0 * (tm2 * tvcorr) / (tm1 * 1000000.0 / sample_rate);
+	if (! nommap) {
+	    if (munmap((caddr_t)abuf, info.fragsize * info.fragstotal))
 		die("munmap");
+	}
 	if (close(fd))
 		die("close");
-	printf("Sample corr: %10.7f\n", scorr);
+	//printf("Sample corr: %10.7f\n", soundcorr);
+	output();
 }
 
 /* --------------------------------------------------------------------- */
 
 int main(int argc, char *argv[])
 {
-        int c;
-        int err = 0;
+        int c, err = 0;
 
-        while ((c = getopt(argc, argv, "a:f:")) != -1) 
+        while ((c = getopt(argc, argv, "a:f:n")) != -1) 
                 switch (c) {
 		case 'a':
 			name_audio = optarg;
@@ -645,19 +819,35 @@ int main(int argc, char *argv[])
 				err++;
 			}
 			break;
+                        
+                case 'n':
+                        nommap = 1;
+                        break;
 
 		default:
                         err++;
                         break;
                 }
         if (err) {
-                fprintf(stderr, "usage: reffreq [-a <audio device>]\n\n"
+                fprintf(stderr, "usage: reffreq [-a <audio device>] -f <frequency>\n"
 			"  -a: audio device path (default: /dev/dsp)\n"
-			"  -f: frequency\n");
+			"  -f: frequency (20 - 22000 Hz) \n"
+                        "  -n: do not use mmap() -** experimental ! **- \n");
                 exit(1);
         }
+	
+	if (! inp_freq ) {
+	    fprintf (stderr, "you did not specify an input frequency!\n");
+                fprintf(stderr, "usage: reffreq [-a <audio device>] -f <frequency>\n"
+			"  -a: audio device path (default: /dev/dsp)\n"
+			"  -f: frequency (20 - 22000 Hz) \n"
+                        "  -n: do not use mmap() -** experimental ! **- \n");
+	    exit(1);
+	}
+	if (nommap) 
+	    printf("I will use the experimental -n (no-mmap) option.\n");
 	rdtsc_probe();
-	sound_input();
+        sound_input();
 	exit(0);
 }
 

@@ -1,0 +1,342 @@
+About the German DCF77 VLF time beacon
+
+(The original text in German is available from the address below. 
+Translation errors courtesy of Peter Lamb, Swiss Fed. Inst. of Technology).
+
+----------------------------------------------------------------
+
+Physikalisch-Technische Bundesanstalt (PTB) Braunschweig, Febuar 1984
+Lab 1.21
+Bundesalle 100
+D-3300 Braunschweig
+
+Legal basis and responsibility for the transmissions from DCF77
+
+The 1978 law on time standards defines legal time in Germany on the
+basis of Coordinated World Time (UTC) and gives the PTB responsibility
+for the keeping and broadcasting of legal time. As well as this, the
+time standards law empowers the Federal government to issue regulations
+for the introduction of Summer Time.
+
+Legal time in the FRG is either Middle European Time (MEZ - German
+abbreviation) or, in case of its introduction Middle European Summer
+Time (MESZ). The following relationships hold between UTC and MEZ and
+MESZ.
+
+     MEZ(D)  = UTC(PTB) + 1h
+     MESZ(D) = UTC(PTB) + 2h
+
+Legal time is generated in the PTB Atomic Clock Building in Braunschweig
+and it is broadcast mainly through the LF transmitter DCF77 which the
+PTB rents from the German Post Office (DBP). The PTB has sole
+responsibility for the control of DCF77, while the DBP has
+responsibility for the transmitter and antennas. Queries should be
+directed to the above address or by telephone to 0531/592 1212 or
+0531/592 1210, or by telex to 952822 ptb d.
+
+DCF77 Specifications
+
+Location:      Mainflingen transmitter complex, (50:01N, 09:00E), about
+               25km south-east of Frankfurt a. Main.
+
+Carrier Frequency: Standard frequency 77.5kHZ, derived from the PTB
+               atomic clocks. Relative deviation of the carrier from
+               specifications:
+
+               averaged over 1d:   <1e-12
+               averaged over 100d: <2e-13
+
+               The carrier phase is controlled so that deviations
+               relative to UTC(PTB) are never greater than +-0.3us.
+               Larger phase and frequency variation observed at the
+               receiver are due to summation of ground and space waves.
+
+Power output:  Transmitter power 50kw, estimated emitted power approx.
+               25kW.
+
+Antenna:       150m high (backup antenna 200m high) vertical
+               omnidirectional antenna with top capacitance.
+
+Transmission times: 24-hour continuous service. Short interruptions (of
+               a few minutes) are possible if, because of technical
+               problems or servicing, the service must be switched to a
+               backup transmitter or antenna. Thunderstorms can cause
+               longer interruptions to the service.
+Time signal:   The carrier is amplitude-modulated with second marks. At
+               the beginning of each second (with the exception of the
+               59th second of each minute), the carrier amplitude is
+               reduced to 25% for the duration of either 0.1 or 0.2
+               seconds. The start of the carrier reduction marks the
+               precise beginning of the second. The minute is marked by
+               the absence of the previous second mark.
+
+               The second marks are phase-synchronous with the carrier.
+               There is a relatively large uncertainty possible in the
+               time of the second mark which depends on the receiver
+               position. The causes are the relatively low bandwidth of
+               the antenna, space wave and other interference sources.
+               Despite this, it is possible to achieve accuracy better
+               than 1ms at distances of several hundred kilometers.
+
+Time code:     The transmission of the numerical values for minute,
+               hour, day, weekday, month and year are BCD-encoded
+               through the pulse duration modulation of the second
+               marks. A second mark with duration 0.1s encodes a binary
+               0 and a duration of 0.2s encodes 1. The order of encoding
+               is shown in the following diagram [replaced by a table in
+               this translation]. The three test bits P1, P2 and P3
+               extend the 3 major sections of the time code (7 bits for
+               minutes, 6 bits for the hour and 22 bits for the date,
+               including the week day number) to maintain an even count
+               of 1's.
+
+               The second marks No. 17 and 18 indicate the time system
+               for the transmitted time codes. In the case of
+               transmission of MEZ, mark 18 has a duration of 0.2s and
+               mark 17 a duration of 0.1s. If MESZ is being transmitted,
+               this is reversed. Furthermore, an approaching transition
+               from MEZ to MESZ or back is announced by extending mark
+               16 from 0.1 to 0.2s for one hour prior to the changeover.
+
+Encoding Scheme [diagram in original]
+
+Mark number(s) Encodes (0.1s=0, 0.2s=1)
+
+0              Minute, always 0 (0.1s)
+
+1-14           Reserved
+
+15             0=Normal antenna, 1=backup antenna
+
+16             1=Approaching change from MEZ to MESZ or back
+
+17,18          Time zone 0,1=MEZ; 1,0=MESZ
+
+19             The leap second is encoded in this bit one hour prior to
+               occurrence.
+
+20             Start bit for encoded time, always 1
+
+21-27          1, 2, 4, 8, 10, 20, 40 Minutes (mark 21=1 minute)
+
+28             P1 maintains even parity for marks 21-28
+
+29-34          1,2,4,8,10,20 Hours (mark 29=1 hour)
+
+35             P2 maintains even parity for marks 29-35
+
+36-41          Day in month (1, 2, 4, 8, 10, 20)
+
+42-44          Day in week (1,2,4)
+45-49          Month number (1, 2, 4, 8, 10)
+
+50-57          Year (1, 2, 4, 8, 10, 20, 40, 80)
+
+58             P3 maintains even parity for marks 36-58 There is no mark
+               transmitted for the 59th second.
+
+Literature
+
+P. Hetzel, "Die Zeitsignal- und Normalfrequenzaussendungen der PTB ueber
+den Sender DCF77: Stand 1982" [The PTB time signal and standard
+frequency transmissions from DCF77: Status 1982] in "Funkuhren" [Radio
+clocks], W. Hilberg, Oldenburg Publishers, Munich & Vienna 1983, pp 42-
+57.
+
+G Becker & P. Hetzel, "Vortraege ueber DCF77" [Lectures: DCF77], PTB
+Reports, PTB-Me-23 (1979), pp 185-253. Braunschweig 1984
+
+Additional information: DCF77
+
+Since July 1983, the DCF77 carrier has been phase modulated in a test
+configuration. The phase modulation is a pseudorandom binary sequence
+sent twice each second. The clock frequency of the binary sequence is
+645.833...Hz and the phase shift \Delta\tau about 3% of the period
+(\^{=} 10\deg). Equal numbers of shifts of +\Delta\tau and -\Delta\tau
+are always sent, so that the mean frequency remains unchanged, and the
+use of DCF77 as a frequency standard is unaffected. The timecode is
+encoded in the sequence by inverting the sequence or not. Not inverted
+sequence corresponds to a 0 bit. The sequence is alleged to be generated
+by a 9 bit shift register which is coupled back on positions 5 and 9.
+The polynomial might be:  x^9 + x^4 + 1.
+
+Because the pseudo-random bitstring has a strictly deterministic nature,
+the correlation analysis at the receiver end leads to a correlation
+function with triangular form, and thereby to timing information. Early
+test results show that the time information received with the help of
+pseudo-random phase modulation is more resistant to interference and
+more accurate (standard deviation \approx 10\mu s during the day and
+\approx 25\mu s at night) than the conventional method using amplitude
+modulated second marks. Since this new modulation method is compatible
+with previous usage of DCF77, and that the users have made no
+difficulties known to us, the tests have been extended. The transmission
+of the pseudo-random phase distortion still has experimental status, and
+should not be seen as a permanent commitment. Further information will
+be made available in the future.
+
+Announcement bit for a leap second
+
+The DCF77 control unit is currently being modified so that in future an
+announcement bit for a leap second can be sent. It is expected that for
+the first time on 1st July 1985 the second mark Nr. 19 will be extended
+to a length of 0.2s for one hour prior to the introduction of a leap
+second. Intelligent receivers will then be able to recognise the
+discontinuity and maintain correct indicated time in spite of a 61s
+minute.
+
+Availability
+
+The clock was made by a local radio amateur.
+
+Empfangsanlage DCF77 (SFr 690. complete, also available in kit form)
+
+Walter Schmidt
+Eichwisrain 14
+8634 Hombrechtikon
+Switzerland
+LF reciever and decoder for the German time standard DCF77. As yet
+untested. Has a 1s impulse output driven direct from the reciever, which
+could be used in a similar manner to the pulse output on the Spectracom.
+Internal crystal-controlled clock reset each minute by the DCF77 minute
+mark. Indication available to program of whether currently synchronised,
+and a count of how long since the last synchronisation is available if
+running unsynchronised. Returns time with resolution 0.1s, but probably
+synchronised to the time of command reception, and not to the 0.1s
+counter. I will try to get the firmware changed if this is the case.
+
+Other sources
+
+Die folgende Liste ist einer Information der PTB entnommen. Fuer evtl.
+Tippfehler wird nicht gehaftet (;-) (Umlaute sind in ASCII Umschrift
+(ae,oe,ue,ss) dargestellt.)
+
+Am 1 Juli 1993 wurde diese Liste auf die neuen Postleitzahlen
+umgestellt. Die alten Postleitzahlen stehen in runden Klammern - einige
+konnten nicht korrigiert werden (Korrekturen werden gerne angenommen).
+Bei Erweiterungen/Aenderungen bitte email an time@informatik.uni-
+erlangen.de
+
+Note: This document was corrected for the new zip codes on July 1st
+1993. The old zip codes are in parenthesis. Some zip codes could not be
+converted.
+
+Last update: 91/06/05 - 13:34:36
+Januar 1989 (PTB Original)
+
+Hersteller/Vetriebsfirmen von DCF77-Empfangsgeraeten
+----------------------------------------------------
+
+1. Funkuhren fuer Zeitdienst-Systeme (z. B. Funkuhren fuer Uhren-
+   anlagen und Turmuhr-Zentralen; modulare Funkuhren mit RS 232-
+   Schnittstelle fuer Rechner; funkgesteuerte Schaltuhren, Zeit-
+   kodegeneratoren und Aussenuhren)
+
+  kodegeneratoren und Aussenuhren)
+
+  Auerswald GmbH & Co. KG       Vor den Grashoefen 1
+  Tel.: 05306/92000             38162 (3302) Cremlingen,
+                                OT Schandelah
+
+
+
+  Electronic Design Buero       Zeilstrasse 56
+  Herwig Braun GmbH             72793 (7417) Pfullingen
+  Tel.: 07121/71560
+
+  Ferrari electronic GmbH       Beusselstrasse 27
+  Tel.: 030/3965021             10553 (1000) Berlin (21)
+
+  Gesellschaft fuer Datensysteme (GDS)  Hindenburgstrasse 13
+  Tel.: 05306/7010              38162 (3302) Cremlingen
+                                OT Schandelah
+
+  Heliowatt Werke               Wilmersdorfer Str. 39
+  Elektrizitaets-Gesellschaft mbH  10627 (1000) Berlin (12)
+  Tel.: 030/31908-01
+
+  Hopf Elektronik               Postfach 18 47
+  Tel.: 02351/45038             58468 (5880) Luedenscheid
+
+  Philip Hoerz                  Moltkestrasse 6
+  Turmuhren                     89077 (7900) Ulm
+  Tel.: 0731/37168
+  Marcel Kreutler               Postfach 37 44
+  Zeit- und Informationstechnik 67050 (7500) Karlsruhe (1)
+  Tel.: 0721/85281
+
+  Landis & Gyr GmbH             Friesstrasse 20 - 24
+  Tel.: 069/40020               60388 (6000) Frankfurt (60)
+
+  Lennartz Elektronic GmbH      Bismarkstrasse 136 - not translated
+  Tel.: 07071/3088              (7400) Tuebingen
+
+  Werner Meinberg Elektronik    Auf der Landwehr 22
+  Tel.: 05281/2018              31812 (3280) Bad Pyrmont
+
+  Aus dem Moore                 Postfach 21 41
+  Turmuhr-Elektronik            32361 (4994) Preussisch
+  Tel.: 05742/5225              Oldendorf 2
+
+  Moser-Baer AG                 CH-3454 Sumiswald
+  Tel.: 0041/34/721144          Schweiz
+
+  Noelpp-Informationssysteme GmbH  Friedensstrasse 41
+  Tel.: 06101/87592             61118 (6368) Bad Vilbel (2)
+
+  Heinrich Perrot               Postfach 13 51
+  Turmuhrenfabrik               75353 (7260) Calw-Heumaden
+  Tel.: 07051/12055
+
+  Precitel SA                   Avenue du Mail 59
+  Tel.: 0041/38/247555          CH-2000 Neuchatel
+                                Schweiz
+
+  Georg Rauscher                Wuerzburgerstrasse 4
+  Turmuhrenfabrik               93059 (8400) Regensburg
+
+  Schwille-Elektronik           Benzstrasse 1
+  Tel.: 089/9031041             85551 (8011) Kirchheim
+
+  Siemens AG                    Postfach 53 29
+  Tel.: 0511/1290               30053 (3000) Hannover (1)
+
+  Telefunken electronic         Ringlerstrasse 17
+  Tel.: 0841/8811               85057 (8070) Ingolstadt
+
+  Telenorma Uhren GmbH          Postfach 44 32 - not translated
+  Tel.: 069/266-1               (6000) Frankfurt (1)
+
+  ZERA Elektronische Pruefgraete  Postfach 11 60
+  Cremer & Co.             53621 (5330) Koenigswinter
+  Tel.: 02223/22075
+
+2. Funkuhren fuer den haeuslichen Gebrauch (z. B. Tisch- und Wand-
+   uhren der Firmen Dugena, Hermle, Junghans, Kundo,...)
+   Vertrieb durch den Uhrenfachhandel und die Fachabteilungen
+   von Kauf- und Versandhaeusern
+
+3. Funkuhr-Bausaetze und -Fertiggeraete
+   Vertrieb durch den Elektronik-Fach- und Versandhandel
+
+4. DCF77-Normalfrequenzempfaenger und Frequenzregler fuer Normal-
+   frequenzoszillatoren
+
+  Goerl HF-Messtechnik          Buchenstrasse 2
+  Tel.: 0821/482613             86356 (8902) Neusaess 4
+  Rohde & Schwarz               Muehldorfstrasse 15
+  Tel.: 089/4129-0              81671 (8000) Muenchen (80)
+                                0911/86747 (Nuernberg)
+
+  Unverdross Technik            Tutzinger Hof Platz 6
+  Tel.: 08151/21198             82319 (8130) Starnberg
+
+Die mit `*' gekennzeichneten Firmen unter 1. haben neben Funkuhren auch
+DCF77-Normalfrequenzempfaenger in ihrem Vertriebsprogramm.
+
+Diese Liste wurde erstellt aufgrund von Informationsmaterial, das der
+PTB ueber DCF77-Empfangsgeraete vorliegt. Falls neue Produkte auf den
+Markt kommen, eine Firma uebersehen wurde oder eine hier aufgefuehrte
+Firma die Produktion von DCF77-Empfangsgeraeten einge-stellt hat, bittet
+die PTB um Zusendung von entsprechenden Infor-mationen, damit diese
+Zusammenstellung aktualisiert werden kann.
+

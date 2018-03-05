@@ -1,0 +1,118 @@
+#!/bin/sh 
+#
+#
+#	***	***	           hf    		***	***
+#	***					 		***
+#	***	    	 Main Start Script for 	 		***
+#	***	                hfkernel	     		***
+#	***	               and hfterm			***
+#	***	        by Guenther Montag DL4MGE		***
+#	***					 		***
+#	***	***	***	***	***	***	***	***	
+#
+#
+# see help in/usr/local/share/doc/hf/hf-howto.txt
+
+cd $HOME
+bindir=/usr/local/bin
+# the great spirits are arguing where to put it
+# so i let the autotools decide
+
+## greeting
+echo "Hello I am hf, the startscript for hfterm & hfkernel."
+echo "I look for them in $bindir. If wrong, edit me."
+
+function startkernel {
+echo "
+I will run now:
+LD_ASSUME_KERNEL=2.2.5 $bindir/hfkernel 
+You can stop the hfkernel with <Strg> c.
+"
+LD_ASSUME_KERNEL=2.2.5 $bindir/hfkernel 
+};
+
+## Hint and exit if options given by mistake: #################################
+if [ ! -z $1 ] 
+then
+    echo "Sorry, the hf script is not prepared to accept options.
+In the config menu of hfterm you can configure the package."
+exit 0
+fi
+
+## set the suid-bit to hfkernel if not yet set
+teststring=`ls -l \`which hfkernel\` | grep "rwsr-xr-x" `
+if [ ! -z "$teststring" ]; then
+    echo "hfkernel must run with root rights.
+The suid bit has already been set at the installation.
+Be aware that this can be a security hole."
+    else 
+        if [ `id -u` -eq 0 ]; then
+	# if root
+            echo "hfkernel must run with root rights.
+The suid bit has to be set. But be aware that this can be a security hole.
+I will do this now \"chmod 4755 $bindir/hfkernel\"."
+	    chmod 4755 $bindir/hfkernel &> /dev/null
+	else
+# if not root
+	    echo "hfkernel must run with root rights.
+The suid bit has to be set. Be aware that this can be a security hole.
+Please do as root \"chmod 4755 $bindir/hfkernel\".
+or start this script again as root."
+	    exit 1
+	fi
+fi
+
+## if root, start the hfkernel only: ##########################################
+if  [ `id -u` -eq 0 ] ; then
+    echo "For you, root, I will start only hfkernel for test purposes.
+If it works o.k., and you want to run the whole program (including graphic terminal),
+become normal user, start X, and start the whole program with $bindir/hf."
+    startkernel 
+    echo "hfkernel has been terminated" 
+    exit 0
+fi
+
+## if not root, but text console, ############################################
+## make personal dir and then start the hfkernel only: #######################
+if  [ ! $DISPLAY ]; then 
+    echo "You started me from a console.
+So I will start hfkernel for test only.
+If it works o.k., and you want to run 
+the whole program (including graphic terminal),
+start X, and start the whole program with $bindir/hf."
+    startkernel 
+    echo  "hfkernel has been terminated." 
+    exit 0
+fi
+
+## if not root, and if not on text console, try to start everything:  ########
+if  [ $DISPLAY ] ; then 
+# see if an old hfterm is running    
+    hfterm=`pgrep hfterm`
+    if [ $hfterm ] ; then
+	echo "hfterm is running already under X. I restart it."
+	kill $hfterm
+    fi
+    echo "You called me under X, and not as root.
+Sorry, old gtk can not show UTF 8. So I will remember your LANGUAGE $LANG
+and set LANG to de_DE.ISO-8859-1 for a while.
+Then I will start $bindir/hfterm. Then hfterm will start hfkernel."
+OLDLANG=$LANG
+LANG=de_DE.ISO-8859-1    
+LD_ASSUME_KERNEL=2.2.5 $bindir/hfterm
+fi
+
+## Cleanup ####################################################################
+# kill hfkernel, if still running after hfterm is finished
+# (if hfterm is finished the normal way, it kills hfkernel by  itself)
+LANG=$OLDLANG
+echo "I reset your LANG to $LANG"
+hfkernel=`pgrep hfkernel`
+if [ -n "$hfkernel" ] ; then
+    echo "hf: sending the kill signal to hfkernel ... " 
+    hfkernel -k
+    exit 0
+fi
+echo "73. Bye." 
+exit 0
+ 

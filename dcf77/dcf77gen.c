@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	unsigned int zone = 0;
 
 	stime = time(NULL);
-        while ((c = getopt(argc, argv, "a:szv:glu")) != -1) 
+        while ((c = getopt(argc, argv, "a:snzv:glu")) != -1) 
                 switch (c) {
                 case 'a':
 			a_out = audio_out;
@@ -65,6 +65,10 @@ int main(int argc, char *argv[])
 		case 'z':
 			zone = 1;
 			break;
+
+                case 'n':
+			a_out = oss_nommap_audio_out;
+                        break;
 
 		case 'v':
 			verboselevel = strtoul(optarg, NULL, 0);
@@ -87,14 +91,15 @@ int main(int argc, char *argv[])
                         break;
                 }
         if (err) {
-                fprintf(stderr, "usage: dcf77gen [-a <audio device>] [-s] [-v <vl>] [-z] [-g] [-l] [-u]\n\n"
+                fprintf(stderr, "usage: dcf77gen [-a <audio device>] [-g] [-l] [-n] [-s] [-u] [-v <vl>] [-z]\n\n"
                         "  -a: audio device path (default: /dev/dsp)\n"
+			"  -l: LSB mode\n"
+			"  -n: no mmap() (experimental!)"
+                        "  -g: HBG modulator\n"		
                         "  -s: stdout\n"
-                        "  -v: verboselevel\n"
-                        "  -z: MESZ\n"
-                        "  -g: HBG modulator\n"
 			"  -u: USB mode\n"
-			"  -l: LSB mode\n");
+                        "  -v: verboselevel (1 or 2)\n"
+                        "  -z: MESZ\n");
                 exit(1);
         }
 	timeenc_init(stime, zone, 0, 0, 0);

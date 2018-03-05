@@ -29,7 +29,7 @@
 #include "config.h"
 #endif
 
-#include <string.h>
+#include <string.h>  
 #include <stdlib.h>
 
 #include "dcf77.h"
@@ -94,7 +94,7 @@ extern __inline__ void decode_pn_bit(unsigned int bit, unsigned int samples)
 	d.t.dhist <<= 1;
 	bit &= 1;
 	d.t.dhist |= bit;
-	vlprintf(2, "Time: Bit %c  cnt: %2d\n", '0'+bit, d.t.dcnt);
+	vlprintf(1, "Time: Bit %c  cnt: %2d\n", '0'+bit, d.t.dcnt);
 	if ((d.t.dhist & 0x3ff) == 0x3ff) {
 		d.t.dbits = 0x3ff;
 		d.t.dcnt = 10;
@@ -172,7 +172,7 @@ extern __inline__  void trk_sample(int sq, unsigned int samples)
 				d.o.sacc[2] -= sq;
 			d.o.scnt[2]++;
 			if (d.o.scnt[2] == PN_LENGTH) {
-				vlprintf(3, "PN Tracking: %10d %10d %10d %10d\n",
+				vlprintf(2, "PN Tracking: %10d %10d %10d %10d\n",
 					 d.o.sacc[0], d.o.sacc[1], d.o.sacc[2], d.o.aacc);
 				decode_pn_bit((d.o.sacc[1] < 0) ^ (!lsb_mode), samples);
 				if (abs(d.o.sacc[1]) > d.o.aacc>>1) {
@@ -215,10 +215,10 @@ extern __inline__  void srch_sample(int sq)
 	asq = abs(sq);
 	for (u = 0, k = d.s.scnt; u < SRCH_N; u++, k = (k + PN_LENGTH/SRCH_N) % PN_LENGTH) {
 		if (k == 0) {
-			vlprintf(5, "Searcher %3u: accumulated: %10d  pn: %10d\n",
+			vlprintf(2, "Searcher %3u: accumulated: %10d  pn: %10d\n",
 				 u, d.s.aacc[u], d.s.sacc[u]);
 			if (abs(d.s.sacc[u]) >= d.s.aacc[u] >> 1) {
-				vlprintf(4, "PN sequence lock at secph 0x%08x\n", d.d.sec_ph);
+				vlprintf(2, "PN sequence lock at secph 0x%08x\n", d.d.sec_ph);
 				d.d.lock_cnt = 4;
 				d.d.sec_ph = PN_STARTSEQ+PN_SEQINC*(PN_LENGTH+1);
 				trk_init();
@@ -245,6 +245,8 @@ static void demod_pn(const short *s, unsigned int n)
 	int si, sq;
 	unsigned int u;
 	int i;
+	static int rodcnt = 0;
+	char* rod = "|/-\\ ";
 
 	for (samples = 0; samples < n; samples++, s++) {
 		d.f.inf_i[d.f.inf_ptr] = (COS(d.f.ph_car) * (*s)) >> 15;
@@ -279,9 +281,15 @@ static void demod_pn(const short *s, unsigned int n)
 			srch_sample(sq);
 		d.d.sec_ph += d.d.sec_inc;
 		if (d.d.sec_ph >= 0x40000000) {
-			vlprintf(5, "Carrier frequency offset: %6.3fHz   Sec freq offset: %6.1fms/s\n", 
+			vlprintf(2, "Carrier frequency offset: %6.3fHz   Sec freq offset: %6.1fms/s\n", 
 				d.f.car_fcorr * ((float)d.sample_rate / (float)0x1000000),
 				d.d.sec_fcorr * (1000.0 / 0x40000000));
+			if (verboselevel < 2) {
+			    printf("\t\t\t\t\t\t\t\t%c\r", rod[rodcnt]);
+			    fflush(stdout); // without this, printf does not printf!!
+			    rodcnt++;
+			    if (rodcnt > 3) rodcnt = 0;
+			}
 		}
 	}
 	i = d.d.car_inc >> 8;

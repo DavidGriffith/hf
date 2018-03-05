@@ -34,9 +34,9 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h> 
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef HAVE_SYS_AUDIOIO_H
 #include <sys/audioio.h>
@@ -45,6 +45,9 @@
 #include <stropts.h>
 #endif
 #ifdef HAVE_SYS_CONF_H
+#ifdef __FreeBSD__
+#include <sys/param.h>
+#endif
 #include <sys/conf.h>
 #endif
 
@@ -52,7 +55,12 @@
 #include <sys/mman.h>
 #include <sched.h>
 #include <sys/soundcard.h>
+#ifdef __linux__
 #include <endian.h>
+#endif
+#ifdef __FreeBSD__ 
+#include <sys/endian.h>
+#endif
 #endif
 
 #include "dcf77.h"
@@ -189,7 +197,7 @@ void audio_in(const char *name_audio, const struct demodulator *dem)
 	if ((abuf = (void *)mmap(NULL, size, PROT_READ, MAP_FILE | MAP_SHARED, 
 			 fd, 0)) == (void *)-1)
 		die("mmap: PROT_READ");
-	fprintf(stderr, "OSS: input: #frag: %d  fragsz: %d  bufaddr: %p\n",
+	vlprintf(1, "OSS: input: #frag: %d  fragsz: %d  bufaddr: %p\n",
 		info.fragstotal, info.fragsize, abuf);
 	/*
 	 * start recording
@@ -242,6 +250,92 @@ void audio_in(const char *name_audio, const struct demodulator *dem)
 }
 
 #endif
+/* --------------------------------------------------------------------- */
+
+void oss_nommap_audio_in(const char *name_audio, const struct demodulator *dem)
+{
+// experimental!
+
+	int i, apar;
+	int fd;
+	struct audio_buf_info info;
+//	struct count_info cinfo;
+	unsigned int size;
+//	short *abuf;
+//	fd_set mask;
+//	unsigned int fragptr;
+//	unsigned int curfrag;
+        struct sched_param schp;
+	short in[1024]; // by günther
+
+        if (!name_audio)
+                name_audio = "/dev/dsp";
+	/*
+	 * set realtime sched
+	 */
+	memset(&schp, 0, sizeof(schp));
+        schp.sched_priority = sched_get_priority_min(SCHED_RR);
+        if (sched_setscheduler(0, SCHED_RR, &schp) != 0) 
+                perror("sched_setscheduler");
+	/*
+	 * start receiver
+	 */
+	if ((fd = open(name_audio, O_RDWR, 0)) < 0)
+		die("open");
+	/*
+	 * configure audio
+	 */
+	apar = AUDIO_FMT;
+	if (ioctl(fd, SNDCTL_DSP_SETFMT, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_SETFMT");
+	if (apar != AUDIO_FMT)
+		vlprintf(-1, "audio driver does not support the S16 format\n");
+	apar = 0;
+	if (ioctl(fd, SNDCTL_DSP_STEREO, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_STEREO");
+	if (apar != 0)
+		vlprintf(-1, "audio driver does not support mono\n");
+	apar = SAMPLE_RATE;
+	if (ioctl(fd, SNDCTL_DSP_SPEED, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_SPEED");
+	if (apar != SAMPLE_RATE) {
+		if (abs(apar-SAMPLE_RATE) >= SAMPLE_RATE/100) 
+			vlprintf(-1, "audio driver does not support the required "
+				 "sampling frequency\n");
+		vlprintf(2, "audio driver inexact sampling rate: %d Hz\n", apar);
+	}
+	if (dem->init)
+		dem->init(apar);
+	tc_init(apar);
+	/*
+	 * set fragment sizes
+	 */
+	apar = 0xffff0007U;
+	if (ioctl(fd, SNDCTL_DSP_SETFRAGMENT, &apar) == -1)
+		die("ioctl: SNDCTL_DSP_SETFRAGMENT");
+	if (ioctl(fd, SNDCTL_DSP_GETISPACE, &info) == -1)
+		die("ioctl: SNDCTL_DSP_GETISPACE");
+	size = info.fragsize * info.fragstotal;
+	tc_start();
+	/*
+	 * loop
+	 */
+	 	for (;;) {
+
+		tc_now(0);
+		i = read(fd, in, sizeof(in));
+		if (i < sizeof(in))
+			die("read");
+		dem->demodulator(in, sizeof(in)/sizeof(in[0]));
+		tc_advance_samples(sizeof(in)/sizeof(in[0]));
+	}
+
+	if (close(fd))
+		die("close");
+}
+
+
+
 /* --------------------------------------------------------------------- */
 
 void audio_stdin(const char *name_audio, const struct demodulator *dem)

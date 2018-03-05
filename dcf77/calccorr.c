@@ -30,16 +30,29 @@
 #endif
 
 #include <string.h>
-
+#include <stdlib.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <sys/time.h>
 
 #include "dcf77.h"
+
+char gmt[32];
+
+/* --------------------------------------------------------------------- */
+
+void timequery()
+{
+	time_t now;
+	time(&now);
+	//would also be possible like ...
+	//sprintf(gmt, "%s", asctime(gmtime(&now)));	
+	// strftime(gmt, 31, "%a %d.%m.%y, %H:%M", gmtime(&now));
+	strftime(gmt, 31, "%Y-%m-%d %H%M", gmtime(&now));
+} 
 
 /* --------------------------------------------------------------------- */
 
@@ -53,6 +66,10 @@ struct time_corr_state {
 	unsigned long long tm1start, tm2start, tm3start;
 	time_t tcur;
 } tc;
+
+float soundcorr, mhzcorr, timecorr;
+struct tm *tm;
+unsigned int timediff;
 
 /* --------------------------------------------------------------------- */
 #ifdef __i386__
@@ -135,7 +152,7 @@ void tc_init(unsigned int sample_rate)
 {
 	rdtsc_probe();
 	memset(&tc, 0, sizeof(tc));
-	tc.tm2inc = (1000000 + sample_rate / 2) / sample_rate;
+	tc.tm2inc = (1000000 + (sample_rate / 2)) / sample_rate;
 	tc.sr = sample_rate;
 }
 
@@ -149,6 +166,7 @@ void tc_start(void)
 		die("gettimeofday");
 	tc.last_usec = tv.tv_usec;
 	tc.tm3st = tc.tm3 = rdtsc_get();
+//	printf("dcf77 time decoding program");
 }
 
 /* --------------------------------------------------------------------- */
@@ -168,9 +186,100 @@ void tc_now(unsigned int minus_samples)
 	if (tc.tm1 < 8000 && tc.tm3 > tc.tm3st && tc.tm1 > 0) {
 		tc.tm3inc = (tc.tm3st - tc.tm3) / (tc.tm1+minus_samples);
 		if (tc.tm3inc == 0)
-			vlprintf(2, "First CPU clock estimate: %9dHz", 
+			vlprintf(1, "First CPU clock estimate: %9dHz", 
 				 tc.tm3inc * tc.sr);
 	}
+}
+
+/* --------------------------------------------------------------------- */
+
+void output()
+{
+        static char head[256],  foot[256];
+	char factors[512];
+#ifdef __linux__
+	const char *configfilename =  "/etc/calibrations";
+#endif
+#ifdef __FreeBSD__
+	const char *configfilename =  "/usr/local/etc/calibrations";
+#endif
+	FILE *configfile = NULL;
+	static int prepared = 0;
+
+/*
+ *  output of the 3 correction factors to stdout
+ */
+	printf(	"Corrections: current time %02d:%02d:%02d, time diff %us\n" // was: ld
+	    "\t***  soundcorr:   (hfkernel option -s):\t%10.8f  ***\n"
+	    "\t***  mhzcorr:     (hfkernel option -m):\t%10.6f  ***\n"
+	    "\t***  timecorr:    (hfkernel option -t):\t%10.8f  ***\n",
+	    tm->tm_hour, tm->tm_min, tm->tm_sec, timediff,
+	    soundcorr, mhzcorr, timecorr);
+
+/*
+ *  preparation of head, foot, and opening config file
+ */
+	configfile = fopen(configfilename, "a");
+	if(configfile == NULL) {
+	    fprintf(stderr, "sorry, configuration file %s can not be opened\n"
+	        "for appending correction factors\n", configfilename);
+	    return;
+	} 
+	vlprintf(2, "configuration file %s opened\n", configfilename);
+
+	if (! prepared) {
+    	    timequery();
+	    sprintf(head, 
+"##############################################################################\n"
+	    "## * * Correction factors by dcf77rx at %s  * *\n"
+	    "## * * Edit if not credible. Last values will be valid.  * *\n",
+	    gmt);
+//	    printf( "head string prepared.\n"); 
+
+	    sprintf(foot, 
+	    "## * * * * End of one cycle of dcf77rx calibration.  * * * *\n");
+	    vlprintf(2, "foot string prepared.\n"); 
+
+	    if ( (fwrite(head, strlen(head), 1, configfile)) != 1) {
+    		fprintf (stderr, 
+		    "Error in writing head lines to config file %s\n", 
+		    configfilename);
+        	return;
+	    }
+	    vlprintf(2, "head string written.\n"); 	    
+	    prepared = 1;
+	}
+
+/*	
+ *  output of the 3 correction factors to the config file
+ */
+	    
+	sprintf(factors, "## dcf77rx calibration at time %02d:%02d:%02d:\n" 
+	    "soundcorr=%10.8f\n"
+	    "mhzcorr=%10.6f\n"
+	    "timecorr=%10.8f\n",
+	    tm->tm_hour, tm->tm_min, tm->tm_sec, 
+	    soundcorr, mhzcorr, timecorr);
+	    vlprintf(2, "factors string prepared\n"); 
+	    
+	if ( (fwrite(factors, strlen(factors), 1, configfile)) != 1) {
+    	    fprintf (stderr, 
+		"Error in writing correction factors to config file %s\n", 
+		configfilename);
+    	    return;
+	}
+	vlprintf(2, "correction factors written to config file.\n"); 	
+
+	if ( (fwrite(foot, strlen(foot), 1, configfile)) != 1) {
+    	    fprintf (stderr, 
+		"Error in writing foot lines to config file %s\n", 
+		configfilename);
+    	    return;
+	}
+	vlprintf(2, "foot string written.\n"); 
+	fclose(configfile);
+	vlprintf(2, "configuration file closed.\n"); 
+	return;
 }
 
 /* --------------------------------------------------------------------- */
@@ -189,10 +298,10 @@ void tc_minute(time_t curtime, unsigned int samples)
 	unsigned long long tm1c = tc.tm1 + samples;
 	unsigned long long tm2c = tc.tm2 + samples * tc.tm2inc; 
 	unsigned long long tm3c = tc.tm3 + samples * tc.tm3inc;
-	unsigned int timediff;
-	struct tm *tm;
 
-	vlprintf(2, "tc_minute: curtime: %u\n", curtime);
+
+
+	vlprintf(1, "tc_minute: curtime: %u\n", curtime);
 
 	if (!tc.tm1start) {
 		if (curtime == INVALID_TIME)
@@ -212,15 +321,19 @@ void tc_minute(time_t curtime, unsigned int samples)
 		tc.tcur += 60;
 	timediff = (tc.tcur - tc.tstart) % 86400;
 	tm = localtime(&tc.tcur);
-	vlprintf(1, "Corrections: current time %02ld:%02ld:%02ld, time diff %us, "
-		 "sample corr: %10.8f, gettimeofday corr: %10.8f, CPU clock: %10.0f\n"
-		 "(kernel driver command line params: scale_tvusec=%u scale_rdtsc=%u)\n",
-		 tm->tm_hour, tm->tm_min, tm->tm_sec, timediff,
-		 (float)tc.sr/((float)(tm1c - tc.tm1start)/(float)timediff),
-		 1000000.0/((float)(tm2c - tc.tm2start)/(float)timediff),
-		 (float)(tm3c - tc.tm3start)/(float)timediff, 
-		 (int)((1<<24)*1000000.0/((float)(tm2c - tc.tm2start)/(float)timediff)), 
-		 (int)((float)(1ULL<<32)*1000000.0/((float)(tm3c - tc.tm3start)/(float)timediff)));
+/*
+ *  calculation of the 3 correction factors
+ */
+	soundcorr = (float)tc.sr/((float)(tm1c - tc.tm1start)/(float)timediff);
+	mhzcorr = (float)(tm3c - tc.tm3start)/(float)timediff / 1000000;
+	timecorr = 2.0 * 1000000.0/((float)(tm2c - tc.tm2start)/(float)timediff),
+
+	output();
+
+/* old fragments by Tom */
+ //(int)((1<<24)*1000000.0/((float)(tm2c - tc.tm2start)/(float)timediff)), 
+ //(int)((float)(1ULL<<32)*1000000.0/((float)(tm3c - tc.tm3start)/(float)timediff)));
+
 }
 
 /* --------------------------------------------------------------------- */

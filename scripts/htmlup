@@ -1,0 +1,2 @@
+# update upload script for hf homepage
+scp $1 dl4mge@hfterm.sourceforge.net:/home/groups/h/hf/hfterm/htdocs/

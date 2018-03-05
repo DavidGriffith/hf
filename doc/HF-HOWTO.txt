@@ -1,0 +1,1347 @@
+----=== HF ===-----
+
+
+H F   -   H O W T O   
+
+LINUX HAM RADIO SHORTWAVE PROGRAM 
+
+RTTY, AMTOR, GTOR, PACTOR 1, MT63  
+
+TCP/IP INTERFACE TO F6FBB MAILBOX  
+
+MIT CW-ELBUG
+
+By Gnther Montag DL4MGE  
+
+Version 0.8 (2/2007)
+
+
+1) Introduction:
+
+The hf program suite implements the historic amateur radio FSK
+protocols RTTY, AMTOR (SITOR), GTOR, Pactor-1, besides this
+Pawel Jalocha's multitone protocol MT63 and a CW elbug for
+mouse and paddle.
+
+The implementation of the protocols uses a binary called
+hfkernel, which runs as daemon in the background. By an UNIX
+domain socket it communicates with its graphic user interface
+hfterm. The start script hf starts hfterm, which starts
+hfkernel.
+
+A PTT (push to talk) signal can be output by the RTS pin of a
+serial interface.
+
+A calibration might be necessary. For this three calibration
+tools are included.
+
+hfterm can connect via a TCP port to the well-known mailbox
+program F6FBB and to any other program that can be accessed via
+a TCP/IP port and output to a console. So hf can be used as an
+automatic mailbox or for remote control.
+
+The program was made in 1997 by Tom Sailer (Thank you!) and is
+being developed by Gnther Montag and many friends.
+
+Please contact us by the mailing list!
+
+
+2. Installation, Configuration, first test:
+
+2.1. Installation of rpm Package:
+
+rpm -i hf-<version>.rpm
+or, if false error "gtk missing":
+rpm -i --nodeps hf-<version>.rpm
+
+2.2. Installation of Source Package:
+
+(for developers!)
+tar -zxvf hf-<version>.tar.gz 
+cd hf-<version> 
+./configure 
+make
+(as root):  make install 
+
+Requirements: 
+ncurses-devel, glib-devel, gtk-devel(Version 1.2.10)
+
+Problems:
+If configure complains 'Cannot find GTK: Is gtk-config in
+path?', but you have gtk, look for it (which gtk-config) and
+(as root) a link like this may help: 
+ln -s /opt/gnome/bin/gtk-config /usr/bin/gtk-config 
+or insert the path to gtk-config into /etc/ld.so.conf.
+If gtk-config says that gtk-libraries are in/opt/gnome/kde...,
+maybe you have to copy them to /usr/lib so that configure finds
+them.
+
+2.3. First test:
+
+Type hf in an X console, this starts the hf start script. This
+will start the graphic terminal hfterm, this will start the
+background program hfkernel. The console messages will show if
+hfkernel is running alright. To test signal input and the
+soundcard gain, open the spectrum display with F2 or <Shift>F
+or the Spectrum button. Squelch can be set with the right mouse
+key. Decoded characters should appear in the rx window. Won! 
+
+If hf runs, you can right-click on the desktop, 'new',
+'application' ... and link hf with an icon. As an old linux
+rabbit you will know that. 
+
+Problems: Sometimes hf and your sound card do not like each
+other. I did much already for peace. See chapter 4. 
+
+2.4. Configuration 
+
+All settings are done in the "config" meu of hfterm. Device
+settings for soundcard and serial and the calibrations come to
+work after new start of hf. The text macros can be edited in
+menu 'fixtexts'.
+
+At installation hf makes a directory "hf" in your home
+directory and fills it with the example files e.g. the text
+macros from /usr/(local)/share/hf/hf-examplefiles. 
+
+
+3. PTT and Elbug Wiring:
+
+3.1. PTT / Key:
+
+As in evey ham radio digimode program, you have to connect
+computer and transceiver with 1 npn transistor und 2 resistors:
+
+                              _____
+                      /------|_10k_|---O  
+ RTS pin             /                PTT pin 
+ Computer           /                 Transceiver
+       _____    B |/      C
+ O----|_10k_|-----|\
+                  |  \_|  E
+                      \
+            npn        \
+            Transistor  |
+                        |
+                        |
+               Masse  =====
+                                            
+You need once more the same circuit, if you want to use the
+elbug with DTR serial pin to key input of radio. You also can
+leave the elbug at RTS and change key and PTT with a switch.
+
+For some transceivers the impedance of this circuit above are
+too much, then leave out the collector resistor and solder 330
+Ohms at the base. Tnx to Waldis Jirgens for your good example
+for this case at:
+http://members.optusnet.com.au/~waldis/ifacen.gif, which
+contains also a transformator coupling for the soundcard io.
+
+3.2. elbug:
+
+Middle pad: +9 V via Resistor 2 k
+Left  contact: -> DCD (9-pin plug: 1) (25-pin plug: 8)     
+Right contact: -> CTS (9-pin plug: 8) (25-pin plug: 5)     
+Ground:               (9-pin plug: 5) (25-pin plug: 7) 
+
+
+4. Options and Problem Solutions with for hfkernel
+
+If hf runs, skip this chapter!
+
+It is a special program and has sometimes special needs... So
+you must know some things to understand the most common errors.
+
+
+4.1. Superuser Rights
+
+Because of its special harware approach (real time mode, high
+priority, mmap) hfkernel needs superuser rights. At
+installation the suid bit is set to hfkernel. If this runs and
+o.k. for you, you need not read con this section.
+
+Errors containing 'permission denied' or 'pthread_create' at
+start ofhfkernel as non-root show a problem here: Is the suid
+bit set?
+
+ls -l /usr/bin/hfkernel should result something like:
+-rwsr-xr-x. The 's' is the suid bit, gives normal user
+super-user-rights when executing it. If not there, set it by
+hand: chmod u+s /usr/bin/hfkernel. (same is chmod 4755
+/usr/bin/hfkernel)
+
+4.2. Serial Line
+
+Errors containing 'ioctl: TIOCMBI[CS]:'Conflict with the mouse?
+Is the serial line correct in /etc/hf.conf ? (As default none
+is set, so no error at first...)
+
+4.3. Problems with soundcards:
+
+The soundcard must support 16bit sampling in the endianness of
+the CPU,8kHz sampling rate, and should support memory mapping
+of the DMA buffersand triggering. It must be able to work in
+"mono", which some new cardscannot do any more! A full duplex
+soundcard is preferred.
+
+hfkernel with Tom's original code does not run with every
+soundcard and/or driver.  The reason is not bad code, but good
+code: Because of the time-critical FSK ARQ protocols (Amtor,
+Gtor, Pactor) it is necessary towork in real-time mode. For
+this, the author Tom Sailer choose the best way and wrote the
+program with the "mmap()" system call. This is alsocalled "DMA"
+(direct memory access) and means mirroring the soundcard'sring
+buffer directly into the working memory of the computer. And
+not every soundcard can do this, and not every driver supports
+this correctly. 
+
+So, the '-n' option works around this and is now set
+automatically, if needed, from V. 0.8 on. If not, try by hand:
+Test on console 'hfkernel -n',  and then set it in hfterm's
+config menu.
+
+Half duplex soundcard: If hfkernel does not detect it, set
+option -h. The soundcard is here switched if the protocol
+changes from receive to transmit and vice versa. This lasts
+quite long; anywhere in the region of 5 to 35 ms. The program
+measures an average at startup. It tries to hide this latency
+under the PTT keyup delay (TXDelay), so set the txdelay to a
+larger value! And hope that the propagation time to your peers
+plus their txdelay is also longer. (Default is 30 ms)
+
+4.4. Problems with Sound Driver
+
+4.4.1. What is a driver, what is an API?
+
+A driver is a program that translates 'general' commands from a
+user application (e.g. hfkernel, or an audio file player) into
+'special' commands for a special device, like the soundcard Via
+82C686.
+
+This means, the driver provides the 'general' command sets to
+the programmer, and translates them into the 'special' ones in
+the background when the application is running. 
+
+The 'general' command sets are also called API (Application
+Programmer`s Interface) and you can imagine them like a little
+`programminglanguage', or something like a special jargon for a
+special area within c.
+
+4.4.2 OSS and ALSA
+
+For Linux there are 2 different API's for sound card
+programmng:
+
+OSS: 
+The older, traditional API is OSS (Open Sound Systems), in up
+to about kernel 2.4 the OSS drivers are included as loadable
+kernel modules. There were also commercial, partially better
+developed OSS drivers. In older Linux distributions there was
+something between, an OSS-Paket paid and free only for the
+purchaser of that distribution, e.g. in my good old SuSE 6.3 to
+be found in /tmp/opso and working good with hf, I am still
+using it. The standard OSS modules can be found in
+/lib/modules/<kernelversion>/misc.(Source in
+/usr/src/linux/<kernelversion>/drivers/sound). You can
+installthem with modprobe (if ALSA is there, after unloading
+ALSA by rcalsasound stop). See man modprobe, modprobe -p
+<module> (for parameter info).modprobe -d <module> shows which
+other depending modules are to be loaded before. You will get
+help for  ISA-PNP cards by pnpdump and isapnp, (seemanpages)
+and for PCI cards by lspci, and you find docs in
+/usr/src/linux/Documentation/sound for your sound card.
+
+ALSA: 
+ALSA (Advanced Linux Sound Architecture) is new , is more
+flexible,complexe and maybe sometimes still more error-prone
+and slower. The ALSA modules are optional from kernel 2.4,
+standard from kernel 2.6 and will play the main part in future.
+Latest version of ALSA and lots of good documentation at:
+http://www.alsa-project.org
+http:///www.alsa-opensource.org
+Mailing lists can be subscribed, almost 1000 mails a month:
+https://lists.sourceforge.net/lists/listinfo/alsa-devel
+https://lists.sourceforge.net/lists/listinfo/alsa-user 
+As root by lsmod you can test what sound driver modules are
+running in your Linux: The ALSA modules start with 'snd-'. The
+ALSA API has a very different logic compared to OSS-API. If
+ALSA would not contain an additional OSS emulation, things it
+would be bad for us,the many good old (ham, music, game)
+programs would not run with new linux.. :-( 
+
+(You can compare the different codes in hfkernel/l1/oss.c and
+hfkernel/l1/alsa.c !)
+
+4.4.3 hfkernel, OSS and ALSA:
+
+hfkernel's soundcard code, like most ham programs' code, was
+written for OSS-API, but runs also with ALSA's OSS emulation.
+
+Because of hfkernel's special desires (mmap and realtime mode)
+it sometimes runs with OSS, sometimes with ALSA's OSS
+emulation, sometimes not at all, depending on the sound card! 
+
+To test my new ALSA full duplex code, choose the option 
+'-a hw:0,0' for the first, or 
+'-a hw:1,0' for the second soundcard and so on, 
+in hfterm's config menu.
+
+Still the code for OSS API is default, but please test the ALSA
+code! Tnx !! ;-) 
+
+4.4.4. Plan for sound driver problems with hfkernel
+
+Try options in hfterm's config menu / General, then type 'hf'
+on a console so that you see hfkernel's output.
+
+Errors with 'open': Is the sound driver loaded at all ? (lsmod,
+and can another programm, e.g.  dcf77gen oder dcf77gen -n, make
+a tone?)
+
+if ALSA driver is installed (teste as root by 'lsmod', the
+modules start with '-snd' ): '-a hw:0,0'
+
+if no ALSA driver: 
+Error with 'MMAP': Test the no-mmap version: '-n'
+
+Sometimes hfkernel says, the soundcard is full-duplex capable,
+but in fact it is not: Force halfduplex mode by '-h'
+
+If, with half duplex card, in standby mode, the numbers after
+'corrout... intermediate...' are always about 8000, the rdtsc
+time query does not work. This happens often with
+non-Intel-processors. Then add option '-R' (disables RDTSC
+instruction).
+
+Still nothing?
+
+Try another soundcard.
+
+if (nervous system == corrupted) {    subscribe_mailing_list
+("https://lists.sourceforge.net/lists/listinfo/hfterm-hackers")
+;    mailto(hfterm.hackers@sf.net);    sleep (24 hrs);   
+break;}
+
+4.5. thread handling
+
+Docs of Suse 9.2 said: Kernel 2.6.8 handles threads
+differently. (A thread is an internal loop). So hfterm must be
+called with the prefix 'LD_ASSUME_KERNEL=2.2.5 hfterm'. If it
+calls hfkernel, it is ok for both. This is preset in the hf
+start script. I tested new ubuntu kernel 2.6.18: The prefix
+seems not to be needed there.
+
+4.6. Save configuration and your soul
+
+If hfkernel runs, fix it with glue and never touch the running
+system again. This means, fix your working options the
+config/General menu and remember them.  Never work more than 24
+hours an evening. Look if your family is still there. Never
+forget: Do it only with fun. If depressive, mail me. I am a
+psychotherapist. It was addicted to it, I healed myself by
+playing piano and doing other things, and by celebrating
+computer-free days.
+
+4.7. Complete list of hfkernel's options:
+
+Partially experimental. Just for info.
+-2: standby: disable monitoring of 200baud signals  
+-3: standby: disable monitoring of 300baud signals  
+-a: audio device path (default: /dev/dsp (OSS))
+(For ALSA: -a hw:0,0)  
+-c: path of the communication socket (default: /var/run/hfapp)
+ 
+-f: standby: disable frequency estimation  
+-h: force half duplex mode (OSS only)  
+-i: invert PTT (default: PTT = positive signal)  
+-k: stop hfkernel (e.g. used by hf startscript. Helps also if
+hangs.)
+-l: logging (default: off)  
+-M: mixer device path (default: none)  
+-m: CPU clock in MHz (exact at the kHz level)  
+-n: no mmap (OSS only)  
+-p: path of the serial port to output PTT (default: none)  
+-R: disable the use of the rdtsc instruction (Intel systems
+only)  
+-r: access permissions of the communication socket 
+(default: 0777 = rwxrwxrwx)  
+-s: soundcard sampling rate correction  
+-t: gettimeofday correction factor
+
+
+5. hfterm and the digimodes:
+
+5.1. Introduction
+
+Most of the program is very intuitive. Help with F1. The state
+menu, mode menu, and the buttons will explain  themselves. If
+you don't like mice, like me, the shortcuts will make you happy
+(see menues): modes by F..., text macros by <Shft>F... 
+
+There are at all 3 levels of debugging output:
+1. the console in the background: hfkernel's output.
+2. monitor: all received data, not only of a connect.
+3. Status Display: you what the program is just doing. 
+If all runs o.k., only 3. is needed.
+
+If you want to know how the digimodes sound: Examples in
+www.wunclub.com/sounds !
+
+Hfterm thinks. (autorx / autotx feature). If you write into the
+tx window, it switches to the fitting or last tx mode. After
+some seconds hf switches to rx, exept you had chosen a tx mode
+explicitely, e.g. RTTY TX. This autorx/tx is useful for the
+beacon and mailbox functions, but can be disturbed by too few
+waiting and too much clicking. Especially MT63 has long delays
+between rx and tx and back because of its datainterleave!
+
+If you change a mode, do not go from a transmit mode directly
+to another transmit! But, as you know as a good ham, go first
+on rx (or wait for autorx), then on rx of the new mode, then on
+tx.
+
+If the program hangs, first wait, then maybe you have to
+restart (hf, not the computer. We do not have anything to do
+with Bill.) 
+
+Exception: Sometimes I had hardlocks of the soundcard. Also
+other programs did not produce a tone then. Here the computer
+has to be restarted. 
+
+5.2. General
+
+5.2.1. SPECTRUM DISPLAY
+
+If you are a new user, get into feeling with the program by
+looking at the spectrum. If no signal appears, look if the tx
+and the soundcard  (lineout) are cabled correctly, and if the
+signal is adjusted well by a potentiometer in the line or by a
+mixer like aumix (for OSS and ALSA) or alsamixer (for ALSA).
+The spectrum has a blue and a red line for mark and space,
+andin the bottom there is a green line, the squelch.
+
+You can change mark and space frequency with the mouse: If one
+of the given shifts is chosen, the left button will select the
+mark (and space will be mark plus shift), or the middle button
+will select the middlefrequency. If the "other" shift is
+chosen, you have to click 2 times, select first mark, then
+space, and the shift will be calculated. This is for FSK modes
+only, MT63 has its fixed audio range.
+
+Squelch: The right button selects the squelch.
+
+5.2.2. PARAMETERS
+
+The config menu (<Ctrl>+P) is a notebook where you can enter
+parameters. There are personal ones like power, rig,  antenna,
+locator, qth, name, mail address, which will also be used by
+the text macros while transmitting. There are program
+parameters like mark, shift, baudrate, txdelay etc. for the
+different modes. If you finish the program, the parameters will
+be stored in~/hf/hfterm.rc (digital, please do not edit!).
+After changes in the "General" section hf has to be restarted.
+
+5.2.3. FIXTEXTS
+
+If you like text macros - edit your Fixtexts (up to 12) by
+'Ctrl T'. There are macros allowed for your call, name, QTH, 
+locator, rig, pwr, ant,mail/internet address, timestamp and all
+the dates of your QSO partner,and: [B] for beacon - e.g. CQ.
+The window on the bottom reminds you to the ekywords. If you
+want to transmit one of the macros, click on one of the 12
+buttons, or 'Ctrl F<1..12>', lean back and drink coffee. The
+fixtexts are stored in ~/hf/fix.<nr>, they can be edited there.
+By renaming or inserting you can import here any text, maximum
+1024 bytes. You can also choose a file to transmit from the
+file menu.
+
+5.2.4. BEACON
+
+As said before, if a fixtext contains [B], the beacon is
+started when  you select it. You can stop it by <Alt>+B or the
+file menu. If you want to send an external file as beacon,
+start the beacon mode by <Alt>+B or the filemenu. A file
+selection dialog appears. After stop and new start of the
+beacon the selected file is sent again. If you then select a
+fixtext containing [B], this is the new beacon etc. If hf runs
+as mailbox: If a connect comes in, the beacon is suspended for
+the time of the connect. 
+
+The interval of beacon transmissions is set at the config menu,
+it is rounded on a multiple of 5 seconds, but this time is not
+exact.
+
+5.2.5. LOGBOOK
+
+We even have 2 logbooks. One for big screens, always open.
+Write your entry, and click 'save' or 'clear'. The other for my
+little old screen (a bigger one does not fit in my shack).
+Shrink the big log frame by 'Ctrl Q'. By 'Ctrl N' you can open
+the little log frame if you need it and you will still see the
+status display on the bottom. 'Ctrl L' shows the current log
+list. 'Ctrl A' archivates the log file and starts a new one.
+With 'Ctrl O' you can search old entries to edit or clear them.
+The log will be stored in portions of 50 entries. The old log
+files are numbered and can not be opened by hfterm any more,
+but with every text editor. The ascii format is adapted to
+cabrillo standard. If you want  to change the format for your
+special contest, and if you understand the printf format
+specifiers (see man  printf), you can change the source easily
+in hfterm/src/log.c !
+
+5.2.6. RX-TEXT
+
+If you receive something, it will be stored. If hfterm runs
+long, from time to time half of the rx window contents is
+appended to this file. The old stored rx files will be renamed,
+and kept, up to 5 of them, in ~/hf. In the file menu, there is
+also an option to select a filename to store.
+
+5.3. The Modes
+
+5.3.0 CW Elbug
+
+My newest hack, maybe it is unique in Linux (is it?). I was
+inspired to do it by Larry Winslow's "CW" DOS program. The
+circuit is also from Larry's docs. It is an elbug only. 
+Btw, a keyboard encoder and decoder is in gMFSK. 
+
+My experiments with soundcard tone gave a too big delay, so
+elbug works only with the PC speaker. Serial output by RTS or
+DTR. In the rx window your signs will be decoded. 
+Thanks for inspirations from cwdaemon and cwlib:
+(http://www.qsl.net/pg4i/linux/cwdaemon.html).
+
+You can test the elbug with the right and left mouse keys by
+clicking into the tx window. (Tip: Turn the mouse and fix it.)
+A real paddle is better, see wiring instruction above and in
+the console output. Speed, tone and serial pin can be adjusted
+in the config menu.
+
+There is also a ready little console program 'elbug' in the
+package!
+
+5.3.1. RTTY
+
+For founding first friendship with the program try RTTY. Usual
+values: shift 170 Hz, baudrate: 45.45. Tuneon your tx e.g. in
+the 20m band and look for the typical beautiful machine-sound
+of rtty. Tune the rig until the double peak of an rtty QSO come
+under the blue and red lines in the spectrum. At steady
+transmitting (mode menu) a "diddle" sends  "LTRS...".
+
+5.3.2. The FEC / ARQ Modes PACTOR - AMTOR - GTOR
+
+If you want to test these modes with hf, please try in any case
+to run hfkernel without the option -n, and try also the ALSA
+Full Duplex driver by chosing the seondcard 'hw:0,0'.
+
+FEC (Forward Error Correction):
+Pactor 1 and Amtor: 
+Signals are repeated and averaged.
+E.g. for calling CQ.
+
+ARQ (Automatic Repeat Request): 
+Pactor, Amtor and Gtor:
+After each data packet the receiver sends a control packet,
+confirming correct reception (if the CRC, a checksum,
+calculated by the receiver is o.k.) or asking for repeat,
+slowdown, speedup or change of direction.
+
+5.3.2.1 Amtor
+
+As far as I know Amtor (Sitor) is the first digimode with
+automatic connects. It was developed from RTTY entwickelt. Its
+packet interval  is 0,45 sec.
+
+5.3.2.2 Gtor
+
+Gtor seems not be much in unse any more. 
+
+The Howto is not yet complete here, please send me docs on
+Amtor und Gtor!
+
+5.3.2.3. PACTOR
+
+If you are seiously interested in Pactor, read also chapter 6
+and /usr/(local/)share/doc/hf/Pactor.txt (sorry, German only.
+Please translate it in your language. And mail it to me. Tnx
+!!!) Pactor has been developed from Amtor, its level 1 was
+often used for some time, but is declining  in favour of the
+commercial levels 2 and 3 (no soundcard programs, TNC needed).
+In a connect every data package is followed by a short
+confirming package, over all length is 1,25 s. First train to
+receive. It is more difficult than RTTY. In the spectrum Pactor
+looks almost like RTTY, but the sound is hacked in typical 1.25
+sec rhythm, (Amtor: 0,45 sec), sometimes you can hear the short
+control signals  of the other station inbetween. Call CQ by
+FEC. Be patient! If you have a partner answering by FEC, try to
+call him by ARQ. Call a mailbox by ARQ. After transmitting, do
+not go to standby directly, the  program might hang. Instead,
+do QRT ('Alt Q'), wait a little (let the program finish its QRT
+routine!), then it will go to standby by itself.
+The speed change in Pactor (100 to 200 baud) is done
+automatic. 
+
+5.3.3. MT63
+
+Very much thanks to Pawel Jalocha, SP9VRC, who made this great
+new mode, which is said to be very robust, especially at bad
+conditions better thanPactor 3, and might be precious for
+future "emcomm" systems. (Emergency Communication, see the
+linlink mailing list at www.wetnet.net)
+
+Because of the many interesting experimental possibilities I
+inserted Pawel`s complete MT63 package with the console
+programs mt63tx, mt63rx, mt63trx, the tools morsecod, peakrms,
+addnoise  and the calibration program ratecal1 into the hf
+package. Thanks! 
+
+I insert here a part of Pawel's documentation on MT63. (The
+complete text is mt63.txt in the doc dir.)
+
+This is the release 0.5 of the MT63 modem for LINUX.Date:
+08-JUL-2004, Author: Pawel Jalocha, SP9VRC,
+Pawel.Jalocha@cern.ch
+Important notes:
+1. To take full advantage of the MT63 modem, the sampling rate
+of your sound card needs to be either calibrated or dead
+precise on 8000.0 Hz. For now, the MT63 receiver doesn't tell
+you the rate mismatch, I may provide such facility in the next
+software versions.
+2. When connecting the audio to your PC/laptop be carefull not
+to damage the computer audio inputs. I suggest you first
+connect the grounds of the radio and the computer and only then
+connect or disconnect the audio cables.
+
+The MT63 modem is intended for amateur radio as a conversation
+(RTTY like) mode where one station transmits and one or more
+other stations can listen. In short, the modem transmits 64
+tones in its 1 kHz bandwidth: the audio range for the tones is
+500-1500 Hz. The differential bipolar phasemodulation is used
+to encode 10 bits of information per second on each tone. The
+user data in the form of 7-bit ASCII characters is encoded as
+aset of 64-point Walsh functions. The bits are interleaved over
+32 symbols (3.2 seconds) to provide resistance against both
+pulse and frequency selective noise or fading. The character
+rate equals to the symbols rate thus the modem can transmit 10
+7-bit characters per second. This modem can as well run in two
+other modes obtained by simple time scaling, the possible modes
+are summarized here:
+
+Bandwidth  Audio range  Symb. rate  Char. rate  Interleave/char
+ 500 Hz   500-1000 Hz     5 baud     5 char/s   6.4 oder
+12.8sec
+1000 Hz   500-1500 Hz    10 baud    10 char/s   3.2 oder 
+6.4sec
+2000 Hz   500-2500 Hz	 20 baud    20 char/s   1.6 oder 
+3.2sec
+
+For each mode the interleave factor can be doubled thus each
+character becomes spread over twice as long period of time. The
+first experiments with this mode were done on the EVM56K DSP
+evaluation board from Motorola and the package was named
+MT63ASC.ZIP. This LINUX implementation is written to be
+compatible with that package. The MT63 modem is made for single
+sideband operation. The audio generated by the modem (sound
+card output) is applied to the SSB modulator. On the receiver
+side, the output of the SSB demodulator is put into the sound
+card input. The envelope of the MT63 signal is not constant as
+in other multi-tone systems - it is rather noise-like. One must
+be carefull not to overdrive the transmitter. The receiver of
+the MT63 is self-tuning and self-synchronizing thus the
+radiooperator is only required to tune into the signal with +/-
+100 Hz accuracy for the basic 1000 Hz mode. The modem will tell
+the actuall frequency offset after it is synchronized. The
+operator should not try to correct this offset unless he is
+able to tune  his radio receiver very slowly, because the MT63
+as a low rate  phase modulated system does not like sudden
+frequency changes. 
+
+Pawel, SP9VRC. (Thanks Pawel!)
+
+I made in hf the "flushing data interleaver" at the end of each
+transmit cycle still longer than Pawel in his original program,
+ to prevent my squelch function from cutting away the last data
+at receive.
+
+
+6. Real Time Problems and Calibration
+
+6.1. Basics
+
+HF protocols are usually synchronous. They require an exact
+clock source to remain bit synchronous even during longer
+disruption of the propagation. SITOR (AMTOR) for example
+specifies that the reference clock must be no more than 20ppm
+off the ideal value. It's difficult to find such an exact clock
+source, therefore all the options chosen by the current
+implementation require manual tuning.
+
+If the soundcard is full duplex capable, the reference clock is
+derived from the sample clock. To correct for inaccurate sample
+rate information given by the OSS driver, the -s option can be
+used. Your soundcard should use real crystals instead of cheap
+ceramic resonators. Also MT63 in hf uses the sample rate
+correction factor (-s).
+
+If the soundcard is not full duplex capable, the above method
+cannot be used. On Intel systems, the program tries the RDTSC
+(read time stamp counters) to see if it is available and
+working (on Pentium class computers and better, this should be
+the case). These counters increment at the CPUclock rate,
+therefore the CPU clock frequency must be known to the program,
+accurate to the kHz level (option -m). Don't be fooled by
+marketing gags, eg. an AMD K5 PR133 runs at 100MHz. On
+non-Intel systems or if the RDTSC instruction is either
+unavailable or not working, gettimeofday is used, in the hope
+that the tv_usec field is accurate enough. Systematic frequency
+errors may be corrected by the -t option.
+
+RTTY, Pactor-FEC and Amtor-FEC might work without calibration,
+there have also been reports about successful Pactor- /
+Amtor-ARQ  connects without calibration. It depends on the
+accuracy of your card`s samplerate! If it is bad, or the
+connects should last longer, however, a calibration improves
+the performance of the program.  Also for MT63 a calibration is
+necessary in many cases.
+
+As described above, with options hfkernel can be given
+correction factors for the soundcard's sampling rate (-s),the
+cpu clock rate (-m) and the gettimeofday funktion (-t). -s only
+works for full duplex mode (time derived from soundcard), -m
+only works for half duplex mode with working RDTSC instruktion,
+-t only works for half duplex mode without RDTSC instruktion,
+which is worse, as the prozessor gets time via gettimeofday(),
+which is not so exact because of changing system load.
+
+In the hf package there are 3 Programs for calibration. Two of
+them, dcf77rx and reffreq, write their results to the file
+/etc/calibrations  by themselves. Repeat the calibration and
+check if the values can be true, then enter them by hand into
+the Config/General menu of hfterm. 
+
+In the end of this chapter I will describe a very primitive
+estimation I succeeded with, and a script which guesses the
+sample rate for MT63. This helps for old hardware where the cpu
+and / or memory might not be sufficient for the calibration
+algorithms.
+
+6.2. dcf77rx   
+
+uses the timecode signal of the well-known German long wave
+reference frequency transmitter DCF77 at 77,5 KHz near
+Frankfurt, that has a power of 25 kW an can be received up to
+about 2000 km distance almost all over Europe. It also gives
+the signal for the radio clocks. (See also dcf77.txt, sorry
+only German, please translate it at least into French and
+Polish !!!) If you never heard this signal, just try the demo
+program dcf77gen ! Note: If it does not run, try option -n!
+
+The signal must be converted to a frequency of 1000 Hz and put
+to the  Mic-or Line in - input of the soundcard. Tune your
+receiver to 78.5 kHz LSB (oder 76.5 kHz USB). I had no LF
+receiver, so i got inspired by ideas from the internet and
+home-brewed a little converter that makes  4077,5 KHz from the
+77,5 KHz, I can hear them with my rig. I needed only a 4MHz
+crystal, 5 npn transistors and some more parts which need no
+exact values. To receive an old ferrite from a radio or a wire
+is o.k. The circuit is in
+/usr/(local/)share/hf/doc/lfconv.jpg. 
+
+Start the dcf77rx program (preferably as root). In SSB or cw
+mode you have to tune exactly on 1000 Hz, until you see the
+second ticks being recognized as regular as possible. The
+option -v 2 or (after some training) the rotating rod will
+help. 
+
+After 1-2 minutes (under error free conditions), the program
+should have acquired the DCF77 time. From then on wait about 15
+minutes so you can check the results. You can write them down
+for sure. But they will be written automagically to
+/etc/calibrations.
+
+But please see there if the correction values seem  credible
+and constant.
+
+dcf77rx also has an option to set the system time (see man
+dcf77rx).
+
+dcf77rx and also dcf77gen already have the -n (no  mmap)
+option. It gave acceptable values for the most important
+correction parameter -s for me. The others vary. 
+
+dcf77rx also has an option to receive the swiss timecode
+transmitter HBG at 75 kHz might.
+
+If you want to tune 2 sound cards together, also over radio,
+one partner could run dcf77gen and the other dcf77rx.
+
+6.3. reffreq
+
+If you cannot receive  DCF77 or HBG, you can use the reffreq
+binary and a known exact clock source in the 20Hz-20kHz
+region. 
+
+If dcf77rx works bad, but if you can receive the DCF77 signal
+in AM (2500Hz), run reffreq -f 2500, it pulsates, but it works!
+
+If you are looking for a reference frequency on the radio,
+hfterm's spectrum can help you in raw measuring the frequency.
+Guess it is a straight value, you can then use reffreq with it.
+
+By the way, if you need to estimate audio Frequencies, you also
+can use my piano-tuning programme piano (piano-tuner.sf.net).
+Later you evan can calibrate it with the same option -s as hf
+to measuere audio frequencies exactly, and it can help tuning
+your piano and every instrument.
+
+Thanks to Dave <dalechid@cox.net> who gave a good info on the
+US time standard stations WWV and WWVH, Boulder, Colorado,
+which transmits 500 and 600 Hz in an alternating way at  2.5, 5
+and 10 MHz AM! So run reffreq -f500 or reffreq -f 600. In spite
+of the 10 and 25 ms periods without a toneand the 5 ms 1000 Hz
+marker, reffreq seems to come up with good, accuratecalibration
+data. Interesting details of the WWV signal can be found at:
+http://www.boulder.nist.gov/timefreq/stations/iform.html
+(I know there is somebody out there who will get inspired by
+WWV`s spec at this URL and will program a tool like dcf77rx for
+ WWV!)
+
+Who knows more about JJY in Japan?
+
+A readily available in most households and usually very
+accurate source is the line sync of an ordinary TV receiver.
+The line sync of the second public german TV channel (ZDF) is
+used as a reference frequency even by official bodies. 
+
+Tune your TV equipment (with baseband video output) to a TV
+channel and feed the video output to the soundcard. Run
+"reffreq -f 15625" as root. After a few seconds, the program
+should have calculated the correction parameters. (The command
+line above implies PAL format with its 15625 Hz line sync
+frequency. For other video formats, use the appropriate
+frequency.)
+
+In CQDL 3/2003, page 168, there is an interesting article by
+Stefan Steger (sorry, German only), describing how to get the
+line frequency signal from a TV, with a circuit that derives
+reference frequencies:
+http://home.t-online.de/home/stefan.steger/homepage.html
+
+With a scope I could get the 15625 Hz from the cable that
+connects 
+a satellite receiver with the TV.
+
+Reffreq could serve for calibration over the air:  One sets in
+hfter mmark and space to 1000 und sends RTTY (RTTY TX in the
+Mode menu), a sine tone of 1000 Hz will be transmitted. The
+other hears the tone with AM und calibrates with reffreq -f
+1000.
+
+6.4. ratecal1:
+
+This tool is also by Pawel and part of his MT63, thanks! I
+insert here Pawel's instructions:
+
+The MT63 is a synchronous system and it relies on the sampling
+rate to be the same at the receiver and the transmitter. At
+least the sampling rates should not be different by more that
+10^-4. MT63 samples at 8000 Hz thus if your card runs at 8000.5
+it's probably OK but if it runs at 8005 Hz it is not good ! 
+
+An extreme example can be my Soundman-16 (PAS-16 clone) which
+when asked to run 8000 Hz tell me, that it can only do 8008 Hz
+and in reality it runs at 7910.3 Hz which makes an error of
+more than 1% - far too much for the MT63 even at infinitely
+good S/N. My other two cards (DSP-16 and Ensoniq 1371) are more
+reasonable: they show an error of 0.3 to 0.5 Hz at 8000 Hz
+sampling.
+
+To measure the sampling rate I have prepared "ratecal1"
+utility. The program has been tuned to work with the HF timing
+standards which transmit short pulses each second. I used the
+signals on 4996.0, 9996.0 and 14996.0kHz. I set the HF receiver
+in the USB mode and 1.0 kHz below the frequency to get pulses
+at 1000 Hz audio. In principle any signal having a periodic
+envelope with a known period can be used, so an AMTOR/SITOR
+station is OK, if you change the reference period to 0.450 sec
+with -T0.450 option. What counts is the envelope of the signal
+around the frequency given by -F and within the bandwidth given
+by -B.
+
+To measure the sampling rate I tune my HF receiver to say
+4995.0 USB so the pulses come up as a 1 kHz beeps. I connect
+the audio to the given soundcard (say /dev/dsp) and I type:
+'ratecal1 -d'. After 10-20 seconds I can see the measured
+sampling rate of my card. The calibrator will try to match the
+delay which gives the smallest differential error. This
+procedure ussually gives you the rate within 0.5 Hz (at 8000 Hz
+sampling).
+
+For more accuracy multiply the repetition time: for example
+give -T4.0 thus 4 second reference period; a signal with period
+of T is as well periodic over time = N*T where N is an integer.
+
+If your sampling rate error is large (like with my card) tell
+the program the (about) true rate with the -R option. for
+example for my card I run the more precise test:
+'ratecal1 -r8000 -R7910 -T4.0 -I40 -B200'
+The most precise test I have ever done was by typing:
+'ratecal1 -r8000 -R7910.3 -T300 -I60.0 -B500 -D4'
+and leaving it for 10 minutes on the 14995.0 USB. After the
+calibration is done put down the two values: the rate you
+request (-r) and the true rate you get. You may try different
+requested rates (-r) so you get the real rate close to what you
+like. For example with my card, I need to request 8100 Hz to
+get real rate of 8018.2 Hz which is closest to the 8000 Hz
+which I want for my applications.
+
+Timing signals on 4996, 9996 and 14996 kHz are not ideally
+periodic because some pulses are longer, some are doubled, etc.
+This has certainly negativ eeffect on the calibration result.
+The pulses there are not transmitted all the time but according
+to certain schedule thus we can not apply too long integration
+times too. Still rate measurement with an error about 10^-5 is
+possible.
+
+When you know the true sampling rate you can correct for this
+when working with the MT63 mode with the -R option. Say, you
+measured that you card at /dev/dsp2 samples at 8010.5 Hz, so
+you type:
+'mt63trx -d2 -R8010.5'.
+I do so with my PAS-16 clone and it works just fine for the
+MT63 despite the 1% error.You may happen to have a card which
+refuses to run at 8000 Hz - but you are not all lost. Say the
+card at /dev/dsp1 only likes the 9600 Hz sampling and when
+asked for 9600, it samples at 9605.4 Hz (you measure this with
+the ratecal1). To run the MT63 receiver you type:
+'mt63rx -d2 -r9600 -R9605.4'
+the mt63rx will ask the sound driver to sample at 9600 and
+knowing that it really means 9605.4 it will apply the proper
+rate converter. Ideally every operator should measure the
+sampling rate of his soundcard and then correct for this when
+transmitting and receiving. This way every signal on the air
+has same absolute timing and thus can be read by anyone.
+(Thanks, Pawel!)
+
+I (Gnther) compared ratecal1 with the 2 other tools and found
+the same good results. Pawel told me that the mentioned pulsed
+signals at on 4996.0, 9996.0 and 14996.0 kHz come from Russia.
+I could not receive them at time of my test, but used the
+signal of the dcf77 beacon, which is also pulsed. If I divide
+the `official` sample rate of my soundcard by the real
+samplerate which is obtained by ratecal1, I get the same 
+"soundcorr" as by the 2 other tools, exact to a degree of 10^-4
+which is o.k.
+
+Also ratecal1 could serve for an on-the-air-calibration: One
+sends Amtor or Pactor ARQ or even dcf77gen (but: this still can
+not take a correction as option!), the other runs 'ratecal -d
+-T0.45' (for Amtor) or '-d -T1.25 '(for Pactor) or '-d' for
+dcf77gen.
+
+6.5. Estimation of Samplerate by hearing and ratetry
+
+I had an adventure with my laptop (150 MHz Pentium 1, 14 MB RAM
+only!), I must tell you. It may help you if you also have old
+hardware... Hf and also MT63 works with the laptop, but the
+calibration tools work bad, they need much memory and cpu! It
+had worked in my tests with 2 cabled  computers with Pactor and
+Amtor, but no single sign decoded with MT63. I had no idea
+about its real sound rate! I wrote the script ratetry (look at
+it's text, you may modify it to your needs, it just tries
+transmitting with rates from... to...,  given by option.) I
+first checked it with around 8000, no success. In my despair I
+found another, very primitive first-look test, working with my
+ears only: I set both computers to
+'mt63tx -d -C_____T____'
+which means, send MT63 with a single dah (T) within 9 spaces as
+cw id. Now  I heard the difference: The laptop was much
+quicker, it overtook the other computer. It really sounded like
+the little fox jumping  over the lazy dog, I could hear it! Now
+I guessed the real rate of the laptop to be 8100, 8200, 8300...
+and ran MT63 on it with 
+'mt63tx -d -C_____T____ -R8100' 
+and so on. With R8300 the two 'dahs' sounded in about equal
+rythm. So I could use 'ratetry 8200 8350' and could receive the
+data with the other computer between laptop's "real rate " 8241
+and 8335! So, now lab working, developement can go on.
+
+
+7. Mailbox:
+
+7.1. Principle
+
+hfterm has a TCP-IP port. Every internet-capable program, which
+means, which can be reached via 'telnet <host> <port>', can be
+reached by a remote user via hf, if you configure it. 
+
+See man inetd or look into /etc/services to see what is running
+on your box... 
+
+7.2. First test of the TCP/IP Ports with portecho:
+
+Hf is made for F6FBB. But i you do not know F6FBB yet, you can
+make a quick first test with the test program "portecho". It
+repeats its input in capitals, and it is polite, it greets and
+says good-bye. 
+
+Start portecho with a port number as option: 'portecho 3333'.
+Test if it runs it from another console by 'telnet localhost
+3333'. 
+
+Then set the port to 3333 in hfterm, start the mailbox function
+by <Alt>+M. By writing into the rx window you can do the first
+tests, best in RTTY or Pactor FEC or Amtor FEC or MT63.
+
+If you can run hf on 2 computers with cabled soundcards, try a
+Pactor or Amtor connect, and run hf in mailbox mode with
+Portecho on one of them!
+
+7.3. Configure F6FBB
+
+hfterm can be linked by it's TCP/IP port with F6FBB, which is
+well-known and proven as Packet Radio BBS. F6FBB can be
+installed on the same or another computer linked by ethernet or
+PLIP. If your computer ip adress and port for F6FBB differ from
+the defaults (localhost = 127.0.0.1 = the same computer, port
+6300 = default for F6FBB) change the corresponding entries in
+the config menu. But if possible, keep port 6300, for this
+activates aspecial code in hfterm adapted for F6FBB, working
+around bugs of it, and automatically gives the remote partner's
+call to F6FBB in a Pactor connect.
+
+At first there is something to change in only 5 configuration
+files and one binary. Don't fear, I help you. Log in at a
+console as root.  If xfbbd is running already, (test with ps
+-ax), quit it with killall xfbbd. For test after the changes
+start it again by xfbbd.
+
+The start is quite easy. 
+
+7.3.1. /etc/ax25/fbb/passwd.sys:
+
+Replace the password after the line 
+#PASSWORD OF ALL NON DEFINED CALLSIGNS.
+by an empty line!
+
+7.3.2. /etc/ax25/fbb/port.sys:
+
+Changes marked by arrows.
+
+# FBB7.00
+#
+#Ports TNCs
+1     1				<-
+#
+#Com Interface Adress (Hex) Baud
+8   9         189C          0	<- (189C hex. = 6300 dec.) 
+#
+#TNC NbCh Com MultCh Pacln Maxfr NbFwd MxBloc M/P-Fwd Mode Freq
+ 0   0    0   0      0     0     0     0    00/01  <- File-fwd.
+# 1  8    9   ax0    250   3     1     10   30/60 XUWYL Linux
+ 2   8    8   0      250   2     1     10   0/60   TUR #hf <-
+#
+# End of file.
+#
+
+(This port.sys is configured only for hf. If already other
+ports / TNC's are there, for hf just 1 Port / 1 TNC has to be
+added. The other marked lines have to be inserted additionally
+for hf.)
+
+
+7.3.3. /etc/ax25/fbb.conf:
+
+(in older versions of F6FBB this was init.srv)
+
+#
+# FBB Set-up file
+#
+version = FBB7.01
+callsign = DL4MGE.BAY.DEU.EU  			<-----   
+# Qra Locator of BBS
+locator = JN58NG				<-----
+qral = JN58NG					<-----
+# Qth of BBS
+city = Baindlkirch				<-----
+# First name of SYSOP
+name = Guenther					<-----
+# Callsign of SYSOP
+sysop = DL4MGE					<-----
+# Callsign (and route if needed) that will have copy of SYSOP
+messages
+sysmail = DL4MGE				<-----
+# Wait for informations (Name, HomeBBS, Qth, ZIP)
+askinfo = NO 		(w�le eins davon)	<-----
+#askinfo = OK		( "    "     "   )	<-----	
+		
+# First connection mask :
+# 0  : Disable
+# 1  : Excluded
+# 2  : Local				
+# 4  : Expert	
+# 8  : Sysop
+# 16 : BBS
+# 32 : Pagination
+# 64 : Guest
+# 128: Modem				
+# 256: See-all-messages
+# 512: Unproto list asking is allowed
+# 1024: Liste des messages nouveaux.
+# original was: mask = 3616
+# orig + 2 + 128 means: plus local and modem    
+mask = 3746 					<-----
+
+The most important is "mask" - add 130 to the existing "mask".
+This means:2 =  Local and 128 = Modem. So a new user can log in
+"local" (this is also IP and telnet) and has access to the
+"Modem", which is  also a TNC, and hfterm is seen as TNC by
+F6FBB. So a new remote users can send mails from the second
+login on, without the sysop having to  become active.
+
+Btw, 3746 is  2 + 32 + 128 + 512 + 1024 + 2048. It works also
+with mask = 130 which is 2 + 128!
+
+
+7.3.4. /etc/ax25/fbb/lang/english.ent:
+
+Replace english.ent by an empty file.
+
+7.3.5. /etc/ax25/fbb/lang/english.txt:
+
+You may optimize the messages for shortwave: shorten them! Now
+I found out how to change this file without making F6FBB crazy:
+It is just important that the number of lines remains 287!
+Lines beginning with a comment sign (which is the '#' like in
+shell scripts) are not counted for this. So you can just
+outcomment a line (don't delete it, this helps you in debugging
+later...), then copy it and edit it. The '$W' means that F6FBB
+prints a newline. Some lines (where F6FBB asks for name, home
+BBS, town etc.) depend on your "askinfo" in /etc/ax25/fbb.conf:
+newlines, if you have'askinfo=NO' (complete empty lines result
+in errors) or e.g. "Name ? ", if'askinfo=OK'. I will deliver my
+english.txt in /usr/(local)/share/<doc>/hf, just look at it,
+edit it to your desires, copy it (as root) to it's place in
+/etc/ax25/fbb/lang.
+
+7.3.6. Hack of binary file /usr/sbin/xfbbd:
+
+And now the most dangerous operation. You have to study
+medicine for this.( ;-) ) Did you already hack a binary? It is
+simple! It is about F6FBB's first login message, which is
+hard-coded, but does not fit for our hf. If a new user logs in
+at F6FBB, it says:
+
+"Login in read-only mode.
+You may leave a message to SYSOP."
+
+But this is better, clearer:  
+
+"First login to register.
+You can send mail at next login!"
+
+You see: The new messages have the same number of signs.
+
+How to do it? At first, in every case make a backup of
+/sbin/xfbbd. (The binary can be destroyed by one sign too
+much!) Then open xfbbd with an editor, e.g. mcedit, best in
+overwrite mode. Look (F7 in mc) for 'SYSOP'. Overwrite the 2
+greeting lines, not more. The first line has 24 chars, the
+second 33. For me it worked!
+
+To configure F6FBB it sometimes kryptic, but it is a good and
+stable program. I had to think and test much to get all this
+out. Thanks to the friends from the F6FBB mailing list
+xfbb@f6fbb.org and the good docs:
+http://www.f6fbb.org/fbbdoc/doc.htm and, of course, for F6FBB
+itself to its author Jean-Paul Robeller!
+
+Now you can test F6FBB by `telnet localhost 6300`. It must be
+possible to login with a call and register, logout, login again
+and to send and read mails.
+
+Now start of the hf-mailbox is simple: start als root xfbbd,
+then start hf as normal user, then (if you want) activate the
+mailbox-beacon fixtext, then activate the mailbox mit <Alt>+M
+or with the State menu, and it runs!
+
+The connection hfterm <--> F6FBB can now be tested by writing
+into the rx window (take Standby Pactor only mode, then you
+transceive in  Pactor-FEC, or take MT63, this is quicker). So
+you can simulate the a remote user logging in withouthaving to
+cable 2 Computers or make a radio contact.
+
+A Pactor connect to the call in menu
+Utilities/Parameters/Pactor/Mycall oran amtor connect to the
+call in ../Amtor/Mycall opens the mailbox. In FEC modes the
+partner must call the normal call of the station data. 
+
+I tested the mailbox with 2 computers with cabled soundcards
+with Pactor FEC, Pactor ARQ, Amtor FEC and Amtor ARQ with very
+good success. With RTTY and MT63, it runs now sometimes with a
+lot of good luck and  patience, but it is still prone to
+errors, and F6FBB confuses. (The squelch function must have
+some delay, little for FSK and big for MT63, so it lets through
+some rubbish at start and end of each transmit  cycle.) So
+let's wait for the MT63 ARQ mode, which is being developed!
+
+In use on the air as automatic mailbox station, concern the
+regulations of your country! 
+
+What about a ptc-free, microsoft-free, free-software based
+mailbox at your Club station?
+
+7.4. Using hf as a self-configured automatic station 
+
+You also can set up any program that has a console prompt to
+become an internet service and approach it over the air with
+hf.
+
+I made a little example script 'hftcp', it can read your mails
+and sends mails (using the program 'mail'), and it can be
+configured for anything you want, see the example commands like
+peace message. It can even open a shell (dangerous!). So you
+can remote-control your computer with hf... Don't launch the
+missiles!
+
+Just run the script on a console to see what it does. You can
+edit and modify it to your taste. You could, for example, add
+an option which starts an internet connection and runs
+fetchmail, which showels your mails to
+/var/mail/<your-user-name>, and then you could read your new
+mails over the air... (not legal in any country)
+
+Now see if port 3333 is free on your computer by
+'netcat -z localhost 3333 && echo not free'
+'telnet -e# localhost 3333'
+If not free, take an other one.
+
+To use hftcp with hf, you (as root) just have to enter one line
+into /etc/inetd.conf:
+hftcp	stream	tcp	nowait	root	/usr/bin/hftcp	hftcp
+and one into /etc/services:  
+hftcp           3333/hftcp   
+
+Then start it one one console, test it from another one by
+netcat localhost 3333. Then, if o.k., set the port, e.g. 3333,
+in hfterm, switch to mailbox mode with <alt>m, and it runs.
+
+
+8. List of all programs in the package:
+
+All installed in /usr/local/bin:
+hfkernel, hfterm: the main programs.    
+hf: the start script for both. 
+elbug: console program for electronic key. 
+paccalc: calculates pactor data throughput 
+channel: Short wave channel simulator.    
+dcf77rx: Calculates clock corrections from DCF77 timecode, can
+also set system time.		
+dcf77gen: generates DCF77 signal.
+reffreq: Calculates clock correction from reference frequency. 
+  portecho: Simple TCP test program for mailbox mode. 
+hftcp: Simple TCP test script for remote-control.
+Pawel Jalocha's MT63 suite as console programs, with many
+experimental features:
+mt63rx:	receives  MT63
+mt63tx:	transmits MT63
+mt63trx: does both
+ratecal1: calculates real sound rate from pulsed beacon
+addnoise: adds noise to an audio file, for experiments 
+morsecod: converts digital to readable morse alfabets 
+peakrms: tools for examining mt63 audio files
+ratetry: a script for testing mt63tx with different rates
+
+More test programs in subdirs test and util of hf source tree.
+Help for all of them: Just call them without options.
+(Note for Pawel's programs: no whitespace between options and
+arguments.)
+
+
+9. List of Help Texts:
+
+For now, there is help in English and German. 
+
+Translations in other languages are very welcome!
+
+The texts are in the doc directory of the program packet and
+will be installed into /usr/share/hf. and, according to
+distribution, in /usr/share/doc/hf
+or/usr/share//doc/packages/hf. 
+
+The most important texts can be found in hfterm help menu (F1).
+
+ENGLISH: HF-HOWTO.txt, P-MB-list.txt (list of Pactor Mailboxes
+by Jost, ZS5S) english.txt (example for
+/etc/ax25/fbb/lang/english.txt),  mt63.txt (original doc by
+Pawel Jalocha for MT63), 
+manpages: man hf, man dcf77gen, man dcf77rx  	
+
+GERMAN:
+DE-HF-HOWTO.txt, pactor.txt, pactor.ps, dcf77.txt, man hf.
+   
+PICTURES: lfconv.jpg (circuit of longwave -> 4 MHz converter) 
+ 
+
+
+10. Conclusion:
+
+There are still 'some' BUGS, also called FEATURES, don't
+scream, better report, best help. I myself have been inspired
+to learn c by this program, learned a lot and had fun most of
+the time. I am going on slower now, but am still there. 
+
+Hope Tom and you all will like it. Have a lot of fun ...
+
+Gnther Montag DL4MGE
+
+
+AUTHORS
+
+Creator: (Thanks very much!)
+Thomas M. Sailer HB9JNX/AE4WA	
+			
+Many graphic contributions & ideas by:
+Ralf-Axel Krause DF3JRK		
+
+MT63 by:
+Pawel Jalocha SP9VRC Pawel.Jalocha@cern.ch
+
+and many other contributors, thanks very much!
+
+Currently maintaining:
+Gnther Montag DL4MGE Safaridoktor@compuserve.de
+ 					
+Main project home page:
+http://hfterm.sourceforge.net
+a quicker mirror in Europe is http://www.hfterm.de.vu
+	
+Please subscribe the mailing list:
+http://lists.sourceforge.net/lists/listinfo/hfterm-hackers
+
+After subscribing, please send all bugs and also good
+reports to this mailing list:
+hfterm-hackers@lists.sourceforge.net	
+	
+
+
+                             \\I//
+                            (     )
+                           [  @ @  ]    
+                            )  ^  (
+                             \ 0 /
+	*============OOOO0===========0OOOO==============*
+	*                                               *
+	*     73 's and good bye                        *
+	*     hope to see you again on my screen        *
+	*                                               *
+	*                              de dl4mge
+	*                                               *
+	*=============oooo0=========0oooo===============*
+                      (   )         (   )
+                       \  )         (  /
+                        ~~           ~~
+
+

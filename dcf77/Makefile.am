@@ -24,6 +24,7 @@ libdcf_a_SOURCES = \
 libdcf_a_LIBADD = costab.o pntab.o
 
 mktables_SOURCES = mktables.c
+mktables_LDADD = -lm
 
 dcf77rx_SOURCES = dcf77rx.c
 dcf77rx_LDADD = libdcf.a
@@ -31,9 +32,8 @@ dcf77rx_LDADD = libdcf.a
 dcf77gen_SOURCES = dcf77gen.c
 dcf77gen_LDADD = libdcf.a
 
-costab.c:	mktables
-	./mktables 1 > costab.c
+costab.c:	mktables$(EXEEXT)
+	./mktables$(EXEEXT) 1 > costab.c
 
-pntab.c:	mktables
-	./mktables 2 > pntab.c
-
+pntab.c:	mktables$(EXEEXT)
+	./mktables$(EXEEXT) 2 > pntab.c

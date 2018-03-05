@@ -29,6 +29,8 @@
 #include "config.h"
 #endif
 
+#include <stdlib.h>
+#include <time.h>
 #include "dcf77.h"
 
 /* --------------------------------------------------------------------- */
@@ -42,6 +44,7 @@ void time_decode(unsigned long long bits, unsigned int samples)
 {
 	static const char *tz_name[4] = { "invalid 0", "MESZ", "MEZ", "invalid 3" };
 	static const char *daynames = "MonTueWedThuFriSatSun";
+	char system_set_date[128], system_set_time[128];
 	unsigned int u;
 	unsigned int pgrp1, pgrp2, pgrp3;
 	struct tm tm, *tmp;
@@ -118,25 +121,52 @@ void time_decode(unsigned long long bits, unsigned int samples)
 		vlprintf(3, "DCF77 time: invalid day of week field 0x%02x\n", u);
 		goto error;
 	}
-	vlprintf(2, "DCF77 time: %s antenna, %s time zone change, time zone %s, "
-		 "leap second: %s\n", backup_ant ? "backup" : "normal", 
-		 tzchg ? "approaching" : "no", tz_name[tz], 
-		 leapsec ? "within 1 hour" : "none");
-	vlprintf(2, "DCF77 time: time: %02d:%02d  date: %-3.3s, %02d.%02d.%02d\n",
+	vlprintf(1, "\nDCF77 time: \n"
+		"%s antenna, %s time zone change, time zone %s, "
+		"leap second: %s\n", backup_ant ? "backup" : "normal", 
+		tzchg ? "approaching" : "no", tz_name[tz], 
+		leapsec ? "within 1 hour" : "none");
+	vlprintf(1, "DCF77 time: TIME: %02d:%02d DATE: %.3s, " 
+		// removed "-3" before .3s after date: %, typo? Günther
+		"%02d.%02d.%02d\n",
 		  tm.tm_hour, tm.tm_min, daynames+3*(dw-1), 
-		  tm.tm_mday, tm.tm_mon+1, tm.tm_year);
+		  tm.tm_mday, tm.tm_mon, tm.tm_year + 1900);
 	t = mktime(&tm);
 	if (t == INVALID_TIME) {
 		vlprintf(1, "mktime failed\n");
 		goto error;
 	}
-	t -= timezone;
-	t -= tz == ZONE_MESZ ? 7200 : 3600;
+/* XXX FreeBSD takes care of timezone internally, I don't know about others. 
+ * -db (VA3DB)
+ */
+#ifdef __linux__
+ 	t -= timezone;
+#endif
+/*	t -= tz == ZONE_MESZ ? 7200 : 3600; */
+/* bug? isn't summer time later than winter time ? */
+	t -= tz == ZONE_MESZ ? 3600 : 7200 ; 
 	tmp = localtime(&t);
-	vlprintf(1, "DCF77 time: time: %02d:%02d:%02d  %02d.%02d.%02d\n",
+	printf  ("DCF77 time: "
+		"%02d:%02d:%02d  %02d.%02d.%02d\n",
 		 tmp->tm_hour, tmp->tm_min, tmp->tm_sec, 
-		 tmp->tm_mday, tmp->tm_mon+1, tmp->tm_year);
+		 tmp->tm_mday, tmp->tm_mon, tmp->tm_year + 1900);
 	tc_minute(t, samples);
+	if (set_time) {
+	    sprintf(system_set_date, "date -s %02d/%02d/%02d > /dev/null", 
+		tmp->tm_mon, tmp->tm_mday, tmp->tm_year + 1900);
+	    sprintf(system_set_time, "date -s %02d:%02d:%02d > /dev/null", 
+		tmp->tm_hour, tmp->tm_min, tmp->tm_sec); 
+	    system(system_set_date);
+	    system(system_set_time);
+	    //system("date");
+	    if (tz == ZONE_MESZ) 
+	        printf("I have set the system time to MESZ = CEST: ");
+	    else
+	        printf("I have set the system time to MEZ = CET: ");
+	    printf("%02d:%02d:%02d  %02d.%02d.%02d\n",
+	        tmp->tm_hour, tmp->tm_min, tmp->tm_sec, 
+	        tmp->tm_mday, tmp->tm_mon, tmp->tm_year + 1900);
+	}
 	return;
   error:
 	tc_minute(INVALID_TIME, samples);

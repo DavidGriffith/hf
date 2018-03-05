@@ -28,9 +28,11 @@
 #include "config.h"
 #endif
 
-#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "fskl1.h"
+#include "fskutil.h"
 
 /* --------------------------------------------------------------------- */
 

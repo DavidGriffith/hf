@@ -1,0 +1,34 @@
+#!/bin/sh
+# by Günther Montag, written inn deep despair....
+rc_done="\033[71G\033[32mdone\033[m"
+echo "
+ratetry by Günther Montag DL4MGE, written in deep despair and grat love,
+it helped me to celebrate a happy end of the despair.
+It is a test script for systematic trying of corrected sample rates for mt63tx,
+if a calculation is not possible (e.g. with very slow cpu or few mem).
+The script will send an example test with the range of rates you input 
+as options, example: 
+If you suppose the real samplerate to be between 7980 and 8010,
+then type ratetry 7980 8010.
+You may look into the script text at /usr/local/bin and modify it,
+e.g. for steps of ten, or for rx."
+
+if [ -z $2 ] ; then
+echo call me like this: $0 \<lowest rate\> \<highest rate\>
+exit 1
+fi
+for i in `seq $1 $2`;
+# e.g. if you want to check in steps of 10, take this line instead:
+#for i in `seq $1 10 $2`;
+do
+echo testing rate $i...
+echo the quick brown fox jumps over the lazy dog \
+with a samplerate of $i >> txfile
+mt63tx -d -ttxfile -R$i
+#if you want to test by receiving, you can 
+# just outcomment the stuff with the txfile and change last line to:
+#mt63rx -d -R$i
+rm txfile
+done
+echo -e "Eh, reseived something on the other side? "
+echo -e "... bye bye by ratetry ..." $rc_done

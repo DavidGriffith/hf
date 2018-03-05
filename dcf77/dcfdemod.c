@@ -31,6 +31,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include "dcf77.h"
 #include "xgintf.h"
@@ -110,6 +111,8 @@ extern __inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
 
 extern __inline__ void dcf77_process_ampl(int si, unsigned int samples)
 {
+	static int rodcnt = 0;
+	char* rod = "|/-\\ ";
 	if ((++d.d.d.a.decay_cnt) >= 400) {
 		d.d.d.a.decay_cnt = 0;
 		d.d.d.a.ampl = (d.d.d.a.ampl * 4055) >> 12;
@@ -128,7 +131,13 @@ extern __inline__ void dcf77_process_ampl(int si, unsigned int samples)
 		d.d.d.a.amphist &= ~1;
 	d.d.d.a.amphist &= 0xffffffffu;
 	if (d.d.d.a.amphist == 0xffff0000u) {
-		vlprintf(5, "second tick at: %08x\n", d.d.sec_ph);
+		vlprintf(2, "second tick at: %08x\n", d.d.sec_ph);
+		if (verboselevel < 2) {
+		    printf("%c\r", rod[rodcnt]);
+		    fflush(stdout); // without this, printf does not printf!!
+		    rodcnt++;
+		    if (rodcnt > 3) rodcnt = 0;
+		}
 		if (((d.d.sec_ph - (0x40000000 / SAMPLE_RATE * 16)) & 0x3fffffff) < 0x20000000) {
 			d.d.sec_ph -= 0x400000;
 			d.d.sec_fcorr -= 0x10;
@@ -185,7 +194,7 @@ static void demod_ampl(const short *s, unsigned int n)
 		dcf77_process_ampl(si, samples);	
 		d.d.sec_ph += d.d.sec_inc;
 		if (d.d.sec_ph >= 0x40000000) {
-			vlprintf(5, "Carrier frequency offset: %6.3fHz   Sec freq offset: %6.1fms/s\n", 
+			vlprintf(2, "Carrier frequency offset: %6.3fHz   Sec freq offset: %6.1fms/s\n", 
 				d.f.car_fcorr * ((float)d.sample_rate / (float)0x1000000),
 				d.d.sec_fcorr * (1000.0 / 0x40000000));
 		}

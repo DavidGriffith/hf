@@ -148,10 +148,10 @@ extern __inline__ int filt2(short *in, int *coeff)
 
 static int filt3(short *in, int *coeff)
 {
-#if 0
 	int res = FILTLEN;
-	
-	__asm__ __volatile__ ("xorl %%ebx,%%ebx\n\t"
+
+/* tnx for correction by Micha!! gave gcc.3.2. error. old: */	
+/*	__asm__ __volatile__ ("xorl %%ebx,%%ebx\n\t"
 			      "xorl %%ecx,%%ecx\n\t" 
 			      "\n1:\n\t"
 			      "movswl (%%esi),%%eax\n\t"
@@ -170,31 +170,31 @@ static int filt3(short *in, int *coeff)
 			      : "=&a" (res) 
 			      : "o" (res), "i" (0x200000000ULL / FILTLEN), "S" (in), "D" (coeff)
 			      : "ax", "bx", "cx", "dx", "si", "di");
-#else
-	int res;
-	unsigned int tmp0, tmp1, tmp2, tmp3, tmp4;
-	
-	tmp4 = FILTLEN;
-	asm("xorl %0,%0\n\t"
-	    "xorl %1,%1\n\t"
-	    "\n1:\n\t"
-	    "movswl (%4),%2\n\t"
-	    "imull (%5)\n\t"
-	    "addl $2,%4\n\t"
-	    "addl $4,%5\n\t"
-	    "addl %2,%0\n\t"
-	    "adcl %3,%1\n\t" 
-	    "decl %6\n\t"
-	    "jnz 1b\n\t"
-	    : "=b" (tmp0), "=c" (tmp1), "=a" (tmp2), "=d" (tmp3), "=S" (in), "=D" (coeff)
-	    : "o" (tmp4), "4" (in), "5" (coeff) : "memory");
-	tmp4 = (0x200000000ULL / FILTLEN);
-	asm("shrdl $15,%2,%1 \n\t"
-	    "# sarl $15,%1 ! high part unneccessary\n\t" 
-	    "imull %1\n\t"
-	    : "=d" (res), "=r" (tmp0), "=r" (tmp1)
-	    : "1" (tmp0), "2" (tmp1), "a" (tmp4));
-#endif
+*/
+
+/* new, by Micha Matz, thanks very much !!!!*/
+	__asm__ __volatile__ ("xorl %%ebx,%%ebx\n\t"
+			      "xorl %%ecx,%%ecx\n\t" 
+			      "pushl %%eax\n\t"
+			      "\n1:\n\t"
+			      "movswl (%%esi),%%eax\n\t"
+			      "imull (%%edi)\n\t"
+			      "addl $2,%%esi\n\t"
+			      "addl $4,%%edi\n\t"
+			      "addl %%eax,%%ebx\n\t"
+			      "adcl %%edx,%%ecx\n\t" 
+			      "decl (%%esp)\n\t"
+			      "jnz 1b\n\t" 
+			      "shrdl $15,%%ecx,%%ebx\n\t"
+			      "# sarl $15,%%ecx ! high part unneccessary\n\t" 
+			      "popl %%eax\n\t"
+			      "movl %3,%%eax\n\t"
+			      "imull %%ebx\n\t" 
+			      "movl %%edx,%%eax\n\t"
+			      : "+a" (res), "+S"(in), "+D"(coeff) 
+			      : "i" (0x200000000ULL / FILTLEN)
+			      : "bx", "cx", "dx");
+
 	return res;
 }
 

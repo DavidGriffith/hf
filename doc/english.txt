@@ -1,0 +1,337 @@
+# * * * This is a modified /etc/ax25/fbb/lang/english.txt   * * * 
+# * * * by Guenther Montag dl4mge, meant for use with hf * * * 
+# * * * (linux pactor amtor MT63 mailbox interface)   * * * 
+# * * * If you edit it: Keep number of lines same  * * * 
+# * * * $W means newline. Comments (#) welcome! * * * 
+#
+#
+#
+English
+OL: Language selected               : English$W
+Yes
+No
+SunMonTueWedThuFriSat
+JanFebMarAprMayJunJulAugSepOctNovDec
+North
+South
+East 
+West
+#The Toulouse Mailbox - %l Msg(s) - %k KB$W
+HF Mailbox - %l Msg(s) - %k KB$W
+#$WHello $I,$WWelcome to The Toulouse Mailbox$W
+$WHello $I,$WWelcome to HF Mailbox$W
+#$WWelcome to The Toulouse Mailbox$W$WUser          :  $U ($I)$WCalling from  :  $e$WHomeBBS       :  $h$WPostal Area   :  $b$W$WLast log-in   :  $Y  $x-$a$WLast Received :  $L$WLast Listed   :  $Z$WActive Msg's  :  $N$W$WCurrent Users are:-$W$W$%$W
+## shortened, only variables:
+#$Whi. $U ($I) $e $h $b $Y $x-$a$W $L $Z $N$W$%$W
+## very short:
+$W
+#$WPlease enter "N" to enter your name.     Example: "N Jean    <return>"$W
+## if you want "askinfo = OK" in /etc/ax25/fbb.conf, say here:
+#$Wname? $W
+## else, if you want "askinfo = NO", say here just nothing
+## and do it for the similiar questions for personal data like here!
+$W
+#Please enter "NQ" and your QRA Locator.  Example: "NQ IO82TK <return>"$W
+#$Wlocator? $W
+$W
+#Please enter "NH" and your Home BBS.     Example: "NH F6FBB  <return>"$W
+#$Whome bbs? $W
+$W
+#Please enter "NZ" and your Postal area.  Example: "NZ 31120  <return>"$W
+#$Wpostal zip? $W
+$W
+#$WThe Toulouse Mailbox$W$WUser          :  $U$WHomeBBS       :  $h$W$WStatus        :  Guest User$W$WIf you plan to use F6FBB as your HomeBBS$Wthen please contact F6FBB for status upgrade.$W
+$WHF Mailbox$W$WUser          :  $U$WHomeBBS       :  $h$W$WStatus        :  Guest User$W$WIf you plan to use F6FBB as your HomeBBS$Wthen please contact F6FBB for status upgrade.$W
+$WSorry, this port is reserved for mail forwarding only$W
+$W
+#$WYou have $0 unread message(s) waiting$W
+$WYou have %x new message(s)$W
+$WYou have $0 redundant message(s)$W
+$W73 $I,$W
+#$W73 $I,$WGB7BBS - The FBB SysOp's Support Mailbox, and$WHome of the U.K. National White Pages Database$W     $W     $W
+$WMulticonnect Server BBS by F6FBB V$E$W$WAssigned channels:$W$% $W$N active messages - Last message $L - Last listed $Z.$WThere are new messages for:$W$Q$W$WYour Message Filter is $l.$WConnected time : $: - CPU time : $.$W
+## with the following line, ast the end the $W does NOT work. ok i leave it.
+<A>bort  <C>ontinue without paging  <N>ext Message  <CR> Continue...
+Do you want to change anything? (Y/N)$W
+$WThank you...$W
+$WOutput aborted!...$W
+Do you want to create anything? (Y/N)$W
+Type "L <return>" to show the full list$WType "F <return>" to finish the session$W>$W
+<A>bort  <R #> Read Message  <CR> Continue...$W>
+*** Error : Your answer is incorrect.$W
+*** Error : [$0] is not a valid command.$W
+*** Error : No space left after the command.$W
+*** Error : Only numeric values can be accepted.$W
+*** Error : No text added after the callsign.$W
+*** Sorry, there is no help available for $0.$W
+*** Error : The 'TO' callsign is missing.$W
+*** Error : The callsign is missing.$W
+*** Error : Unknown filename.$W
+*** Error : The character ($0) is not understood.$W
+*** Error : Message #%M does not exist.$W
+*** Error : Filename $f does not exist.$W
+*** Error : Message #%M cannot be killed.$W
+*** Error : Non-existent file message #%M.$W
+*** Error : Not a valid port.$W
+*** Error : Use the CD command.$W
+*** Error : The field $0 is too long.$W
+*** Error : $0 has no spaces in the address.$W            The required format is "G1DIL @ GB7BBS"$W
+*** Sorry, You have already downloaded %d Kb.$W
+*** Nothing Found ***
+*** Error : The file name is missing.$W
+*** Error : The 'TO' file name is missing.$W
+*** Error : Unknown language.$W
+*** Error : It is impossible to modify the file $f.$W
+*** Error : Directory $0 is either unknown or not empty.$W
+*** Error : The directory is missing.$W
+*** Error : It is impossible to create directory $0.$W
+*** Error : The path statement is missing.$W
+*** Error : The path statement is too long.$W
+*** Error : No such path, or User not authorised.$W
+*** Error : It is impossible to create the file $f.$W
+$W*** TIMEOUT ***$W
+$WF6FBB >$W
+$WGuest Menu$W----------$WB: Bye            LM: List Mine$WH: Help           KM: Kill Mail$WS: Send Mail      RM: Read Mine$W>$W
+#$WMailbox Menu$W------------$WB: Bye              C: Conference     D: DOS Area       F: Facilities$WK: Kill Mail        L: List Mail      O: Options        R: Read Mail$WS: Send Mail       TH: News-Groups    !: System Info    ?: Help$W$W>
+## I shortened it because some feature will not needed in slow hf condx
+## we do not offer all the services, but the commands will still work
+$WL: List Mail	R: Read Mail	K: Kill Mail	S: Send Mail$W!: System Info	O: Options	?: Help		B: Bye$W>
+*** : Nothing found$W*** : TO Field Filter is set to: - [ $l ]$W
+No new message(s) found.$W
+Enter Title (only)            :$W
+#Enter text for message:$W
+Enter text, close with /EX :$W
+Message #%M has been killed.$W
+F6FBB Mailbox and Server:- F6FBB-v$E$W$WMail is currently waiting at F6FBB for:-$W$Q$W
+#Please enter your first name:-    Example: "Jean-Paul<return>"$W
+$Wfirst name? $W
+Thank You, $I.$W
+Callsign  LastConnect #Cnct RPBSXLFEMUI Name         Password     Private$W
+$V is not available, why don't you leave him a message?$W                                            
+Paging Jean-Paul.$W
+Jean-Paul is not available.$W
+You called ?....>>$W
+Hold on, $V is breaking in....$B$B$B$W
+You are now in Expert mode.$W
+You are now in Non-Expert mode.$W
+$WSERVER: Type "F <return>" to return to MAILBOX mode.$W
+File $f appended.$W
+Your message to %G has been cancelled.$W
+OP: Paging mode is now set to       : Off$W
+OP: Paging mode is now set to       : $p lines$W
+User is already connected. No edit facility.$W
+$0 $1 $2 $3 $j $K = $4'$5
+ON: Base message number now set to  : $0$W
+(B)id, (F)rom, (V)ia, (T)o, T(I)ttle, (S)tatus, T(Y)pe, (Cr)=End >$W
+RPBSXLEMU, (N)ame, Pass(W)ord, Lan(G)uage #, Pri(V)-Dir, (Cr)=End >$W
+$0 is an unknown callsign. Create it (Y/N) ?$W
+Delete [$0] (Y/N) ?
+Languages currently available are :$W
+($0):$1$W
+$W$W[End of Message #%M from %P]$W$W
+Message #$0$W
+From         : %P$WTo           : $G$0$WType/Status  : $t$s$WDate/Time    : %j %K$WBid          : $R$W
+$W*** : TO Field Filter is set to:- [ $l ]$W$W Msg # Origin TSD  Size To     Route   From              -  Title -$W
+$M %j $t$s%r $n $G $0 $P $1$W
+Message #    : %M$WTitle        : $S$W
+Bid (Mid)    : $R$W$W
+Forward route: 
+Address added: @$v$W
+F>$W
+>$W
+NO - Incorrect parameter$W
+NO - Duplicate BID$W
+OK$W
+*** Done$W
+Size: %n bytes$W
+No forwarding route known for this address.$WThe message will be held for review by F6FBB.$W
+Your reply will be sent to %G @$v$W
+OR: Unrestricted access to all mail : $0$W
+OM: Show messages listing at Log-On : $0$W
+#Please enter your Home BBS:-      Example: "F6FBB <return>"$W
+$Whome bbs? $W
+#Please enter your Postal area:-   Example: "WV16   <return>"$W
+$Wpostal area? $W
+HomeBBS: $0      Postcode: $1$W
+Address unknown:-$WType ENTER to abort and readdress manually$W
+$W$0 message(s) are currently on "Hold"$W
+$W(A)rchive,(K)ill,(L)ocal,(Q)uit,(R)ead,(V)erbose,(U)nhold, (CR) finished >$W
+Message held.$W
+*** The circuit is busy at present - Please wait a moment.$W
+*** $0 is busy with an active task - Please try later.$W
+*** Sorry, $0 is not connected.$W
+$W$B*** Connected to $0 (End = Ctrl Z).$W
+*** Disconnected.$W
+*** "Break" from $0 ***$W
+*** End of "break" ***$W
+"Break"...  ...Message from $0.$W
+Interrupt request from $0. Code : $1$W
+Stop request accepted, no connection.$W
+Reset request accepted, performing initialization.$W
+<CR> Continue  <A>bort .....>
+Interrupt request rejected.$W
+$WMAILBOX: Type "F <return>" to return to SERVER mode.$W $W
+$WServer Menu$W-----------$W(B) Bye$W(C) Connect Statistics$W(F) Return to Mailbox$W(D) Library$W(N) User-Database$W(Q) Qra-Locator$W(T) Satellites$W$WFor Help type "?(Command)"$W>
+$W
+$WServer Menu$W-----------$W(B) Bye$W(C) Connect St@tistics$W(F) Return to Mailbox$W(D) Library$W(N) User-Database$W(Q) Qra-Locator$W(T) Satellites$W$WFor Help type "?(Command)"$W>
+$WStatistics Menu$W---------------$W(B) Bye$W(F) Return to Server Menu$W(G) General information$W(H) Hourly histogram$W(I) Callsigns of users$W(J) Daily histogram$W(L) List recent callers$W(O) Occupancy$W$WFor Help type "?(command)"$W>
+$W
+$WStatistics Menu$W---------------$=(B) Bye$W(F) Return to Server Menu$W(G) General information$W(H) Hourly histogram$W(I) Callsigns of users$W(J) Daily histogram$W(L) List recent callers$W(O) Occupancy$W$WFor Help type "?(command)"$W>
+Use per day$W
+  MON  TUE  WED  THU  FRI  SAT  SUN$W
+Use per hour$W
+0 0 0 0 0 1 1 1 1 1 2 2  Hour$W
+0 2 4 6 8 0 2 4 6 8 0 2$W
+$N active messages$W
+$0 Connections since $j$W
+Connections$W  Average time per connection: $0min $1s$W
+  Average daily connections  : $0$W
+  Rush-hours                 : At $1:00hrs and $0:00hrs.$W
+Usage (in percent)$W
+  BBS                : $0 % $W
+  Server             : $0 % $W
+Server details:$W
+  DOS                : $0 % $W
+  Qth-Locator        : $0 % $W
+  Docs               : $0 % $W
+  Connections-stat   : $0 % $W
+  User-data          : $0 % $W
+  Satellites         : $0 % $W
+$0 $1 $2 $3 $j $K = $4'$5"$W
+$WUser-Database Menu$W------------------$W(B) Bye$W(R) Search for a user$W(I) Callsigns$W(N) Change Name and Adress$W(F) Return to Server menu$W$WFor Help type "?(command)"$W$W>
+$W
+$WUser-Database Menu$W------------------$W(B) Bye$W(R) Search for a user$W(I) Callsigns$W(N) Change Name and Adress$W(F) Return to Server menu$W$WFor Help type "?(command)"$W$W>
+$WCallsign: $0$W 
+Last connection was on $j at $K.$W
+$WCurrent record:$W$WName: $1 $0$WAddress: $2, $3$WQra-Locator: $4.  Phone (Home): $5, Phone (Other): $6$W
+#Please enter your Surname:-$W     Example: "Smith   <return>"$W
+#$Wsurname? $W
+$W
+#Please enter your House-number$Wand the name of your street:-     Example: "27, High Street <return>"$W>
+#$Wstreet and house nr? $W
+$W
+#Please enter your Town name:-     Example: "London  <return>"$W
+#$Wtown? $W
+$W
+#Please enter your phone number:-  (Or type ENTER to ignore)$W
+#$Wphone nr? $W
+$W
+#Please enter your Fax number:-    (Or type ENTER to ignore)$W
+#$Wfax? $W
+$W
+#Please enter your QRA Locator:-   Example: "IO82TK  <return>"$W
+#$Wqra loc? $W
+$W
+$WTotal $0 callsigns$W
+*** Callsign $0 is unknown.$W
+*** Wrong Qra-locator.$W
+$WSatellites Menu$W---------------$W(C) Characteristics$W(P) Print Keplerian Elements$W(T) In-Range Calendar$W(F) Return to Server Menu$W(B) Bye$W$WFor Help type "?(command)"$W$W>
+$W(M) Modify Keplerian Elements$W
+$WSatellites Menu$W---------------$W(C) Characteristics$W(P) Print Keplerian Elements$W(T) In-Range Calendar$W(F) Return to Server Menu$W(B) Bye$W$WFor Help type "?(command)"$W$W>
+$WLocator : $0    Satellite $1$W
+--------------------------------------------------------------$W
+| Time  | Az. | El. | Dpl. | Dist. | Alti. | Lon | Lat | Ph. |$W
+|  UTC  | Deg | Deg | KHz  |  Km   |  Km   | Deg | Deg | 256 |$W
+--------------- $j-$y ------ Orbit #$0 ----------------$W
+| $0:$1 | $2 | $3 | $4 | $5 | $6 | $7 | $8 | $9 |$W
+Enter start-date for calculation (DD/MM/YY):$W(Carriage return only for date $d)     :
+Enter start-time for calculation (HH:MM)   :$W(Carriage return only for time $H)      :
+$W$WStand-By your In-Range calendar is being processed.....$W
+$WThere is no information available for this satellite.$W
+Updated on $j-$y.$W               
+Satellite name      :
+Reference orbit     :
+Reference year      :
+Reference day       :
+Mean anomaly        :
+Arg. of perigee     :
+R.A.A.N.            :
+Inclination         :
+Eccentricity        :
+Mean motion         :
+Derived mean mo˜ion :
+Estimated step      :
+Doppler frequency   :
+$WOrbiting parameters for $0$W
+Orbit number        : $0$W
+Epoch year          : $0$W
+Epoch day           : $0$W
+Mean anomaly        : $0$W
+Arg. of perigee     : $0$W
+R.A.A.N.            : $0$W
+Inclination         : $0$W
+Eccentricity        : $0$W
+Mean motion         : $0$W
+Derived mean motion : $0$W
+Estimated step      : $0$W$W
+($0) $1
+$W
+$WLocator Menu$W------------$W(Q) Qra to Lat/Long.$W(L) Lat/Long to Qra$W(D) Distance & Azimuth$W(C) Cumulative calculation$W(F) Return to Server Menu$W(B) Bye$W$WFor Help type "?(command)"$W$W>
+$W
+$WLocator Menu$W------------$W(Q) Qra to Lat>Long.$W(L) Lat/Long to Qra$W(D) Distance & Azimuth$W(C) Cumulative calculation$W(F) Return to Server Menu$W(B) Bye$W$WFor Help type "?(command)"$W$W>
+$WPlease enter your Qra Locator (or Q to Quit) ?:$W
+Geographical coordinates in the centre of the square :$W
+Longitude  : $0 degrees $1' $2 : $3 gr $2$W
+Latitude   : $0 degrees $1' $2 : $3 gr $2$W
+$WUse the following format$WIn degrees    :1:45:00 (Direction).$WIn gradians   :1.5 (Direction)$W(Direction) should be replaced by North, South, East or West.$W
+$WLongitude (East/West)  :
+$WLatitude (North/South) :
+$WQra Locator : $0$W
+$WFrom Qra Locator :
+$WTo   Qra Locator :
+Azimuth ˜: $0 degr $1' : $2 gr$W
+Distance : $0 Km$W
+$WPlease enter your Qra Locator (or Q to Quit) ?:$W
+$WTo Qra Locator? (F = Finish) :
+Calculation # $0 - Total distance : $1 Km$W
+End of Calculation.$W
+$W"WHERE filename" locates a file in the Dos file system (Wildcards accepted)$W$W[Downloaded : %d Kb]$W[Authorised : %m Kb]$W$W$u:$0>$W
+Directory <$0> has been deleted.$W
+No File(s) / File(s) not found$W
+$0 $1 $2 $3   $4 $5 $6 $7$W
+$WDownload of $f was aborted!$W
+$WTransfer of $f was successful ($0 bytes - $1 bytes/sec)$W
+Ready to accept upload of $f.$W(End transfer with ^Z)$W
+$0 bytes copied.$W
+$WF6FBB User Files Area (v$E) $j $T$W$WDownload protocols:-$WPacket                   Modem$W$WGET   =  Ascii Xfer      XGET  = Xmodem$WYGET  =  YAPPc Xfer      YGET  = Ymodem$WBGET  =  GP/SP Xfer      ZGET  = Zmodem$W$W
+$WAvailable DOS commands are:-$W$W
+File $f has been deleted.$W
+$W$0 bytes are available for user upload$W$W
+$WLibrary Menu$W------------$W(B) Bye$W(F) Return to Server menu $W(L) List Directories/filenames$W(#) The number you wish to view $W$WLIBRARY:$0>$W
+$W
+$WLibrary Menu$W------------$W(B) Bye$W(F) Return to Server menu $W(R) Refresh Options menu$W(#) The number you wish to view $W$WLIBRARY:$0>$W
+The information requested does not exist.$W
+F6FBB Cross-Band Gateway:-$WYou are currently on PORT $!$WYou have access to the following frequencies.$WAccess to F6FBB-10 LINUX-FpacNode on port NETWORK$W$W
+$WChoose a port number, or type "Q <return>" to return to the mailbox$W$W>
+$W
+Sorry there are no channels available on $m$W
+Cmd :
+$W
+*** Error : You're already on this port!$W
+*** Error : Invalid port number$W
+*** Gateway non-operational.$W
+$O: $0 is an invalid command. Options are: (C,D,J,K,H,M,P,Q?)$W
+Ready to send file: $f $W
+Text capture opened in $f.$W
+Text capture closed.$W
+Ready to send $f with $0 protocol$W    
+Ready to receive $f with $0 protocol$W  
+Sorry, $0 is not allowed on this frequency.$W
+Enter the descriptive file label      :$W
+$0 $1 $2 $3   $4$W
+CONFERENCE:$WType ".? <return>" for assistance$W
+Stations in the conference at $Hz are:$W
+$0, on channel $1.$W
+[$Hz] $0 is joining the conference.$W
+You have quit the conference.$W
+[$Hz] $0 has left the conference.$W
+[$H - $0]$W
+Nobody else is in the conference.$W
+$H $0 : Retry count exceeded.$W
+$H $0 busy.$W
+$H $0 is not in the conference !$W
+Msg #  Size    To    From Subject (NewsGroup: %T)$W
+$M $n $G $P $1$W
+$WNewsGroup <%T> - %t Bulletins$W$W<#>Change NewsGroup  <H>eaders of Groups  <L>ist  <F>inish  <B>ye$W
+#
+# EOF

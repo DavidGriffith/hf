@@ -1,12 +1,9 @@
-INCLUDES = -I$(top_srcdir)/include
+SUBDIRS = scripts hfkernel hfterm dcf77 doc test util
+EXTRA_DIST = depcomp hf.spec
 
-SUBDIRS = l1 proto os hfterm hftermfl dcf77 doc test util
+install-exec-hook:
+	echo -e "\033[0G\033[32mhf installation done! Start me with 'hf'!\033[m"
 
-noinst_HEADERS = \
-	include/hfapp.h \
-	include/os.h
-
-EXTRA_DIST = freqdev.m ggtest.m golay.m startkern.pl \
-	include/hfapp.h \
-	include/os.h
-
+rpm: $(PACKAGE)-$(VERSION).tar.gz hf.spec 
+	cp -v $(PACKAGE)-$(VERSION).tar.gz /usr/src/packages/SOURCES
+	rpmbuild -ba hf.spec

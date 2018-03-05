@@ -1,0 +1,854 @@
+Hello friends, these are 2 lists:
+One of the classic Pactor mailboxes,
+and the other of the Winlink Mailboxes.
+They were provided by Jost from South Africa, thanks!
+You can also subscribe them on your own, see below.
+
+
+PCT Classic MBO's WW - 05JAN01
+R:050101/0436z @:ZS5S.ZAF.AF [AfricaLink] #:358537
+
+SB PACTOR @ WW < ZS5S $PCT011_ZS5S
+
+DIRECTORY OF CLASSIC PACTOR MBO's - 05JAN01
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The only list recognized by the ARRL and supported by AirMail.
+
+A separate directory is issued for Winlink-2000 MBO's (PMBO's).
+Unless noted, all MBO's are using 'Classic' Winlink software, are
+available 24 hours a day and are auto-replying in either Pactor-1 
+or Pactor-2. A few MBO's offer Pactor-3 on frequencies which are
+followed by the hash sign.
+Listed are the standard Center Frequencies.
+
+Explanation of codes used:
+    - = Details unknown
+    # = Pactor-III only frequency
+    A = Additional information
+    P = Packet port available and forwarding to domestic network
+  Antenna being used:
+    B = Beam
+    D = Dipole
+    V = Vertical
+  Internet details:
+    E = E-mail address sysop
+    H = Homepage URL
+    T = Telnet address. Contact sysop for password.
+
+>>> As from 04JUL01 Nexus is no longer supported <<<
+
+  Full H-address, Name sysop, [Locator: QTH], (last update rcvd)
+  ---------------------------------------------------------------
+
+ 9K2EC.KWT.AS, Mohsen, [LM30--: Kuwait], (-------/DJ6HH)
+    B  10141.9# 10144.9#  14065.9 14070.9 14079.9 14111.9#
+       AS/OC: 0030-0900 1200-1800 - EU: 0900-1200 1800-0030
+    E  abajeel@qualitynet.net
+
+ 9Y4IBN.TTO.CAR.SA, Irvine, [FK90gk: Trinidad], (04JUL15)
+    B  North - 1400-2200 : 14064.9 14069.9 14075.9 14112.4 14115.9
+                           21064.9 21078.9  28135.9 28137.9
+    P  none
+    E  i9y4ibn@lycos.com
+    H  -
+
+ AA5BJ.#RUI.NM.USA.NA, Dusty, [DM73di: Ruidoso], (01MAY/WB5KSD)
+    V  3624.9 7072.9 7074.9 7104.9  10133.9  14112.4 14113.9 14117.9
+    E  lrhodes@zianet.com
+
+ AL7PI.#NAK.AK.USA.NA, Pete, [BP51bc: Anchorage], (02MAY)
+    D   3619.9 3623.9  7060.9 7067.9 7068.9  10125.9 10127.9
+       14063.9 14068.9 14069.9  18105.4
+       21063.9 21078.9  24910.9  28124.9
+    E  al7pi@winlink.org & msalstew@gci.net (bouncing)
+
+ CN8TW.CAS.MAR.AF, Chris/CN8HB, [IM63eo: Casablanca], (01SEP/icpt)
+    D  14063.5 14068.0 14077.5 14109.0
+       0700-1900: 21063.5 21077.5  28063.5
+    E  cn8tw@yahoo.fr
+    A  FBB s/w
+
+ DA5UHA.#HH.DEU.EU, Rup/DJ6HH, [JO53bp: Hamburg], (04OCT24)
+    D   3579.4 3580.9 3581.9 3583.9 3587.9 3611.9#
+        7037.9 7039.9 7040.9  10145.9#
+    D   0500-2100: 14062.9 14064.9 14070.4 14071.4 14071.9 14072.9 
+                  14074.9 14076.9 14111.9#  28111.9#
+    V   0500-2100: 21111.9#  
+    P  yes, FBB, -
+    E  rupteacher@gmx.net
+    H  none
+    A  formerly operating as DJ6HH
+    A  FBB s/w
+
+ DK0BLN.#BLN.DEU.EU, Andre/DL7UAZ, [JO62sl: Berlin], (-------)
+    D   3580.9
+    V  14074.9 14077.9 14080.9
+    E  dl7uaz@freenet.de
+    A  DPBox-Linux system
+
+ DK0MUN.#BAY.DEU.EU, Werner/DL2JA, [JN48--: nr Munich], (------)
+    B  AS/OC: 14065.9 14071.4 14073.9 14115.9  21074.9
+    E  dl2ja_dk4if@t-online.de (reported bouncing)
+
+ F2PY.FMLR.FRA.EU, Pierre, [JN04rf: Montpezat], (04NOV/DJ6HH)
+    B  14067.9 14076.9 - 100 dgs 1100-2200, 240 dgs 0500-0800
+    P  yes, -, -
+    E  peter.f2py@wanadoo.fr
+    H  none
+         
+ F3KT.FPDL.FRA.EU, Michel, [IN88--: Nantes], (02APR)
+    B  S: 0600-1800 - NW: 1800-0800
+       14063.4 14070.9 14077.4  21063.4 
+       21077.4 (0600-1800)  28063.4 (0800-1800)
+    D   3581.9  7037.9 7039.9
+       1800-0600: 3579.9 3580.9 3582.9 3583.9
+    P  no
+    E  f3kt@free.fr
+    H  None
+    A  FBB s/w
+
+ F6FBB.FMLR.FRA.EU, Jean Paul, [------: Toulouse], (01SEP/icpt)
+    B  NE: 14073.9 14074.9 14075.9
+    P  -
+    E  f6fbb@f6fbb.org
+    H  www.f6fbb.org
+    A  FBB s/w
+
+ F6FUB.#12.FMLR.FRA.EU, Andre, [JN14--: nr Millau], (99DEC/F5GIT)
+    D  3578.9 3580.9 3581.9 3583.9 3585.9 3587.9 3588.9  7037.9 7039.9
+    B  14065.4 14070.9 14071.4 14071.9 14072.9  
+       21072.9 21076.9  28101.8
+       S: 0600-1800 - W: 1800-0600
+    P  -
+    E  penja@infonie.fr
+    H  penja.free.fr
+    N  no
+    A  FBB s/w
+
+ F6HBB.FRPA.FRA.EU, Joaquim,  [JN18CX : nr Paris], (04OCT08)
+    D    7037.9  7039.9
+    P   none
+    E   f6hbb@caramail.com
+    H   none
+    A   FBB linux
+    A   forwarding to domestic packet network (no user port)
+
+ HB9AK.CHE.EU, Martin/HB9AUR, [JN47fe: Cham/Zug], (03JAN27)
+    D   3580.9  3611.9#
+    V   7037.9 7040.9  10141.9 10145.9  14077.9 14111.9#
+       18103.9#  21083.9 21111.9#  24923.9#  28111.9#
+    P  yes, WLc, none, call HB9AK-9 via digi's
+    E  hb9aur@swiss-artg.ch
+    H  www.swiss-artg.ch
+
+ HS0ZDZ.#SAR.NNK.THA.AS, Roy/G3NOM, [OK04pg: Nakhon Nayok], (04APR/DJ6HH)
+       Station-1:
+    B  14068.0 14077.0 14078.0 14098.0# 14112.0#  28130.0
+       2300-1300: OC - 1300-0100: EU
+       Station-2:
+    V  21077.0 (P1 only)
+    P  yes, -, -
+    E  g3nom@rast.or.th
+    H  -
+    A  stn-1 is FBB and stn-2 is Winlink classic
+
+ I5FLN.ITOS.ITA.EU, Luciano, [JN53--: Florence], (00DEC), PCT-1 only
+    B  14068.9 14072.9  21068.9 21072.9  28068.9 28072.85
+       AF 0600-1800  NA 1700-2300
+    P  no
+    E  i5fln@iol.it
+
+ JA8HK.01.JNET8.JPN.AS, Mat, [QN13--: Sapporo], (99APR)
+    B  7029.9 (J1KAU) - 14069.9 14071.9 14073.9 14075.9 14077.9
+       21072.9 21075.9
+       0000-0900 South - 0900-2100 AF/AS/EU/NA - 2200-2400 NA/SA
+    P  -
+    E  ja8hk@ka2.so-net.ne.jp
+    H  -
+    A  believed to be QRT	
+
+ K1UOL.CT.USA.NA, Bob, [FN31hj: nr New York], (04OCT31)
+    D   3619.9 3620.9 3621.9  7071.9 7073.9 7076.9
+       10125.9 10140.4 10141.9
+    B  070 dgs 
+       14065.9 14077.9 14111.9 14115.9 14117.9  
+    P  -
+    E  k1uol@arrl.net
+
+ K8MHR.#8RN.WV.USA.NA, Phil, [EM98cj: St Albans], (01JUL)
+    D  1400-2400: 3617.9 3621.9  7070.9 7100.4  10128.9 10131.9 10140.9
+    P  -
+    E  k8mhr@worldnet.att.net (bouncing)
+    A  PCT-1 only, NTS only
+
+ KD1RY.CT.USA.NA, Rocco, [FN31hj: Bethel], (04OCT30/K1UOL)
+    -   7073.9 7078.9
+    P  -
+    E  rgrosso@worldnet.att.net
+
+ N7QDN.OR.USA.NA, Duane, [CN85sl: nr Portland], (02MAY)
+    D   3623.9  3626.9  3628.9  7070.9 7071.9 7072.9 7084.9
+       10121.9 10123.9 10125.9 
+    B  110 dgs 1400-0800: 14068.9 14069.9 14072.9 14074.9 14113.9
+       18102.9  21067.9 21073.9 21076.9 
+       24914.9  28072.9 28074.9 28076.9
+    P  -
+    E  d.shults@verizon.net
+
+ OK0PBR.#MOR.CZE.EU, Libor/OK2PEN, [JN89hf: Brno], (04APR08)
+    V   7037.9 7040.9  10127.9 10147.9
+       14064.9 14065.9 14066.9 14072.9 14074.9 14076.9
+       18107.9 21072.9 21074.9 21076.9  28072.9 28076.9
+    P  yes, via OK0NMA
+    E  ok2pen@medvidek.dyndns.org or ok2pen@volny.cz
+    H  medvidek.dyndns.org (1200-0100 only)
+    T  193.165.211.34 (OK0NMG: CZGATE amprnet gate)
+
+ ON0BEL.#LG.BEL.EU, Rene, [JO20um: Liege], (03JAN02)
+    V   3580.0 3582.0 3584.0  7037.0 7038.0 7040.0  10144.0 10146.0
+    B  14065.5 14068.0 14068.5 14070.0 14071.0 14073.0 14075.0
+       21073.0 21075.5 21077.0  28104
+       160 dgs: 0000-1900, 270 dgs: 1900-2400
+    P  yes, FBB, 144.8875 and 438.150 (9600)
+    E  on0bel.pr@skynet.be
+    H  on0bel.dynip.com
+    T  on0bel.dynip.com 23
+
+ ON5FS.ON0OB.#OVN.BEL.EU, Andre, [------: Kluisbergen], (-------/DJ6HH)
+    B  South - 14064.9 14076.4 14107.5# 14108.9# 14111.9#  
+               21073.9 21077.9
+    E  on5fs@skynet.be
+
+ SK4NI.S.SWE.EU, Anders/SM4VRZ, [------: Karlstad], (-------/DJ6HH)
+    D   3580.9 3583.9 3585.9 3586.9 3594.9  7034.9 7036.9 7040.9
+       10139.9 10142.9 10145.9  14062.9 14073.9
+    E  anders.rhodin@srsab.se
+
+ SL5ZXN.C.SWE.EU, Rolf/SM5BPV, [JO89SN: Baalsta], (-------/DJ6HH)
+    V  2000-0700: 3580.9 3583.9 3585.9 3586.9 3591.9  
+                  7034.9 7035.9 7036.9  10139.9 10142.9 10145.9
+       14069.9 14070.9 14071.9 14072.9 14073.9 14075.9 14077.9 
+       14078.9 14079.9 14089.9
+       0700-2000: 18103.9 18107.9  21083.9 21086.9  24922.9 24927.9
+                  28079.9 28064.9
+    E  rolf.wikstrom@fro.se
+
+ SM7TDC.M.SWE.EU, Chrisi, [JP83--: Hoellviken], (--)
+    V  1500-0100: 3583.9 3593.9 3596.9 3597.9  7035.9 7036.9 7037.9
+    B  EU 1100-1500: 14064.9 14065.9 14068.9 14072.9 14073.9 14075.9
+    P  -
+    E  sm7tdc@telia.com
+    H  www.bergqviststiftelsen.com
+
+ SV1IW.ATH.GRC.EU, Manos, [KM17uw: Athens], (04SEP/DJ6HH)
+    B  NW: 14066.9 14068.9 14074.9 14076.9 
+    E  sv1iw@raag.org
+    H  www.raag.org
+    A  FBB s/w
+
+ T90BOX.SAR.BIH.EU, Sead/T97S, [JN93eu: Sarajevo], (99MAY)
+    D   3590.9
+       2200-0700: 3585.9 3586.9 3591.9 3593.9  7034.9 7036.9 7037.9 7039.9
+    B  N 0700-2200: 14069.9 .. steps of 1 kHz .. 14089.9
+    E  -
+    A  FBB s/w
+
+ TA2BBS.#ANK.TUR.EU, Fatih/TA2FQ  [KM69jv: Ankara], (04OCT23/DG4FDI)
+    D  7035.9 7037.9 7040.9  14075.9 14097.9 14111.9#
+    V  10147.9#
+    V  0500-1800: 21075.9 21079.9 21111.9#
+    P  yes, FBB, 144.625 & 433.650 (9k6), call TA2BBS-8 via TA2 FlexNet
+    E  thomas@sofortsurf.de
+    H  none
+    T  44.176.206.128 6300  ARP TA2BBS-10 via TA2 FlexNet (TCP/IP via RF)
+    A  LinuxFBB s/w
+    A  Realtime FBB gateway to TA2 packet network:
+        Enter 'G' for gateway, '5' for port DIGI, 'C TA2BBS-2' for Node
+    A  co-pilot Thomas/DG4FDI
+
+ TU2BB.CIV.AF, Felix, [-----: Abidjan], (03MAR04)
+    B  14063.5 14068.0 14077.5 14109.0 14112.0#
+       21063.5 21077.5 21112.0#  28063.5 28112.0#
+    P  yes, -, 144.675
+    E  tu2bb@amsat.org & vieira@globeaccess.net (bouncing)
+    H  -
+
+ UA6ADV.H.KRD.RUS.EU, Raya, [------: Holmskaya], (04NOV28/DJ6HH)
+    D  1900-0300:  7034.9 7035.9 7036.9 7037.9 7039.9 
+       0300-1900: 14062.9 14073.9 14074.9 14097.9# 14110.4# 14111.9
+    P  yes, -, -
+    E  ua6adv@bk.ru
+    H  -
+    A  FBB s/w
+
+ VE3BDM.#EON.ON.CAN.NA, George, [FN05--: Brockville], (03MAY01)
+    D  3621.9  7070.9 7072.4 7100.4  
+       1200-0100 (summer until 0430): 10129.9 10139.9 10140.9  
+             14073.4 14095.9 14097.9 14111.9  21075.9 21093.4
+       0100-1300: 3620.9
+    P  no
+    E  ve3bdm@ripnet.com
+    H  web.ripnet.com/~ve3bdm
+    A  NTS ONLY
+
+ VK3WZ.#MEL.VIC.AUS.OC, John, [QF22--: Melbourne], (01OCT)
+    B  WNW 2200-0900 - 14068.0
+    P  -
+    E  johnja@telstra.easymail.com.au (bouncing)
+    H  -
+
+ VK5ATB.#BVL.#SA.AUS.OC, Pops, [PF95lm: Nuriootpa], (04DEC/HB9AK)
+    A  QRT
+
+ VK8PDG.PLM.#NT.AUS.OC, Peter, [PH57lm: Palmerston], (03OCT07)
+    V  28129.9 28159.9
+    P  yes, FBB, 146.900 and Telpac 146.925
+    E  petergiles2@hotmail.com
+    H  www.vk8pdg.com
+    T  vk8dpg.no-ip.com :6300
+
+ W0WWR.#WICHITA.KS.USA.NA, Preston, [EL90ec: Wichita], (02NOV03)
+    D  0200-0230: 3377.9 - 2000-2200: 10143.0 - 1400-1800: 14100.0
+    P  no
+    E  pbarr40659@aol.com
+    H  none
+    A  NTS ONLY
+
+ W4NPX.#CVA.VA.USA.NA, Bob, [FM08sb: Charlottesville], (04OCT30/K1UOL)
+    A  has closed down permanently
+
+ W5SEG.#STX.SEG.USA.NA, Robby, [EL19as: Seguin], (04MAY20)
+    D   3629.9  7100.4 7103.7#  10144.9
+       14109.9  18105.9  21097.9  24927.9  28122.9
+    P  yes, -, 145.090
+    E  w5seg@swbell.net
+    H  www.axs4u.net/home/w5seg
+
+ W7NTF.#TAC.#WWA.WA.USA.NA, Gary, [CN87tb: Spanaway], (04NOV01)  
+    D   3622.0 3624.0 3629.0 3632.0# 3640.0  
+        7071.0 7072.0 7076.0 7100.5 7103.7#
+       10128.0 10141.0 10147.9#  14073.5.14096.0 14098.0 14111.9#
+    P  66.80.67.210, port 6300
+    E  w7ntf@yahoo.com
+    H  www.w7ntf.net
+    T  66.80.67.219 port 12001
+    A  Airmail s/w
+
+ WA1URA.IN.USA.NA, Frank, [EN71mf: nr Fort Wayne], (02SEP02)
+    D   3619.9 3620.9 3622.9  
+    V   7070.9 7074.9  10125.9 10127.9 10139.4 10140.4
+    B  060 dgs - 14068.9 14070.4 14073.4 14074.9 14110.4 14115.9 
+                21073.9 21075.9 21078.9
+    P  -
+    E  fn.moore@verizon.net
+
+ WB1DSW.NH.USA.NA, Herb, [FN42mv: East Kingston], (04OCT30/K1UOL)
+    A  has closed down permanently
+
+ WB2FTX.#NENJ.NJ.USA.NA, Dave, [FM20tx: Butler], (02MAY)
+    D   3621.9 3623.9  7072.9 7102.4  10129.9 10142.9  
+       14075.4 14097.9 14114.4  21077.9 21094.9
+    P  yes, -, -, not available to users
+    E  wb2ftx@optonline.net
+
+ WO0A.MN.USA.NA, Norb, [EN34mn: nr Cannon Falls], (01MAR)
+    D   3620.03 3621.9 3624.03   7074.53 7079.03 7103.53 
+       14075.53 14100.03 14112.9 14115.53 14117.9 14120.03 
+       21075.9 21078.03 21098.03
+    P  -
+    E  wo0a@arrl.net
+    A  Airmail s/w
+
+ WU3V.GTF.MT.USA.NA, Jim, [DN47hl: GTF], (04MAR09)
+    V   7100.2 7100.7 7101.2 7101.7  10140.7 10143.7  
+       1300-0200: 14077.7 14099.7 14108.7
+       0200-1300:  3683.7 3688.7
+    E  jim@wu3v.net
+    T  bbs.wu3v.net 3601
+    A  FBB s/w
+
+ WX4J.#SWITZ.FL.USA.NA, Earl, [EL90ec: nr Jacksonville], (04AUG01)
+    D   3621.9 3623.9 3625.9  7072.4 7100.4  
+       10140.9 10142.9 10143.9  14095.9 14097.9 14112.4 14113.9
+       0700-2100 lt: 18102.4
+    P  yes, -, 144.990
+    E  unlisted
+    H  none
+    A  NTS ONLY
+
+ ZS6KM.PTA.GAU.ZAF.AF, Mario, [KG44dg: Pretoria], (02OCT26)
+    B  night: 14117.9#  day: 21117.9#
+    P  yes, WLc, 430.600 & 439.650 (9K6)
+    E  zs6km@winlink.org
+    H  none
+    A  also replies to Pactor-1 and -2 calls on the Pactor-3
+       marked frequencies
+
+Stations not listed either have not submitted details (unknown), 
+have restricted access or are operating illegally.
+
+Additions/corrections may be e-mailed to zs5s@zs5s.net
+
+This bulletin will be renewed on the first of each month.
+
+To subscribe to this bulletin, send E-mail 
+   To:   zs5s@zs5s.net
+   Subj: SUBSCRIBE CLASSIC
+   Text: your_call_sign
+
+- end -
+
+
+PCT Winlink-2000 MBO's WW - 05JAN01
+R:050101/0437z @:ZS5S.ZAF.AF [AfricaLink] #:358538
+
+SB PACTOR @ WW < ZS5S $PCT012_ZS5S
+
+THE ZS5S DIRECTORY OF WL2K PACTOR MBO's (PMBO's) - 05JAN01
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This list is recognized by the ARRL and supported by AirMail
+
+All stations provide Radio-EMail service, are auto-replying in
+either Pactor-1 or Pactor-2 and, unless noted, available 24 hours.
+Frequencies followed by a hash sign are available for Pactor-3 connects.
+Listed are the standard Center Frequencies. Times in UTC.
+Two separate directories are issued for "Classic" Pactor MBO's 
+(NPMBO's), those associated with WL2K and those not.
+
+
+Explanation of codes used:
+    - = Unknown
+    # = Pactor-3 only frequency
+    A = Additional information
+    P = Packet port to local network
+  Antenna being used:
+    B = Beam
+    D = Dipole
+    V = Vertical
+  Internet details:
+    E = E-mail address sysop
+    H = Homepage URL
+    T = Telnet TCP/IP ID - Registered WL2K users should 
+        obtain port # and password from the sysop.
+    All PMBO's offer 'Fastlink', permanent Internet connection.
+
+
+ Full H-Address, Name Sysop, QTH, (YRMODA last update rcvd)
+ ---------------------------------------------------------
+
+ 9Y4/WG3G.TYCMM.TTO.CAR.SA, Bernie, [FK90fq: Trinidad], (04MAR14)
+    D 1300-1000: 3617.9  7036.9 7101.4# 10126.9 10142.9#
+                 14066.9  18101.9 18106.5#
+    P  yes, WL2K, 145.010
+    E  bernie@tstt.net.tt
+    H  -
+    T  wg3g.no-ip.com
+    A  not accepting Pactor-1 connects
+
+ A71BY.QAT.AS, Jabor, [LL55sa: Doha], (03NOV18/K4CJX)
+    B  10123.9 10147.7#  14074.9 14097.2#  18101.9 18107.2#
+    P  -
+    E  a71winlink@qatar.net.qa
+    H  -
+    A  co-sysops: Abdul, VU3MAX & Murali, VU3MUV
+    A  The beam is bi-directional, aiming at 120/300 dgs
+
+ AB7AA.HI.USA.NA, Bill, [BL11--: Honolulu/HI], (03JUL09/K4CJX)
+    V   3641.9  7103.7#  10142.7#  14064.4 14109.2#  
+       18104.9 18106.2#  21065.9 
+    P  none
+    E  whickey@compuserve.com
+    H  none
+    T  ab7aa.no-ip.com
+    A  please avoid 14 Mhz use during seafarer net 0300-0400z daily
+
+ AH6QK.HI.USA.NA, Richard, [BL11cj: Oahu/HI], (03SEP18/K4CJX)
+    V   7070.9  10126.9  14069.0 14110.0#  18101.9
+    P  none
+    E  rhacker@aloha.net
+    H  none
+    T  24.94.84.68
+
+ DA5UAW.DEU.EU, Andy/DH8WR, [JO50pr: Rudolstadt/DEU], (04DEC29)
+    V  H24:  3580.9 3590.9#  7037.9  10146.1  14077.9 14108.9#
+    V  0500-1800: 18102.9 18108.9#
+    P  none
+    E  dh8wr@gmx.de
+    H  none
+    T  none
+
+ EA8RCT.-.AF, Fred/EA8CAP, [IL28jb: Las Palmas], (04FEB17/K4CJX)
+    -  7036.9  10131.9 10145.7#  14064.9 14110.0#  18102.9 18108.4#
+    P  -
+    E  adeubler@mail.infocanarias.com - bouncing
+    H  -
+    I  -
+    T  -
+    A  still awaiting further details
+
+ HP2XBA.PNR.NA, Craig, [EJ88rk: Bagala], (04DEC08))
+    V   7104.4#  10148.2#  14109.2#  21102.9#  28130.0#
+    P  none
+    E  hp2xba-1@winlink.org or david@pananix.com
+    H  www.svpogo2.com & www.pananix.com
+    T  hp2xba-winlink.ssbmail.com port 12001
+    A  P-3 connects only
+    A  Craig/AG4XE is the operator and David/AI4FG does maintenance
+
+ HS0ZER.#PWT.BKK.THA.AS, Rudolf/DL1ZAV, [OK03hr: Bangkok], (04SEP09)
+    B  14069.4 14072.4 14076.9 14111.9#  21072.4
+    P  yes, -, 145.530
+    E  dl1zav@amsat.org
+    H  www.qsl.net/dl1zav
+    T  hs0zer.no-ip.com port 12001
+    A  OFF AIR till at least December
+
+ IV3XHR.ITA.EU, Gianpaolo, [JN66pb: Udine/ITA], (04NOV04)
+      Station 1:
+    V  7037.9 7046.7#  14073.9 14103.2#  
+      Station 2:
+    D  10129.9 10142.7#  
+    P  none
+    E  iv3xhr@tin.it
+    H  none
+    T  iv3xhr.no-ip.com
+    A  accepts no P-1 connects
+
+ K4CJX.TN.USA.NA, Steve, [EM66oc: Nashville/TN], (04JAN14)
+      Station 1:
+    D   7076.9 7101.2#  14076.9 14106.7#
+      Station 2:
+    D  10123.9 10141.2# 
+      Station 3:
+    D  18103.9 18108.7#
+    P  none
+    E  k4cjx@comcast.net
+    H  winlink.org/k4cjx
+    T  k4cjx.no-ip.com
+    A  not accepting Pactor-1 connects
+
+ K4SET.#WKY.KY.USA.NA, Scott, [EM56uo: Murray/KY], (03SEP29)
+    D   7074.9 7103.7#  10136.9 10143.4#  21073.9 21095.2#
+    P  yes, wl2k, 145.010
+    E  k4set@radioministries.org
+    H  radioministries.org/k4set
+    T  k4set.no-ip.com
+
+ K6CYC.CA.USA.NA, Scott/N6ABC, [DM03sx: Los Angeles/CA], (04DEC16/K4CJX)
+    V  7069.9  10123.9  
+    B  S Pacific & Mexico - 14068.9 14094.9#  21068.9 21096.2#
+    P  none
+    E  dr.scotts@verizon.net
+    H  www.calyachtclub.com
+    T  k6cyc.no-ip.com
+    A  California Yacht Club, Marina del Rey
+    A  Does not accept P-1 connects.
+
+ K6IXA.#CCA.CA.USA.NA, Grady, [CM97qi: Atwater], (04JUN25)
+      Station 1:
+    V  10122.9 10143.7#
+      Station 2:
+    B  135 dgs, after 0500 240 dgs - 14064.9 14102.7#
+    P  yes, WL2K, 144.910
+    E  gradyw@elite.net
+    H  www.elite.net/~gradyw/
+    T  206.62.222.199
+
+ K7AAE.WA.USA.NA, Ron, [CN87xs: nr Seattle/WA], (03SEP28)
+      Station-1:
+    D  0000-1500: 3629.9 
+    B  SSW: 7076.9  14067.9 14109.2#
+      Station-2:
+    D  10133.9
+    P  none
+    E  k7aae@yahoo.com
+    H  none
+    T  k7aae.no-ip.com
+
+ KA6IQA.CA.USA.NA, Tom, [DM12jx: nr San Diego/CA], (03MAY30/KN6KB)
+    V   7066.9 7101.2#  14104.2# 14112.4  18102.9 18106.7#
+    P  none
+    E  lafleur@ucsd.edu
+    H  none
+    T  swan.dyndns.org
+         
+ KB6YNO.#EMA.MA.USA.NA, Eric, [FN42oo: Hamilton], (04MAY07)
+    V   7069.9  10125.9  14067.9 14094.9#  18098.9
+    P  yes, WL2K, 145.010 (1200 Bd)
+    E  kb6yno@comcast.net
+    H  home.comcast.net/~kb6yno
+    T  kb6yno.no-ip.com
+    A  till further notice on 14067.9 only
+
+ KF6NPC.#SOCA.CA.USA.NA, Mike/N6KZB, [DM14--: Colton], (04MAY08)
+    D  3621.2  7067.9 7103.7#  10146.2#  14096.0#
+    P  yes, WL2K, 145.070
+    E  n6kzb@arrl.net
+    H  www.rivcoraces.org
+    T  kf6npc.no-ip.com
+
+ KN6KB.#MLBFL.FL.USA.NA, Rick, [EL98pq: nr Melbourne/FL], (03MAY30)
+    V   7068.9 7103.7#  10146.2#  14066.4  
+    P  yes, WL2K, 145.090 & 441.000 (1200)
+    E  rmuething@cfl.rr.com
+    H  www.dwatt.com/users/kn6kb.html
+    T  kn6kb.no-ip.com
+
+ KQ4ET.VA.USA.NA, Joel, [FM16xu: Virginia Beach], (04DEC07/K4CJX)
+    -   3628.7 7067.9  10146.5# 14110.0#
+    P  -
+    E  -
+    H  -
+    T  -
+    A  New station
+
+ N0IA.#CENFL.FL.USA.NA, Bud, [EL98jv: Deltona], (03OCT01)
+    D   3626.9  7072.9  10133.9 
+    B  285 dgs: 14074.9 14098.7#  18106.2# 
+    P  yes, FBB, 144.910
+    E  budt@cfl.rr.com
+    H  none
+    T  n0ia.no-ip.com
+    A  0000-1200: 3626.9 & 1200-2400: 18106.2#
+
+ N8PGR.#NEOH.OH.USA.NA, Hans, [EN91dh: nr Cleveland], (04FEB29/K4CJX)
+    D   3621.9  7071.9  10140.4  14077.9
+    P  yes, WL2K, 145.01
+    E  n8pgr@winlink.org
+    H  -
+    T  n8pgr.no-ip.com
+    A  not operational
+
+ NP2E.-.NA, Bernie, [FK78mi: St. Thomas], (04JUN13/K4CJX)
+    -   7066.9 7101.4#  10127.9 10145.2#
+    P  -
+    E  np2e@paradise.vi
+    H  -
+    T  -
+    A  awaiting further details
+
+ OE4XBU.AUT.EU, Rudi/OE4RYC, [JN87gu: Eisenstadt], (03JUN01/K4CJX)
+    B  South: 14074.9 14110.0#  21074.9 21098.0#
+    P  yes, wl2k, -
+    E  oe4xbu@aon.at (bouncing)
+    H  none
+    T  none
+
+ PA3DUV.NLD.EU, Dick, [JO32cf: Deventer/NLD], (04JUL19)
+      Station-1:
+    D   3583.5 3593.5#
+      Station-2
+    D   7035.4 7043.9#
+      Station-3:
+    V  10136.9  10141.0#
+      Station-4:
+    B  SW  14065.9 14106.7#
+      Station-5:
+    D  18100.9 18106.2#
+    P  none
+    E  pa3duv@planet.nl
+    H  www.qsl.net/pa3duv
+    T  pa3duv.no-ip.com
+    A  not accepting P-1 connects
+
+ VE1YZ.CAN.NA, Neil, [FN86bq: nr Halifax/NS/CAN], (04DEC05]
+    D   3631.9 3631.9#   
+    V   7096.5 7096.5#  10148.2 10148.2#  14111.0 14111.0# 
+    P  none
+    E  ve1yz@eastlink.ca
+    H  none
+    T  ve1yz.no-ip.com
+    A  condensed, scanning 4 frequencies only, Pactor-1, -2 & -3
+    A  actual QTH is St Margarets Bay and MM's are welcome
+
+ VE2AFQ.QB.CAN.NA, Andre, [FN35im: Montreal], (04NOV16)
+    D  3629.9 3629.9#  7094.0 7101.4#
+    V  10137.9 10137.9#
+    B  South: 14068.9 14096.2#  21109.4 21109.4#
+    P  yes, Telpac, 145.070
+    E  va2af@videotron.ca
+    H  lereseauducapitaine.qc.ca
+    T  ve2afq.no-ip.com
+
+ VE6KBS.AL.CAN.NA, Karl, [DO20wx: Calgary/AL/CAN], (O2NOV30)
+    B  240 dgs - 7096.0 7096.5# 14078.9 14104.2#  
+                18100.9 18106.2#  21079.9 21098.7#
+    P  yes, WL2K, via digipeater on 145.150 (-600 kHz)
+    E  ve6kbs@agt.net
+    H  none
+    T  ve6kbs.no-ip.com
+
+ VK2SYD.NSW.AUS, Charles, [QF56ne: Sydney/NSW/AUS], (04APR30)
+    D   3620.2 3620.2#  7046.7 7046.7#  10116.2 10116.2#  
+       14106.7 14106.7#  18107.0 18107.0#  21298.7 21298.7#
+    P  none
+    E  leahyfamily@bigpond.com
+    H  none
+    T  vk2syd.no-ip.com
+    A  no longer accepts P1 connects
+
+ VK6KPS.WA.AUS.OC, Phil, [OF78wa: Perth], (04NOV07)
+    D   3624.3 3624.3#  7043.5 7043.5#  10135.4 10135.4#
+       14097.5 14097.5#  18113.8 18113.8#  21126.5 21126.5#
+    P  YES, WL2K, 144.725
+    E  vk6kps@clew.com.au
+    H  none
+    T  vk6kps.no-ip.com
+
+ W1ON.MA.USA.NA, Doc/W1EO, [FN42jm: Bedford/MA], (04FEB15)
+    D  3620.9  7070.9  18100.9
+    B  SSW - 14075.9 14104.2# 
+    P  none
+    E  doc@mitre.org
+    H  none
+    T  none
+
+ W6IM.CA.USA.NA, Rod/W6MWB, [DM12jr: San Diego]/CA, (03SEP29)
+    D   7073.9  10141.2#
+    B  135 dgs - 14073.9 14098.7#
+    P  none
+    E  mclennan@cox.net
+    H  none
+    T  none
+
+ W7BO.#SWWA.WA.USA.NA, John, [CN85pw: nr Portland], (04APR22)
+    D   7067.9 7101.2#
+    P  yes, -, 145.090, use command 'c 1 w7bo' through local node GOBLE
+    E  w7bo@adelphia.net
+    H  www.qsl.net/w7bo
+    T  w7bo.no-ip.com
+
+ W7IJ.#WWA.WA.USA.NA, Bill, [CN86sv: nr Olympia], (04AUG03)
+      Station-1:
+    B  240 dgs/SW: 14069.4 14110.0#  21077.9 21091.2#
+      Station-2:
+    LW  3631.9#  7068.9 7103.7#  10139.5
+    P  yes, WL2K, 145.070
+    E  w7ij@arrl.net (bouncing)
+    H  none
+    T  w7ij.no-ip.com
+    A  Accepts no Pactor-1 connects
+
+ W9GSS.IL.USA.NA, Chuck, [EN50pf: Peoria/IL], (03MAY30/KN6KB)
+    D   7072.9
+    B  SSE: 14073.9 14109.9#  21098.0#
+    P  none
+    E  w9gss@insightbb.com
+    H  none
+    T  w9gss.no-ip.com
+    A  FAX: (775) 490-1399 att. W9GSS (for license verification)
+
+ 
+ W9MR.#SEIL.IL.USA.NA, Ken, [EM68bi: Keensburg], (04SEP10))
+    V 7065.9 10145.2# 14069.9 14101.7#
+    P none
+    E kmw9mr@shawneelink.net
+    H none
+    
+ WA2DXQ.#HWDFL.USA.NA, Dave, [EL96ve: Ft. Lauderdale], (03MAY31)
+    D   7074.9  10143.7#  14075.9 14101.7#
+    P  yes, WL2K, 144.930
+    E  dwagner2@bellsouth.net
+    H  none
+    T  wa2dxq.no-ip.com
+    A  not accepting P-1 connects
+
+ WB0TAX.LA.USA.NA, Deni, [EM32gi: Shreveport/LA], (04OCT29/K4CJX)
+    D   7103.7#  10133.9 10143.7#  18106.2#
+    B  SE: 14066.9 14096.2# 
+    P  none
+    E  deni@dwatt.com
+    H  www.dwatt.com
+    T  207.254.214.102
+    A  not accepting Pactor-1 connects
+    A  OFF AIR untill NOV09
+
+ WB5KSD.TX.USA.NA, Jon, [EM13te: nr Dallas/TX], (03DEC06/K4CJX)
+    D   7075.9  10132.9  14078.9 14109.2# 
+    P  -
+    E  jon_brown@bigfoot.com (bouncing)
+    H  -
+    A  not connecting to CMBO
+
+ WD8DHF.TX.USA.NA, Gary, [EM11dc: nr Austin/TX], (04MAY14)
+       Station-1:
+    D   3590.9  7075.4 7103.7#  10127.9
+       Station-2:
+    B  254 dgs: 14075.4 14098.7#  18075.4  18107.9#  21091.2#
+    P  none
+    E  kc5cgf@earhlink.com
+    H  none
+    T  wd8dhf.no-ip.com
+    A  does accept Pactor-1 connects
+
+ WU3V.MT.USA.NA, Jim, [DN47jl: Great Falls], (04NOV08)
+    V   3631.2 3631.2#  7074.9 7103.7#  10126.9 10143.4#
+    B  S: 14069.0 14102.7#
+    P  Telpac on 145.090
+    E  jim@wu3v.net
+    H  none
+    T  moe.wu3v.net
+
+ WX4J.FL.USA.NA, Earl, [EM90ec: nr Jacksonville], (04SEP13/K4CJX)
+    D   3622.4#  7066.9 10143.4#  14066.9
+    P  Yes, 144.990 Telpac node: WX4J-7
+    E  unlisted
+    H  none
+    T  WX4J.NO-IP.COM
+    A  New PMBO!
+
+ ZF1GC.CG.NA, Frank, [EK99ig: Grand Cayman Isl.], (04MAY06/K4CJX)
+    D   7072.9 7101.7#  10125.9 10143.7#  14065.9 14098.7#  18100.9 18106.2#
+    P  none
+    E  zf1gc@candw.ky
+    H  none
+    A  accepts no P-1 connects
+    A  off air till further notice
+
+ ZL1MA.NZL.OC, Arnold, [RF73kc: Auckland], (04OCT26)
+    D   3631.2 3631.2#  7163.0 7163.0#  7176.5 7176.5# 
+       10131.5 10131.5#  18116.3 18116.3#
+    P  none
+    E  agibbons@xtra.co.nz
+    H  none
+    T  zl1ma.no-ip.com
+    A  testing 7165.0 and 7165.0# - reports appreciated
+
+ ZL2UT.#38.NZL.OC, Basil, [RF91ai: Gisborne], (03NOV/K4CJX)
+    B  14074.9 14094.9#  21074.9 21102.9# 
+       0000-0900: NE (Cook Is., Fr. Poly)
+       1800-2400: NW (AUS, New Cal., Fiji)
+    D  0900-1800: 10127.9 10145.9#
+    P  yes, WL2K, 144.650
+    E  b.davoren@xtra.co.nz
+    H  none
+    T  none
+
+ ZS5S.ZAF.AF, Joost, [KG50cm: nr Durban], (05JAN01)
+      Station 1:
+    B   7037.0 7041.0#  14073.0 14111.0#  21073.0 21111.0#
+       345 dgs (Africa/Europe)
+      Station 2 (0300-2100):
+    V   7037.0 7041.0#  10125.0 10141.0#
+    P  yes, FBB, 144.650 (c/s ZS5V)    
+    E  zs5s@zs5s.net
+    H  zs5s.net
+    T  zs5s.no-ip.com
+    A  7 Mhz on station-1: 0400-1800 & on station-2: 1800-0400
+
+
+To connect to above PMBO's client software 'AirMail' 
+version 3.1.922 or later is required, available free at
+    www.airmail2000.com
+Info about the WL2K system can be found at winlink.org
+
+To subscribe to this directory, send E-mail 
+   To:   zs5s@zs5s.net
+   Subj: SUBSCRIBE PMBO
+   Text: your_call_sign
+
+This bulletin is issued on the first of each month.
+A continuously update can be found at zs5s.net
+
+- end -
+

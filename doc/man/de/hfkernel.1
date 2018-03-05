@@ -1,0 +1,202 @@
+.TH HFKERNEL 1 02/15/07
+.CM 1
+.SH "NAME"
+hfkernel \-Kurzwellen- Amateurfunk- Protokollimplementation für Soundkarte
+.SH "AUFRUF"
+.B hfkernel
+[\-2] [\-3] [\-a <audio-Gerät>] [\-c <comm socket>] [\-f] [\-h]
+[\-i] [\-k] [\-l] [\-M <Mixer>] [\-m <cpu MHz>]
+[\-n] [\-p <Ptt-Port>] [\-R] [\-r <Socket-Zugriffsrechte]
+[-s <soundcard clock correction>] [-t <gettimeofday correction>]
+[\-s <Soundkarten-Samplerate-Korrektur>] [\-t <gettimeofday Korrektur>]
+.SH "BESCHREIBUNG"
+.B hfkernel
+implementiert die Funkprotokolle Pactor 1, AMTOR (SITOR), GTOR und RTTY.
+Es benützt eine normale Soundkarte als Modem. Der
+Geschwindigkeitswechsel bei Pactor (von 100 auf 200 baud) geschieht
+automatisch nach einer automatischen Abschätzung der Signalqualität. Ein
+PTT (push to talk) -Signal kann über die RTS-Leitung einer seriellen
+Schnittstelle ausgegeben werden. 
+.B hfkernel
+hat keine eigene Benutzeroberfläche.  Dafür stellt es ein UNIX domain
+socket (Software-Schnittstelle) zur Verfügung. Dies wurde dafür
+ausgelegt, um auch den Austausch mit einem Internet domain socket zu
+ermöglichen. Das Terminalprogramm und Mailboxinterface hfterm verbindt
+sich mit diesem Socket.
+.B hfkernel
+muß mit root-Rechten ausgeführt werden, weil es im Echtzeit-Modus läuft. 
+Es wird aber mit dem suid-Bit installiert, und das Startskript hf
+vereinfacht den kombinierten Start mit hfterm.
+.SH "OPTIONEN"
+.TP
+.I \-2
+Im Standby-Modus 200 Baud nicht decodieren
+.TP
+.I \-3
+Im Standby-Modus 300 Baud nicht decodieren
+.TP
+.I \-a
+Pfad zum Audio-Gerät (Default für OSS: /dev/dsp)
+(für den ALSA-Treiber versuche -a plughw:0,0)
+.TP
+.I \-c
+Pfad zur Software-Schnittstelle (Default: /var/run/hfapp)
+.TP
+.I \-f
+Im Standby-Modus keine Frequenznachstellung (frequency tracking)
+.TP
+.I \-h
+Halbduplex erzwingen (läuft mit manchen Soundkarten besser)
+(nur für OSS)
+.TP
+.I \-i
+invertiert PTT-Impuls
+.TP
+.I \-k
+Hfkernel beenden (wird im Startskript hf verwendet)
+.TP
+.I \-l
+Einträge in Logdatei (Default: keine)
+.TP
+.I \-M
+Pfad zum Mixergerät 
+.TP
+.I \-m
+CPU-Uhr in MHz (auf khz genau)
+.TP
+.I \-n
+Verzicht auf 'mmap()' (kein direkter Zugriff auf Soundkartenpuffer).
+Experimentell! Für manche Soundkarten, die (oder deren Treiber) mmap
+nicht richtig unterstützen. (nur für OSS)
+.TP
+.I \-p
+Pfad zur seriellen Schnittstelle für die PTT-Ausgabe (Default: keiner)
+.TP
+.I \-R
+deaktiviert den Gebrauch der RDTSC-Instruction (nur bei Intel-Systemen).
+Die Verwendung der RDTSC-Instruktion kann bei Laptops und/oder 
+bei aktiviertem APM (Advanced Power Management) Probleme verursachen.
+.TP
+.I \-r
+Zugangsrechte zur Software-Schnittstelle (Default: 0777 = rwxrwxrwx)
+.TP
+.I \-s
+Korrektur der soundcard sampling rate
+.TP
+.I \-t
+gettimeofday - Korrekturfaktor (Zeitbestimmung über Prozessortaktrate)
+.SH "ECHTZEIT - PROBLEME"
+Kurzwellenprotokolle sind normalerweise synchron. Sie benötigen eine
+exakte Zeitquelle, um auch bei längeren Unterbrechungen der Übertragung
+bitsynchron zu bleiben. Z.B. fordert das SITOR-Protokoll (ähnlich
+AMTOR), daß die Referenzzeitquelle nicht mehr als 20 ppm vom Idealwert
+abweichen darf. Es ist schwierig, eine so exakte Zeitquelle zu finden.
+Deshalb erfordern alle Optionen, die in dieser Implementation gewählt
+werden können, eine manuelle Einstellung.
+.PP
+Wenn die Soundkarte voll-duplex-fähig ist, wird die Referenzzeit von der
+Sample-Uhr der Soundkarte abgeleitet. Um unzutreffende Informationen des
+OSS-Treibers über die Sample-Rate zu korrigieren, kann die Option -s
+benützt werden. Die Soundkarte sollte echte Quarze statt billiger
+keramischer Resonatoren enthalten.
+.PP
+Wenn die Soundkarte nicht voll-duplex-fähig ist, kann die o.g. Methode
+nicht angewandt werden. Auf Intel-Architekturen testet das Programm die
+Prozessorinstruktion RDTSC (read time stamp counters, lese
+Zeitmarkenzähler), um zu sehen ob sie  verfügbar ist und arbeitet (auf
+Pentium-Computern und neueren sollte dies der Fall sein). Diese Zähler
+inkrementieren im Takt der CPU-Clock, deshalb muß dem Programm die auf
+khz exakte Frequenz der CPU-Uhr bekannt sein (Option -m). Laß Dich nicht
+von Werbegags irreführen, z.B. läuft ein AMD K5 PR133  auf 100MHz.
+.PP
+Auf Nicht-Intel-Systemen, oder wenn die RDTSC-Instruktion nicht 
+verfügbar ist oder nicht arbeitet, verwenden wir gettimeofday - in der 
+Hoffnung daß das tv_usec -Feld genau genug ist.  Systematische
+Frequenzabweichungen könnten mit der Option -t korrigiert werden.
+.SH "UHR-KALIBRIERUNG"
+Wenn Du den deutschen Zeitnormal- und Referenzfrequenzsender 
+DCF77 empfangen kannst, kann das  
+.B dcf77
+- Programm benutzt werden, um die Kalibrierfaktoren zu messen.
+Stelle Deinen Empfänger auf 78.5kHz LSB (oder 76.5kHz USB) 
+und starte 
+.B dcf77
+(vorzugsweise als root). Nach 1-2 Minuten (unter störungs-
+freien Bedingungen) sollte das Programm die DCF77-Zeit ermittelt
+haben. Von da an warte etwa 15 Minuten und schreibe die Messungen auf.
+.PP
+Der Schweizer Zeitnormalsender HBG bei 75kHz könnte vermutlich auch
+verwendet werden, aber ich kenne das genaue Format seiner Übertragung
+nicht (es scheint dem des DCF77 sehr ähnlich zu sein).
+.PP
+Wenn Du weder DCF77 noch HBG empfangen kannst, benütze 
+.B refclock
+und eine bekannte exakte Zeitquelle im Bereich von 200Hz-20kHz.
+Eine in den meisten Haushalten bereitstehende und normalerweise
+sehr genaue Quelle ist die Zeilenfrequenz-Synchronisation eines gewöhnlichen
+Fernsehempfängers. So weit ich weiß, wird die Zeilenfrequenz des
+ZDF auch von Behörden als Zeitnormal benutzt. Stelle Deinen 
+Fernseher (mit Video-Grundfrequenzausgang) auf einen Kanal ein 
+und leite den Videoausgang an die Soundkarte.
+Starte 
+.B "reffreq \-f 15625"
+als root. Nach einigen Sekunden sollte das Programm die 
+Korrekturparameter ermittelt haben. (Die oben angegebene Kommando-
+zeile setzt das PAL-format mit seiner Zeilenfrequenz von 15625 Hz
+voraus. Für andere Formate verwende die entsprechende Frequenz.)
+.SH "SOUNDKARTE"
+Die Soundkarte muß vom OSS-Treiber unterstützt werden. 
+Sie muß 16-Bit-Sampling in der Byteordnung der CPU, 8kHz
+Sampling-Rate, memory mapping der DMA-Puffers and triggering unterstützen.
+Eine Voll-Duplex-Soundkarte ist vorzuziehen.
+.PP
+Halb-Duplex-Soundkarten müssen umgeschaltet werden, wenn das  Protokoll
+vom Empfangen zum Senden und umgekehrt übergeht. Das dauert recht lang,
+zwischen 5 und 35 ms. Das Program mißt die durchschnittliche Zeit beim
+Start. Es versucht, diese Latenz in der PTT-Auftastverzögerung
+(TXDelay) zu verstecken, also stelle das txdelay auf einen größeren Wert
+ein! Und hoffe, daß die Summe aus Ausbreitungszeit zu Deinem Funkpartner 
+und dessen txdelay auch länger ist.
+.PP
+Die Audio-Level und -Parameter können mit den üblichen Mixer-
+Programmen eingestellt werden. Das eingebaute AGC sollte ausgeschaltet
+sein.
+.SH "UNTERSTÜTZTE PROTOKOLLE"
+Derzeit werden RTTY, Amtor, GTOR und Pactor 1 unterstützt. 
+Landesspezifische Zeichensätze werden wegen mangelnder Dokumentation 
+nur begrenzt unterstützt.
+.SH "BEGRENZUNGEN"
+Alle implementierten Protokolle sind von Natur aus nicht sehr robust und 
+nicht perfekt. Memory ARQ, das Ausmitteln von Fehlern durch
+Durchschnittsbildung wiederholter Pakete bei Pactor, ist implementiert,
+aber das Grundkonzept ist fehlerhaft. Seine Erfinder gingen davon aus,
+daß Signal-Rausch-Abstände bei Wiederholung  eines Paketes gleich
+bleiben, was gewöhnlich nicht zutrifft. Bessere  Korrekturalgorithmen
+sollten Testbits verwenden, die dem Empfänger bekannt sind und ihn
+befähigen, die Übertragungsqualität einzuschätzen und wiederholte
+Sendungen entsprechend zu gewichten.  Die Synchronisierung reagiert
+evtl. zu schnell.
+.PP
+Das Programm reagiert empfindlich auf andere laufende Prozesse. Der
+Grund dafür ist, daß Prozesse - auch im Echtzeitmodus - nur laufen,
+nachdem alle Interruptroutinen  und 'bottom halfs' des Betriebssystems
+fertig sind. In Abhängigkeit von Computertaktrate und Treibern kann das 
+lang dauern, mehr als 100ms. Mehr als 10ms stört diese  Anwendung schon
+sehr. Deswegen sollte L1 (FSK-Modem) am besten in die  Kernel-Ebene
+verlagert werden. Jedoch gefällt mir im Moment die Idee  nicht, noch
+einmel einen Soundkartentreiber zu entwickeln....
+.SH "SIEHE AUCH..."
+Die Dokumentation des Pactor 1 -Protokolls  (z.B.
+/usr/local/info/pactor.txt), die CCIR-Dokuumente zur Definition von
+SITOR (AMTOR), die OSS- und ALSA-Dokumentation. 
+Die ausführlichere Dokumentation zur aktuellen Version des hf-Paketes
+ist in /usr/share/doc/packages/hf oder über das Hilfemenü von hfterm zu
+finden!
+man dcf77rx, man dcf77gen,
+man hfkernel, man hf und auch diese manpage sind nur kurze Einführungen und 
+können nicht regelmäßig aktualisiert werden!
+.SH BUGS
+oder Ecken werden sicher zu finden sein...
+.SH AUTOR
+Thomas M. Sailer, HB9JNX/AE4WA, sailer@ife.ee.ethz.ch
+übersetzt und ergänzt 30.07.2004 von Günther Montag dl4mge@darc.de

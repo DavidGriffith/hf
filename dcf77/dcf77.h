@@ -29,11 +29,14 @@
 
 /* --------------------------------------------------------------------- */
 
-#include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <stdio.h>
 
 /* --------------------------------------------------------------------- */
 
 #define SAMPLE_RATE  8000
+/*#define CARRIER_FREQ 1000*/
 #define CARRIER_FREQ 1000
 #define PN_FREQ      77500/120
 #define PN_PERIOD    120/77500
@@ -62,6 +65,7 @@ extern unsigned int verboselevel;
 
 /* audioout.c */
 extern void audio_out(const char *name_audio, const struct modulator *mod);
+extern void oss_nommap_audio_out(const char *name_audio, const struct modulator *mod);
 extern void audio_stdout(const char *name_audio, const struct modulator *mod);
 
 /* dcfmod.c */
@@ -82,9 +86,11 @@ extern void tc_start(void);
 extern void tc_now(unsigned int minus_samples);
 extern void tc_advance_samples(unsigned int s);
 extern void tc_minute(time_t curtime, unsigned int samples);
+void output();
 
 /* audioin.c */
 extern void audio_in(const char *name_audio, const struct demodulator *dem);
+extern void oss_nommap_audio_in(const char *name_audio, const struct demodulator *dem);
 extern void audio_stdin(const char *name_audio, const struct demodulator *dem);
 
 /* timedec.c */
@@ -102,7 +108,9 @@ extern const struct demodulator hbg_demodulator;
 /* --------------------------------------------------------------------- */
 
 /* dcf77gen.c and dcf77rx.c */
-extern const int lsb_mode;
+extern int lsb_mode;
+extern int use_mmap;
+extern int set_time;
 
 /* --------------------------------------------------------------------- */
 

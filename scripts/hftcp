@@ -1,0 +1,72 @@
+#!/bin/sh
+# test script for remote control with hf
+# install me as an inetd service, see HF-HOWTO
+# by Günther Montag dl4mge
+
+rc_done="\033[71G\033[32mdone\033[m"
+rc_failed="\033[71G\033[31m\033[1mfailed\033[m"
+
+function help {
+echo "
+hftcp
+Command:
+h	help
+r	read mail
+s	send mail
+b	shell 
+l	launch the missiles
+p	send global peace message 
+q	quit "
+}
+
+help
+EX=
+tmpfile=/tmp/hftcp
+while [ 1 ];
+do
+    echo -n "hftcp:> "
+    read command
+    case $command in
+	h) help
+	;;
+	r) mail
+	;;
+	s) 
+	    rm -f $tmpfile
+	    touch $tmpfile
+	    
+	    EX=
+	    echo -n "to ? "
+	    read to
+	    echo -n "cc ? "
+	    read cc
+	    echo -n "bc ? "
+	    read bc
+	    echo -n "subject ? "
+	    read subject
+	    echo  "enter text. Quit with /EX ! "
+	    while [ ! $EX ] ;
+	    do
+		read moretext
+		if [ "$moretext" == "/EX" ] ;  then
+		    EX=1
+		else
+		    echo -n $moretext >> $tmpfile
+		fi
+	    done
+	    mail -s $subject -c $cc -b $bc $to  < $tmpfile
+	;;
+	b) echo "I will start sh. Quit with exit."
+	    /bin/sh
+	;;
+	l) echo -e No ! $rc_failed
+	;;
+	p) sleep 1 && echo -e Transmission of World-wide Peace Message "$rc_done"
+	;;
+	q)  rm -f $tmpfile
+	    exit 0
+	;;
+	*) echo unknown command
+	;;
+    esac
+done

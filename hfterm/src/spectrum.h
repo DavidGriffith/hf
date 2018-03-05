@@ -24,6 +24,39 @@
 #include <gdk/gdk.h>
 #include <gtk/gtkwidget.h>
 
+#define SPEC_WIDTH   460 // 512
+#define SPEC_HEIGHT 330 //384
+
+extern void spec_samples(short *data, unsigned int len);
+void spec_samples(short *data, unsigned int len);
+unsigned int get_freq_shift(void);
+void set_freq_shift(int shift);
+void set_fsk_freq(unsigned int mark, unsigned int space);
+void scope_window(int on) ;
+void scope_draw(float *data);
+
+/*
+static void spectrum_class_init(SpectrumClass *klass);
+static void spectrum_init(Spectrum *spec);
+static void spectrum_finalize(GtkObject *object);
+static gint spectrum_expose(GtkWidget *widget, GdkEventExpose *event);
+static void spectrum_realize(GtkWidget *widget);
+static void spectrum_unrealize(GtkWidget *widget);
+static void spectrum_size_allocate(GtkWidget *widget, GtkAllocation *allocation);
+static void spectrum_send_configure (Spectrum *spec);
+static gint idle_callback(gpointer data);
+*/
+
+extern int scope_on;
+extern guint squelch;
+extern int squelchpercent;
+extern int squelch_passed_fsk;
+extern int squelch_passed_cw;
+extern int squelch_passed_mt36_500_1000;
+extern int squelch_passed_mt36_1000_1500;
+extern int squelch_passed_mt36_1500_2500;
+/* last 2 prepared for mt63_bandwidth_auto_detect() to come in sha allah ! */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -47,15 +80,16 @@ struct _Spectrum
 	guint idlefunc;
 	GdkGC *trace_gc;
 	GdkGC *grid_gc;
+	GdkGC *squelch_gc;
 	GdkGC *space_gc;
 	GdkGC *mark_gc;
 	GdkGC *pointer_gc;
 	GdkColor tracecol;
-	GdkColor gridcol;
-	GdkColor spacecol;
+        GdkColor gridcol;
+	GdkColor squelchcol;
+        GdkColor spacecol;
 	GdkColor markcol;
 	GdkColor pointercol;
-
 	GdkPixmap *pixmap;
 
 	/* marker */
@@ -74,6 +108,7 @@ struct _SpectrumClass
 
 
 guint spectrum_get_type(void);
+
 GtkWidget* spectrum_new(const char *name, void *dummy0, void *dummy1, unsigned int dummy2, unsigned int dummy3);
 void spectrum_setdata(Spectrum *spec, short *samples);
 void spectrum_setmarker(Spectrum *spec, int space, int mark, int pointer);

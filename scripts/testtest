@@ -1,0 +1,10 @@
+#!/bin/bash
+# test for test and grep and tail ....
+grepstring=`ps -a | grep hfkernel  | grep -v grep | tail -n 1 | tail -c -9`
+echo grepstring = $grepstring
+if [ -z $grepstring ] ; then
+    echo hfkernel not running
+else
+    echo hfkernel running
+fi
+exit 0

@@ -78,11 +78,18 @@ static void encode(void)
 	u = (1 << 20) | 0x3ff | (t.antenna << 15) | (t.ann_zone << 16) |
 		(t.zone << 17) | (t.ann_leapsec << 19);
 	t.bits |= u;
-	vlprintf(1, "Transmitting time: %2u:%02u:%02u  %.3s %2u.%02u.%02u  zone:%4s ant:%c annz:%c "
-		 "annls:%c\n", tm->tm_hour, tm->tm_min, tm->tm_sec, "SunMonTueWedThuFriSat"+3*tm->tm_wday,
-		 tm->tm_mday, tm->tm_mon, tm->tm_year, t.zone == ZONE_MESZ ? "MESZ" : "MEZ",
-		 t.antenna ? 'R' : 'N', t.ann_zone ? '+' : ' ', t.ann_leapsec ? '+' : ' ');
+	vlprintf(1, "Transmitting time: %2u:%02u:%02u  %.3s %2u.%02u.%02u"
+		"\n\t     zone:%4s ant:%c annz:%c "
+		"annls:%c\n", tm->tm_hour, tm->tm_min, tm->tm_sec, 
+		"SunMonTueWedThuFriSat"+3*tm->tm_wday,
+		 tm->tm_mday, tm->tm_mon + 1, 
+		 tm->tm_year + 1900, t.zone == ZONE_MESZ ? "MESZ" : "MEZ",
+		 t.antenna ? 'R' : 'N', t.ann_zone ? '+' : ' ', 
+		 t.ann_leapsec ? '+' : ' ');
 }
+//      corrected tm_mon to tm_mon + 1 and added 
+// 	the +1900 to tm_year by günther to change output "Sat 12 May 104" to 
+// 	"Sat 12 June 2004" on this day
 
 /* --------------------------------------------------------------------- */
 
