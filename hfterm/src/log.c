@@ -297,11 +297,11 @@ void log_store()
 	  {
 	    // ein biﬂchen cabrillo-adaptiert
 	    sprintf(logrow, "%s %s\t%s\t%s\t%s %s out %s in %s %s\n",  				lb.line[i].time,  lb.line[i].call, lb.line[i].name, 				lb.line[i].qth, lb.line[i].band, lb.line[i].mode,
-	    	lb.line[i].rstout, lb.line[i].rstin, lb.line[i].notes);	  
-	    strcat(logtxt, logrow); 	  
+	    	lb.line[i].rstout, lb.line[i].rstin, lb.line[i].notes);
+	    strcat(logtxt, logrow);
 	  }
-	  fprintf(logtxtfile, logtxt);	    
-	  fclose(logtxtfile);	
+	  fprintf(logtxtfile, "%s", logtxt);
+	  fclose(logtxtfile);
 	display_status("log stored.");
 	}
 }
