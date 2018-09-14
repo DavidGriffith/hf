@@ -319,18 +319,8 @@ void start_l2_thread(void *(*routine)(void *))
 	}
 	crashblock = 1;
 	
-	res =(pthread_cancel(thr_l2));
-	//res =(pthread_kill(thr_l2, NULL));
-	//kill does not work
-	
-	if (res){
-	    if (res == ESRCH) {
-	    	errstr(SEV_INFO, "pthread_cancel: no l2 thread was running");
-		res = 0;
-	    } else {
-		errstr(SEV_WARNING, "pthread_cancel l2 thread: unknown error");
-	    }
-	}
+	//res =(pthread_cancel(thr_l2));
+	res =(pthread_kill(thr_l2, 0));
 	
 	if (!res) {
 	    if (pthread_join(thr_l2, NULL))
