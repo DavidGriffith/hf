@@ -213,8 +213,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-configdir = /usr/local/etc
-scripts = hf hftcp ratetry 
+configdir = ${prefix}/etc
+scripts = hf hftcp ratetry
 configfiles = calibrations
 EXTRA_DIST = $(configfiles) $(scripts) testtest htmlup
 all: all-am

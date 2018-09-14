@@ -1,5 +1,5 @@
-configdir = /usr/local/etc
-scripts = hf hftcp ratetry 
+configdir = ${prefix}/etc
+scripts = hf hftcp ratetry
 configfiles = calibrations
 
 EXTRA_DIST = $(configfiles) $(scripts) testtest htmlup
