@@ -319,10 +319,10 @@ void start_l2_thread(void *(*routine)(void *))
 	}
 	crashblock = 1;
 	
-	//res =(pthread_cancel(thr_l2));
-	res =(pthread_kill(thr_l2, 0));
-	
-	if (!res) {
+
+	// hack to check whether thread is alive, because glibc maintainers
+	// are morons
+	if (pthread_tryjoin_np(thr_l2, NULL) == EBUSY) {
 	    if (pthread_join(thr_l2, NULL))
 		errstr(SEV_WARNING, "pthread_join l2 thread");
 	}
