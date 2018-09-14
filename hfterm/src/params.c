@@ -173,13 +173,13 @@ void param_get(void)
 	"soundcardvalue"));
 	strncpy(par, gtk_entry_get_text(entry), sizeof(par));
 	if (!par[0]) sprintf(par, "none");
- 	strncpy(params.general.soundcard, par, sizeof(par));
+ 	strncpy(params.general.soundcard, par, sizeof(params.general.soundcard));
  	
 	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar),
 	"serialvalue"));
 	strncpy(par, gtk_entry_get_text(entry), sizeof(par));
 	if (!par[0]) sprintf(par, "none");
- 	strncpy(params.general.serial, par, sizeof(par));
+ 	strncpy(params.general.serial, par, sizeof(params.general.serial));
  	
 	entry = GTK_ENTRY(gtk_object_get_data(GTK_OBJECT(wpar),
 	"kerneloptions"));
