@@ -118,7 +118,7 @@ void errprintf(int severity, const char *fmt, ...)
         if (logging) {
                 char tmp[512];
                 vsnprintf(tmp, sizeof(tmp), fmt, args);
-                syslog(severity, tmp);
+                syslog(severity, "%s", tmp);
         } else {
                 fprintf(stderr, "hfkernel[%u]: ", getpid());
                 vfprintf(stderr, fmt, args);
