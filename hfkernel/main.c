@@ -97,7 +97,7 @@ unsigned int standby_flags =
   STANDBY_FLAG_FREQ_ESTIMATION|STANDBY_FLAG_MONITOR_200|STANDBY_FLAG_MONITOR_300;
 unsigned int comm_perm = S_IRWXU|S_IRWXG|S_IRWXO;
 extern int brake, elbug_rts;
-pthread_t thr_l2;
+pthread_t thr_l2 = NULL;
 int fd_audio = -1, fd_mixer = -1, fd_ptt = -1;
 pthread_t thr_l1;
 int samples_remain = 0;

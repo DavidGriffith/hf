@@ -322,9 +322,10 @@ void start_l2_thread(void *(*routine)(void *))
 
 	// hack to check whether thread is alive, because glibc maintainers
 	// are morons
-	if (pthread_tryjoin_np(thr_l2, NULL) == EBUSY) {
+	if (thr_l2 != NULL) {
 	    if (pthread_join(thr_l2, NULL))
 		errstr(SEV_WARNING, "pthread_join l2 thread");
+	    thr_l2 = NULL;
 	}
 	
 	// switch fsk sound loop on / off 
@@ -377,6 +378,7 @@ static void ori_start_l2_thread(void *(*routine)(void *))
 		errstr(SEV_FATAL, "pthread_cancel");
 	if (pthread_join(thr_l2, NULL))
 		errstr(SEV_FATAL, "pthread_join");
+	thr_l2 = NULL;
 	if (pthread_attr_init(&thr_attr))
 		errstr(SEV_FATAL, "pthread_attr_init");
 #ifndef NOREALTIME
