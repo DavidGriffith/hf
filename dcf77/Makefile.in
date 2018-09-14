@@ -337,7 +337,7 @@ mktables_LDADD = -lm
 dcf77rx_SOURCES = dcf77rx.c
 dcf77rx_LDADD = libdcf.a
 dcf77gen_SOURCES = dcf77gen.c
-dcf77gen_LDADD = libdcf.a df77rx.o
+dcf77gen_LDADD = libdcf.a
 all: all-am
 
 .SUFFIXES:
