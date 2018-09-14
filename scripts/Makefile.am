@@ -1,4 +1,4 @@
-configdir = ${prefix}/etc
+configdir = /etc
 scripts = hf hftcp ratetry
 configfiles = calibrations
 
