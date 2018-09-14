@@ -158,7 +158,7 @@ struct {
 
 #define TMSIZE (sizeof(as.tm.devflt)/sizeof(as.tm.devflt[0]))
 
-extern __inline__ void tmg_clear(void)
+__inline__ void tmg_clear(void)
 {
 	memset(as.tm.devflt, 0, sizeof(as.tm.devflt));
 	as.tm.ptr = 0;
@@ -751,13 +751,13 @@ static int encode_triple(void)
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ void cycle_end(void)
+__inline__ void cycle_end(void)
 {
 	as.rxtime += 450000;
 	as.txtime += 450000;
 }
 
-extern __inline__ int retry(void)
+__inline__ int retry(void)
 {
 	if ((--as.retry) <= 0)
 		return 1;

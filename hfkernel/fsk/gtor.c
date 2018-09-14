@@ -243,7 +243,7 @@ void gtor_set_params(const char *destcall, const char *mycall, int txd, int retr
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ unsigned int get_crc_preset(int pktlen)
+__inline__ unsigned int get_crc_preset(int pktlen)
 {
 	return 0xffff;
 }
@@ -660,7 +660,7 @@ static unsigned int decode_packet(unsigned char *bp, unsigned int len)
 
 #define TMSIZE (sizeof(gs.tm.devflt)/sizeof(gs.tm.devflt[0]))
 
-extern __inline__ void tmg_clear(void)
+__inline__ void tmg_clear(void)
 {
 	memset(gs.tm.devflt, 0, sizeof(gs.tm.devflt));
 	gs.tm.ptr = 0;
@@ -887,27 +887,27 @@ static void prgraph(const char *title, const int *inp, int samp)
 }
 #endif
 
-extern __inline__ void cycle_end(void)
+__inline__ void cycle_end(void)
 {
 	gs.rxtime += GTOR_CYCLE_ARQ;
 	gs.txtime += GTOR_CYCLE_ARQ;
 	gs.golay_flag = !gs.golay_flag;
 }
 
-extern __inline__ void ack_transmit(void)
+__inline__ void ack_transmit(void)
 {
 	kbd_ack();
 	gs.pkt_counter = (gs.pkt_counter + 1) & 3;
 }
 
-extern __inline__ void fec_clear(void)
+__inline__ void fec_clear(void)
 {
 	gs.rx_validmask = 0;
 	memset(gs.rx_dat, 0, sizeof(gs.rx_dat));
 	memset(gs.rx_par, 0, sizeof(gs.rx_par));
 }
 
-extern __inline__ int retry(void)
+__inline__ int retry(void)
 {
 	if ((--gs.retry) <= 0)
 		return 1;
@@ -915,7 +915,7 @@ extern __inline__ int retry(void)
 }
 
 #ifdef FREQ_TRACKING
-extern __inline__ void gtor_freq_tracking(int trk, l1_soft_t trkl, l1_soft_t trkm, l1_soft_t trkh)
+__inline__ void gtor_freq_tracking(int trk, l1_soft_t trkl, l1_soft_t trkm, l1_soft_t trkh)
 {
 	gs.rxfreqdev += trk;
 	if (!gs.is_master)

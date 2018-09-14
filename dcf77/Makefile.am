@@ -30,7 +30,7 @@ dcf77rx_SOURCES = dcf77rx.c
 dcf77rx_LDADD = libdcf.a
 
 dcf77gen_SOURCES = dcf77gen.c
-dcf77gen_LDADD = libdcf.a
+dcf77gen_LDADD = libdcf.a 
 
 costab.c:	mktables$(EXEEXT)
 	./mktables$(EXEEXT) 1 > costab.c

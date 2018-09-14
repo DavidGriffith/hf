@@ -21,7 +21,7 @@ bin_PROGRAMS = hfkernel
 hfkernel_SOURCES = main.c msg.c
 hfkernel_DEPENDANCIES =	 $(noinst_HEADERS) $(hfkernel_SOURCES) $(MYLIBS)
 hfkernel_LDADD = $(MYLIBS) \
-	$(OSLIBS) $(SOCKLIBS) $(THRLIBS) $(SCHEDLIBS) $(ALSALIBS) -lstdc++
+	$(OSLIBS) $(SOCKLIBS) $(THRLIBS) $(SCHEDLIBS) $(ALSALIBS) -lstdc++ -lm -lpthread
 
 install-exec-hook:
 	chmod 4755 $(DESTDIR)$(bindir)/hfkernel 

@@ -89,7 +89,7 @@ static const int filt_coeff[2*FILTER_N] = {
        -1930, -503, 221, -736, -1295, -33, 48, 465
 };
 
-extern __inline__ short calc_filter(short new)
+__inline__ short calc_filter(short new)
 {
 	const int *c = filt_coeff + FILTER_N;
 	int *s = m.f.state;

@@ -256,7 +256,7 @@ void pactor_mode_speedup(void)
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ unsigned int get_crc_preset(int pktlen)
+__inline__ unsigned int get_crc_preset(int pktlen)
 {
 	switch (pktlen) {
 	case 23:
@@ -611,7 +611,7 @@ static int encode_packet(int pktlen)
 
 #define TMSIZE (sizeof(ps.tm.devflt)/sizeof(ps.tm.devflt[0]))
 
-extern __inline__ void tmg_clear(void)
+ __inline__ void tmg_clear(void)
 {
 	memset(ps.tm.devflt, 0, sizeof(ps.tm.devflt));
 	ps.tm.ptr = 0;
@@ -657,7 +657,7 @@ extern __inline__ void marq_clear(void)
  * misc utility functions
  */
 
-extern __inline__ void cycle_end(void)
+ __inline__ void cycle_end(void)
 {
 	ps.rxtime += PACTOR_CYCLE_ARQ;
 	ps.txtime += PACTOR_CYCLE_ARQ;
@@ -665,14 +665,14 @@ extern __inline__ void cycle_end(void)
 	ps.txinv = !ps.txinv;
 }
 
-extern __inline__ void ack_transmit(void)
+__inline__ void ack_transmit(void)
 {
 	kbd_ack();
 	ps.pkt_counter = (ps.pkt_counter + 1) & 3;
 	ps.cur_hdr ^= 0xff;
 }
 
-extern __inline__ int retry(void)
+__inline__ int retry(void)
 {
 	if ((--ps.retry) <= 0)
 		return 1;
@@ -680,7 +680,7 @@ extern __inline__ int retry(void)
 }
 
 #ifdef FREQ_TRACKING
-extern __inline__ void pct_freq_tracking(int trk, l1_soft_t trkl, l1_soft_t trkm, l1_soft_t trkh)
+__inline__ void pct_freq_tracking(int trk, l1_soft_t trkl, l1_soft_t trkm, l1_soft_t trkh)
 {
 	ps.rxfreqdev += trk;
 	if (!ps.is_master)
@@ -1534,7 +1534,7 @@ tx_rx_200:
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ void guess_crc(unsigned char *pkt, unsigned int len)
+__inline__ void guess_crc(unsigned char *pkt, unsigned int len)
 {
 #ifdef STANDBY_CRC_PRINT
 	unsigned char buf[24];

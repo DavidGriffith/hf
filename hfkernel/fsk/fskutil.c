@@ -109,4 +109,107 @@ long soft_time_dev(l1_soft_t *inp, int nbits, int spacing, l1_time_t tinc)
 	return tacc / trcnt;
 }
 
+__inline__ unsigned int hweight32(unsigned int w) 
+{
+        unsigned int res = (w & 0x55555555) + ((w >> 1) & 0x55555555);
+        res = (res & 0x33333333) + ((res >> 2) & 0x33333333);
+        res = (res & 0x0F0F0F0F) + ((res >> 4) & 0x0F0F0F0F);
+        res = (res & 0x00FF00FF) + ((res >> 8) & 0x00FF00FF);
+        return (res & 0x0000FFFF) + ((res >> 16) & 0x0000FFFF);
+}
+
+__inline__ unsigned int hweight16(unsigned short w)
+{
+        unsigned short res = (w & 0x5555) + ((w >> 1) & 0x5555);
+        res = (res & 0x3333) + ((res >> 2) & 0x3333);
+        res = (res & 0x0F0F) + ((res >> 4) & 0x0F0F);
+        return (res & 0x00FF) + ((res >> 8) & 0x00FF);
+}
+
+__inline__ unsigned int hweight8(unsigned char w)
+{
+        unsigned short res = (w & 0x55) + ((w >> 1) & 0x55);
+        res = (res & 0x33) + ((res >> 2) & 0x33);
+        return (res & 0x0F) + ((res >> 4) & 0x0F);
+}
+
+__inline__ void soft_to_hard(const int *inp, unsigned char *out, 
+				    int nsamp, int spacing, int inv)
+{
+	unsigned char mask = 1;
+	unsigned char invm = inv ? 0 : 0xff;
+
+	memset(out, 0, (nsamp + 7) >> 3);
+	while (nsamp > 0) {
+		*out |= ((*inp >> 31) ^ invm) & mask;
+		mask <<= 1;
+		if (mask == 0) {
+			mask = 1;
+			out++;
+		}
+		inp += spacing;
+		nsamp--;
+	}
+}
+
+__inline__ void invert(unsigned char *c, int len)
+{
+	for (; len > 0; len--, c++)
+		*c ^= 0xff;
+}
+
+__inline__ int freq_tracking(l1_soft_t *inmid, l1_soft_t *inlo, 
+				    l1_soft_t *inhi, int nbits,
+				    int spacing, l1_soft_t *valmid, 
+				    l1_soft_t *vallo, l1_soft_t *valhi)
+{
+	l1_soft_t vm = 0, vl = 0, vh = 0;
+
+	for (; nbits > 0; nbits--, inmid += spacing, inlo++, inhi++) {
+		if (*inmid > 0) {
+			vm += *inmid;
+			vl += *inlo;
+			vh += *inhi;
+		} else {
+			vm -= *inmid;
+			vl -= *inlo;
+			vh -= *inhi;
+		}
+	}
+	*valmid = vm;
+	*vallo = vl;
+	*valhi = vh;
+	if (vm > vl && vm > vh)
+		return 0;
+	if (vl > vh)
+		return -1;
+	return 1;
+}
+
+__inline__ unsigned int calc_crc_ccitt(unsigned char *data, int len,
+					      unsigned int preset)
+{
+        unsigned int crc = preset;
+        
+        for(; len > 0; len--, data++)
+                crc = ((crc >> 8) & 0xff) ^
+                        crc_ccitt_table[(crc ^ *data) & 0xff];
+        return (~crc) & 0xffff;
+}
+
+
+__inline__ unsigned int gtor_calc_crc_ccitt(unsigned char *data, 
+						    int len, 
+						   unsigned int preset)
+{
+        unsigned int crc = preset;
+        
+        for(; len > 2; len--, data++)
+                crc = ((crc >> 8) & 0xff) ^
+                        crc_ccitt_table[(crc ^ *data) & 0xff];
+	crc = ((crc >> 8) & 0xff) ^ crc_ccitt_table[(crc ^ data[1]) & 0xff];
+	crc = ((crc >> 8) & 0xff) ^ crc_ccitt_table[(crc ^ data[0]) & 0xff];
+	return (~crc) & 0xffff;
+}
+
 /* --------------------------------------------------------------------- */

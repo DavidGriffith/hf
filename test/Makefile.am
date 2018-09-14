@@ -4,9 +4,9 @@ EXTRA_DIST = freqdev.m ggtest.m golay.m  \
 if HAVEALSA
 ALSA = alsafdx alsalatency
 alsafdx: alsafdx.c
-	gcc alsafdx.c -o alsafdx -lasound
+	gcc alsafdx.c -o alsafdx -lasound -lm
 alsalatency: alsalatency.c
-	gcc alsalatency.c -o alsalatency -lasound
+	gcc alsalatency.c -o alsalatency -lasound -lm
 else
 ALSA = 
 endif

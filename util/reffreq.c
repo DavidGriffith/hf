@@ -47,7 +47,7 @@
 #include <stdlib.h>
 #ifdef __linux__
 #include <sys/soundcard.h>
-#include <asm/page.h>
+//#include <asm/page.h>
 #include <endian.h>
 #endif
 

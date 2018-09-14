@@ -144,99 +144,21 @@ extern const unsigned int pn_tab[PN_LENGTH>>PN_LOGWORDSIZE];
  * misc utility functions
  */
 
-extern __inline__ unsigned int hweight32(unsigned int w) 
-{
-        unsigned int res = (w & 0x55555555) + ((w >> 1) & 0x55555555);
-        res = (res & 0x33333333) + ((res >> 2) & 0x33333333);
-        res = (res & 0x0F0F0F0F) + ((res >> 4) & 0x0F0F0F0F);
-        res = (res & 0x00FF00FF) + ((res >> 8) & 0x00FF00FF);
-        return (res & 0x0000FFFF) + ((res >> 16) & 0x0000FFFF);
-}
-
-extern __inline__ unsigned int hweight16(unsigned short w)
-{
-        unsigned short res = (w & 0x5555) + ((w >> 1) & 0x5555);
-        res = (res & 0x3333) + ((res >> 2) & 0x3333);
-        res = (res & 0x0F0F) + ((res >> 4) & 0x0F0F);
-        return (res & 0x00FF) + ((res >> 8) & 0x00FF);
-}
-
-extern __inline__ unsigned int hweight8(unsigned char w)
-{
-        unsigned short res = (w & 0x55) + ((w >> 1) & 0x55);
-        res = (res & 0x33) + ((res >> 2) & 0x33);
-        return (res & 0x0F) + ((res >> 4) & 0x0F);
-}
+extern __inline__ unsigned int hweight32(unsigned int w);
+extern __inline__ unsigned int hweight16(unsigned short w);
+extern __inline__ unsigned int hweight8(unsigned char w);
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ unsigned int zero_run_length(unsigned int bits)
-{
-        unsigned int res = 0;
-        
-        if (!bits)
-                return 32;
-        if (!(bits & 0xffff)) {
-                bits >>= 16;
-                res += 16;
-        }
-        if (!(bits & 0xff)) {
-                bits >>= 8;
-                res += 8;
-        }
-        if (!(bits & 0xf)) {
-                bits >>= 4;
-                res += 4;
-        }
-        if (!(bits & 0x3)) {
-                bits >>= 2;
-                res += 2;
-        }
-        return res + !(bits & 1);
-}
+extern __inline__ unsigned int zero_run_length(unsigned int bits);
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ unsigned int dcf_pn_advance(unsigned int *st)
-{
-	*st &= 0x1ff;
-	if (!*st) {
-		*st = 1;
-		return 0;
-	}
-	*st <<= 1;
-	*st |= ((*st >> 5) ^ (*st >> 9)) & 1;
-	return (*st) & 1;
-}
+extern __inline__ unsigned int dcf_pn_advance(unsigned int *st);
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ int ld2(unsigned int x)
-{
-	int res = 0;
-
-	if (!x)
-		return -1;
-	if (x >= 0x10000) {
-		res += 16;
-		x >>= 16;
-	}
-	if (x >= 0x100) {
-		res += 8;
-		x >>= 8;
-	}
-	if (x >= 0x10) {
-		res += 4;
-		x >>= 4;
-	}
-	if (x >= 0x4) {
-		res += 2;
-		x >>= 2;
-	}
-	if (x >= 0x2)
-		res += 1;
-	return res;
-}
+extern __inline__ int ld2(unsigned int x);
 
 /* --------------------------------------------------------------------- */
 #endif /* _DCF77_H */

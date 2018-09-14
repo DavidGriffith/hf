@@ -91,7 +91,7 @@ static void dem_init(unsigned int sample_rate)
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
+__inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
 {
 	if (bit == 0) {
 		if (d.t.dcnt >= 59)
@@ -109,7 +109,7 @@ extern __inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ void dcf77_process_ampl(int si, unsigned int samples)
+__inline__ void dcf77_process_ampl(int si, unsigned int samples)
 {
 	static int rodcnt = 0;
 	char* rod = "|/-\\ ";

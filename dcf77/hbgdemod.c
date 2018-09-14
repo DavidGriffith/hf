@@ -90,7 +90,7 @@ static void hbg_init(unsigned int sample_rate)
 
 /* --------------------------------------------------------------------- */
 
-extern __inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
+__inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
 {
 	vlprintf(2, "Decode Bit: %u  Cnt: %u\n", bit, d.t.dcnt);
 	if (bit == 0) {
