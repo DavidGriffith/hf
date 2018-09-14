@@ -25,10 +25,10 @@ echo "I look for them in $bindir. If wrong, edit me."
 function startkernel {
 echo "
 I will run now:
-LD_ASSUME_KERNEL=2.2.5 $bindir/hfkernel
+$bindir/hfkernel
 You can stop the hfkernel with <Strg> c
 "
-LD_ASSUME_KERNEL=2.2.5 $bindir/hfkernel
+$bindir/hfkernel
 };
 
 ## Hint and exit if options given by mistake: #################################
@@ -95,7 +95,7 @@ if  [ $DISPLAY ] ; then
     fi
     echo "You called me under X, and not as root.
 I will start $bindir/hfterm. Then hfterm will start hfkernel."
-LD_ASSUME_KERNEL=2.2.5 $bindir/hfterm
+$bindir/hfterm
 fi
 
 ## Cleanup ####################################################################
