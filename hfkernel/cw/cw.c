@@ -37,7 +37,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef __linux__
+#ifdef HAVE_SYS_IO_H
 #include <sys/io.h>
+#endif
 #define IOPERM ioperm
 #define TTY0    "/dev/ttyS0"
 #define TTY1    "/dev/ttyS1"

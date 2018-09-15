@@ -30,10 +30,12 @@
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef __linux__
+#ifdef HAVE_SYS_IO_H
 #include <sys/io.h>
+#endif
 #define IOPERM ioperm
 #endif
-#ifdef __FreeBSD__ 
+#ifdef __FreeBSD__
 #include <machine/cpufunc.h>
 #include <machine/sysarch.h>
 #include <sys/kbio.h>
