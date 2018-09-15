@@ -39,8 +39,8 @@
 #ifdef __linux__
 #ifdef HAVE_SYS_IO_H
 #include <sys/io.h>
-#endif
 #define IOPERM ioperm
+#endif
 #define TTY0    "/dev/ttyS0"
 #define TTY1    "/dev/ttyS1"
 #define TTY2    "/dev/ttyS2"
