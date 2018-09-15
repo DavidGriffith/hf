@@ -698,7 +698,7 @@ int main(int argc, char *argv[])
 //	start_threads();
 
 	printf("Note: hfkernel is only part of the hf package.\n"); 
-	printf("It is controlled by the graphic terminal hfterm. To start them both, use the start script hf. In newer linuxes (kernel 2.6...) we need the syntax\n ´LD_ASDSUME_KERNEL=2.2.5 hfterm´, this is already prepared in the hf script. \n");
+	printf("It is controlled by the graphic terminal hfterm. To start them both, use the start script hf.\n");
 	start_io_thread();
 	exit(0); }
 
