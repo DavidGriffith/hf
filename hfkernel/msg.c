@@ -322,9 +322,7 @@ void start_l2_thread(void *(*routine)(void *))
 
 	// hack to check whether thread is alive, because glibc maintainers
 	// are morons
-	if (thr_l2 != NULL) {
-	    if (!pthread_cancel(thr_l2))
-	      errstr(SEV_FATAL, "pthread_cancel");
+	if (thr_l2 != NULL && pthread_cancel(thr_l2) != ESRCH) {
 	    if (pthread_join(thr_l2, NULL))
 		errstr(SEV_WARNING, "pthread_join l2 thread");
 	    thr_l2 = NULL;
