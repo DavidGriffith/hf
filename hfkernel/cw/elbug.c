@@ -32,8 +32,8 @@
 #ifdef __linux__
 #ifdef HAVE_SYS_IO_H
 #include <sys/io.h>
-#endif
 #define IOPERM ioperm
+#endif
 #endif
 #ifdef __FreeBSD__
 #include <machine/cpufunc.h>
