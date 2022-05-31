@@ -5,6 +5,7 @@
  */
 
 
+static
 GtkWidget*
 create_wmap (void)
 {

@@ -6,18 +6,18 @@
 /* rxtx.c : --------------------------------------------------------*/
 GtkWidget* create_fileselection (gchar *title, gchar *filename);
 /* specgui.c : -----------------------------------------------------*/
-GtkWidget* create_wspec (void);
+extern GtkWidget* create_wspec (void);
 /* pargui.c : ------------------------------------------------------*/
-GtkWidget* create_wpar (void);
+extern GtkWidget* create_wpar (void);
 /* maingui.c : -----------------------------------------------------*/
-GtkWidget* create_wmain (void);
+extern GtkWidget* create_wmain (void);
 
 /* monigui.c : -----------------------------------------------------*/
-GtkWidget* create_wmonitor (void);
+extern GtkWidget* create_wmonitor (void);
 /* fixgui.c : ------------------------------------------------------*/
-GtkWidget* create_Wfixtext (void);
+extern GtkWidget* create_Wfixtext (void);
 /* loggui.c : ------------------------------------------------------*/
-GtkWidget* create_Wsearchlogentr (void);
+extern GtkWidget* create_Wsearchlogentr (void);
 GtkWidget* create_wlistalllog (void);
 GtkWidget* create_wqsoeditor (void);
 /* helpgui.c : -----------------------------------------------------*/

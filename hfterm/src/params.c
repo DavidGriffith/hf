@@ -58,7 +58,7 @@
 #define PCT_CRC_3 "FFFF"
 #endif
 
-struct par params;
+extern struct par params;
 
 /* --------------------------------------------------------------------- */
 

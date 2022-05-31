@@ -108,7 +108,7 @@ __FILE__, __FUNCTION__,  __LINE__);
 /* --------------------------------------------------------------------- */
 
 //static 
-GPollFD msgpfd;
+extern GPollFD msgpfd;
 
 /* Funktionen aus main.c -------------------------------------------- */
 
@@ -142,19 +142,19 @@ void init(void);
 void finit(void);
 
 /* aus maingui.c ------------------------------------------------------ */
-GtkWidget *wrxfileselection;
-GtkWidget *wspec;
-GtkWidget *wpar;
-GtkWidget *wmain;
-GtkWidget *wabout;
-GtkWidget *whilfe; 		/* HILFEDATEI */
-GtkWidget *Wfixtext;		/* FIXTEXTE */
-GtkWidget *Wsearchlogentr;	/* LOGBUCH DURCHSUCHEN */
-GtkWidget *wlistalllog; 	/* LISTE ALLE LOGBUCH EINTRAEGE */
-GtkWidget *wqsoeditor; 		/* ZEIGE LOGBUCH EINTRAEGE */
-GtkWidget *whinweis; 		/* HINWEISFENSTER */
-GtkWidget *wmap; 		/* WELTKARTE */
-GtkWidget *wmonitor;
+extern GtkWidget *wrxfileselection;
+extern GtkWidget *wspec;
+extern GtkWidget *wpar;
+extern GtkWidget *wmain;
+extern GtkWidget *wabout;
+extern GtkWidget *whilfe; 		/* HILFEDATEI */
+extern GtkWidget *Wfixtext;		/* FIXTEXTE */
+extern GtkWidget *Wsearchlogentr;	/* LOGBUCH DURCHSUCHEN */
+extern GtkWidget *wlistalllog; 		/* LISTE ALLE LOGBUCH EINTRAEGE */
+extern GtkWidget *wqsoeditor; 		/* ZEIGE LOGBUCH EINTRAEGE */
+extern GtkWidget *whinweis; 		/* HINWEISFENSTER */
+extern GtkWidget *wmap; 		/* WELTKARTE */
+extern GtkWidget *wmonitor;
 
 struct par {
 	struct {

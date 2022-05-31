@@ -751,7 +751,7 @@ static int encode_triple(void)
 
 /* --------------------------------------------------------------------- */
 
-__inline__ void cycle_end(void)
+static __inline__ void cycle_end(void)
 {
 	as.rxtime += 450000;
 	as.txtime += 450000;

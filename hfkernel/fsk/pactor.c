@@ -657,7 +657,7 @@ extern __inline__ void marq_clear(void)
  * misc utility functions
  */
 
- __inline__ void cycle_end(void)
+static __inline__ void cycle_end(void)
 {
 	ps.rxtime += PACTOR_CYCLE_ARQ;
 	ps.txtime += PACTOR_CYCLE_ARQ;
@@ -665,7 +665,7 @@ extern __inline__ void marq_clear(void)
 	ps.txinv = !ps.txinv;
 }
 
-__inline__ void ack_transmit(void)
+static __inline__ void ack_transmit(void)
 {
 	kbd_ack();
 	ps.pkt_counter = (ps.pkt_counter + 1) & 3;

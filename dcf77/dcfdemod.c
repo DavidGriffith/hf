@@ -109,7 +109,7 @@ __inline__ void decode_ampl_bit(unsigned int bit, unsigned int samples)
 
 /* --------------------------------------------------------------------- */
 
-__inline__ void dcf77_process_ampl(int si, unsigned int samples)
+static __inline__ void dcf77_process_ampl(int si, unsigned int samples)
 {
 	static int rodcnt = 0;
 	char* rod = "|/-\\ ";

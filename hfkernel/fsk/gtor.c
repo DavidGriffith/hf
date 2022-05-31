@@ -887,14 +887,14 @@ static void prgraph(const char *title, const int *inp, int samp)
 }
 #endif
 
-__inline__ void cycle_end(void)
+static __inline__ void cycle_end(void)
 {
 	gs.rxtime += GTOR_CYCLE_ARQ;
 	gs.txtime += GTOR_CYCLE_ARQ;
 	gs.golay_flag = !gs.golay_flag;
 }
 
-__inline__ void ack_transmit(void)
+static __inline__ void ack_transmit(void)
 {
 	kbd_ack();
 	gs.pkt_counter = (gs.pkt_counter + 1) & 3;

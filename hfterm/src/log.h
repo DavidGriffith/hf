@@ -28,7 +28,7 @@ struct logbook
 };
 extern struct logbook lb;
 
-void log_get(int);
+extern void log_get(int);
 void log_set(int);
 void log_search();
 void log_list();

@@ -43,7 +43,7 @@
 
 #define MAILBOXPAUSE 1 // pause between mailbox rx and tx,
 		      // the unit is Keepalive-message-intervals
-int beacon_pause = 0;
+extern int beacon_pause;
 
 /* --------------------------------------------------------------------- */
 

@@ -147,7 +147,8 @@ char *cable = "\n"
 
 char* name_spkr = "/dev/tty1";
 int lastcwmsg = 0, dotus = 100000, port = 0, pin = TIOCM_RTS;
-int fd_ptt, fd_spkr;
+extern int fd_ptt;
+int  fd_spkr;
 int elbug_rts, elbug_ok, spkr = 0, argp;
 
 /* --------------------------------------------------------------------- */

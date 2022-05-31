@@ -47,6 +47,22 @@ static char *name_kernel = "/var/run/hfapp";
 char gmt[32];
 GdkFont *radiofont = NULL;
 struct par params;
+int beacon_pause = 0;
+GPollFD msgpfd;
+GtkWidget *wrxfileselection;
+GtkWidget *wspec;
+GtkWidget *wpar;
+GtkWidget *wmain;
+GtkWidget *wabout;
+GtkWidget *whilfe; 		/* HILFEDATEI */
+GtkWidget *Wfixtext;		/* FIXTEXTE */
+GtkWidget *Wsearchlogentr;	/* LOGBUCH DURCHSUCHEN */
+GtkWidget *wlistalllog; 	/* LISTE ALLE LOGBUCH EINTRAEGE */
+GtkWidget *wqsoeditor; 		/* ZEIGE LOGBUCH EINTRAEGE */
+GtkWidget *whinweis; 		/* HINWEISFENSTER */
+GtkWidget *wmap; 		/* WELTKARTE */
+GtkWidget *wmonitor;
+struct par params;
 
 /* --------------------------------------------------------------------- */
 /*
@@ -489,7 +505,7 @@ void edit_addchar(char v)
 
 /* --------------------------------------------------------------------- */
 
-//static 
+static
 gboolean poll_prepare(gpointer source_data, GTimeVal *current_time, gint *timeout, gpointer user_data)
 {
 	*timeout = -1;
